@@ -2,8 +2,8 @@
 [![crates.io](https://img.shields.io/crates/v/yage.svg)](https://crates.io/crates/yage)
 [![Maintenance](https://img.shields.io/badge/maintenance-experimental-blue.svg)](https://github.com/rust-lang/rfcs/blob/master/text/1824-crates.io-default-ranking.md#maintenance)
 [![](https://tokei.rs/b1/github/bwasty/yage)](https://github.com/Aaronepower/tokei)
-[![Build Status](https://travis-ci.org/bwasty/yage.svg?branch=master)](https://travis-ci.org/bwasty/yage)
- [![Build status](https://ci.appveyor.com/api/projects/status/TODO/branch/master?svg=true)](https://ci.appveyor.com/project/bwasty/yage/branch/master)
+[![Build Status](https://travis-ci.com/bwasty/yage.svg?branch=master)](https://travis-ci.com/bwasty/yage)
+[![Build status](https://ci.appveyor.com/api/projects/status/h088302uygm2hvgr/branch/master?svg=true)](https://ci.appveyor.com/project/bwasty/yage/branch/master)
 
 Graphics engine targeting WebGL 2.0 (via WebAssembly) and OpenGL 3.3+.
 
