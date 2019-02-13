@@ -1,7 +1,18 @@
 [package]
 name = "yage"
-version = "0.1.0"
+version = "0.0.1"
+description = "Yet another graphics engine"
 authors = ["Benjamin Wasty <benny.wasty@gmail.com>"]
+repository = "https://github.com/bwasty/yage"
+readme = "README.md"
+license = "MIT/Apache-2.0"
+categories = ["rendering"]
+keywords = ["glTF", "3D", "scene"]
+
+edition = "2018"
+
+[badges]
+maintenance = { status = "experimental" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]

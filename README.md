@@ -1,3 +1,27 @@
+# yage - Yet another graphics engine 
+[![crates.io](https://img.shields.io/crates/v/yage.svg)](https://crates.io/crates/yage)
+[![Maintenance](https://img.shields.io/badge/maintenance-experimental-blue.svg)](https://github.com/rust-lang/rfcs/blob/master/text/1824-crates.io-default-ranking.md#maintenance)
+[![](https://tokei.rs/b1/github/bwasty/yage)](https://github.com/Aaronepower/tokei)
+[![Build Status](https://travis-ci.org/bwasty/yage.svg?branch=master)](https://travis-ci.org/bwasty/yage)
+ [![Build status](https://ci.appveyor.com/api/projects/status/TODO/branch/master?svg=true)](https://ci.appveyor.com/project/bwasty/yage/branch/master)
+
+Graphics engine targeting WebGL 2.0 (via WebAssembly) and OpenGL 3.3+.
+
+## Getting started
+### Requirements
+- [Rust 1.32+](https://www.rust-lang.org/tools/install)
+- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+- [npm](https://www.npmjs.com/get-npm)
+
+### Building
+- `wasm-pack build`
+
+---
+
+_GENERATED PART OF README_
+
+---
+
 # 🦀🕸️ `wasm-pack-template`
 
 A template for kick starting a Rust and WebAssembly project using
@@ -21,17 +45,6 @@ publishing the resulting package to NPM.
   for logging panic messages to the developer console.
 * [`wee_alloc`](https://github.com/rustwasm/wee_alloc), an allocator optimized
   for small code size.
-
-## 🚴 Usage
-
-### 🐑 Use `cargo generate` to Clone this Template
-
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
-
-```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
-```
 
 ### 🛠️ Build with `wasm-pack build`
 
