@@ -8,4 +8,5 @@ install:
 build: false
 
 test_script:
-  - cargo test --locked
+  # TODO: --locked would be better but fails - see https://github.com/rustwasm/wasm-pack-template/issues/35
+  - cargo test #--locked
