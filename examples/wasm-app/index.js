@@ -1,3 +1,3 @@
-import * as wasm from "hello-wasm-pack";
+import * as yage from "yage";
 
-wasm.greet();
+yage.greet();
