@@ -3,10 +3,13 @@ mod support;
 use glutin::GlContext;
 
 use yage::some_non_wasm_function;
+use yage::gltf::load_gltf;
 
 // TODO!!: This is just the (slighly adapted) glutin window example and doesn't even use yage
 fn main() {
+
     dbg!(some_non_wasm_function());
+    load_gltf("Box.glb");
 
     let mut events_loop = glutin::EventsLoop::new();
     let window = glutin::WindowBuilder::new().with_title("A fantastic window!");

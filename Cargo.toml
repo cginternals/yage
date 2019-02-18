@@ -20,10 +20,20 @@ crate-type = ["cdylib", "rlib"]
 [features]
 wasm = ["web-sys", "js-sys", "console_error_panic_hook"]
 native = [] 
+gltf = ["yage-gltf"]
 # NOTE: to disable the default wasm feature, use `default-features = false`
-default = ["wasm"]
+default = ["wasm", "gltf"]
+
+[workspace]
+members = ["yage-core", "yage-gl", "yage-app", "yage-gltf"]
+exclude = ["examples/native-glutin"]
 
 [dependencies]
+yage-core = { path = "yage-core", version = "0.0.1" }
+yage-gl = { path = "yage-gl", version = "0.0.1" }
+yage-app = { path = "yage-app", version = "0.0.1" }
+yage-gltf = { path = "yage-gltf", version = "0.0.1", optional = true }
+
 cfg-if = "0.1.6"
 wasm-bindgen = "0.2.36"
 
