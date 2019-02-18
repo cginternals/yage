@@ -18,7 +18,10 @@ maintenance = { status = "experimental" }
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = ["console_error_panic_hook"]
+wasm = ["web-sys", "js-sys", "console_error_panic_hook"]
+native = [] 
+# NOTE: to disable the default wasm feature, use `default-features = false`
+default = ["wasm"]
 
 [dependencies]
 cfg-if = "0.1.6"
@@ -37,11 +40,11 @@ console_error_panic_hook = { version = "0.1.5", optional = true }
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.2", optional = true }
 
-# TODO!!: make js-sys, web-sys optional for native compilation
-js-sys = "0.3.14"
+js-sys = { version = "0.3.14", optional = true }
 
 [dependencies.web-sys]
 version = "0.3.4"
+optional = true
 features = [
   'Document',
   'Element',

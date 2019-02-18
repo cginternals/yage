@@ -2,9 +2,14 @@ mod utils;
 
 use cfg_if::cfg_if;
 
-use js_sys::WebAssembly;
+#[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::*;
+#[cfg(feature = "wasm")]
 use wasm_bindgen::JsCast;
+
+#[cfg(feature = "wasm")]
+use js_sys::WebAssembly;
+#[cfg(feature = "wasm")]
 use web_sys::{WebGlProgram, WebGlRenderingContext, WebGlShader};
 
 cfg_if! {
@@ -17,6 +22,11 @@ cfg_if! {
     }
 }
 
+pub fn some_non_wasm_function() -> u32 {
+    42
+}
+
+#[cfg(feature = "wasm")]
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     let document = web_sys::window().unwrap().document().unwrap();
@@ -80,6 +90,7 @@ pub fn start() -> Result<(), JsValue> {
     Ok(())
 }
 
+#[cfg(feature = "wasm")]
 pub fn compile_shader(
     context: &WebGlRenderingContext,
     shader_type: u32,
@@ -104,6 +115,7 @@ pub fn compile_shader(
     }
 }
 
+#[cfg(feature = "wasm")]
 pub fn link_program<'a, T: IntoIterator<Item = &'a WebGlShader>>(
     context: &WebGlRenderingContext,
     shaders: T,
