@@ -1,6 +1,7 @@
 pub extern crate yage_core as core;
 pub extern crate yage_gl as gl;
 pub extern crate yage_app as app;
+#[cfg(feature = "gltf")]
 pub extern crate yage_gltf as gltf;
 
 mod utils;
