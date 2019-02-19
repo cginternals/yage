@@ -26,7 +26,7 @@ default = ["wasm", "gltf"]
 
 [workspace]
 members = ["yage-core", "yage-gl", "yage-app", "yage-gltf"]
-exclude = ["examples/native-glutin"]
+exclude = ["examples/native-glutin", "examples/native-azul"]
 
 [dependencies]
 yage-core = { path = "yage-core", version = "0.0.1" }

@@ -1,0 +1,8 @@
+[package]
+name = "native-azul"
+version = "0.0.1"
+authors = ["Benjamin Wasty <benny.wasty@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+azul = { git = "https://github.com/maps4print/azul", rev = "87d85a70176a8b0e6cbd516f7cb246238c371611" }
