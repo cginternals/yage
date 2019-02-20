@@ -1,0 +1,5 @@
+# for more accurate tokei LoC badge
+*.md
+*.toml
+package-lock.json
+package.json

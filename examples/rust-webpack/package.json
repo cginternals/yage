@@ -1,15 +1,12 @@
 {
   "author": "Nick Fitzgerald <nfitzgerald@mozilla.com>",
-  "name": "create-rust-webpack",
-  "version": "0.1.5",
-  "repository": "https://github.com/rustwasm/rust-webpack-template",
+  "name": "rust-webpack",
+  "version": "0.0.1",
+  "repository": "git+https://github.com/bwasty/yage.git",
   "license": "(MIT OR Apache-2.0)",
   "scripts": {
     "start": "webpack-dev-server -d",
     "build": "webpack"
-  },
-  "bin": {
-    "create-rust-webpack": ".bin/create-rust-webpack.js"
   },
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "0.2.3",
