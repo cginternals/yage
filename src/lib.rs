@@ -33,7 +33,7 @@ pub fn some_non_wasm_function() -> u32 {
 }
 
 #[cfg(feature = "wasm")]
-#[wasm_bindgen(start)]
+#[wasm_bindgen]
 pub fn start() -> Result<(), JsValue> {
     let document = web_sys::window().unwrap().document().unwrap();
     let canvas = document.get_element_by_id("canvas").unwrap();
