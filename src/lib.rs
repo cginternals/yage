@@ -28,8 +28,23 @@ cfg_if! {
     }
 }
 
-pub fn some_non_wasm_function() -> u32 {
-    42
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+pub fn start_new() -> Result<(), JsValue> {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let canvas = document.get_element_by_id("canvas").unwrap();
+    let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
+
+    let context = canvas
+        .get_context("webgl")?
+        .unwrap()
+        .dyn_into::<WebGlRenderingContext>()?;
+
+    let gl = gl::GL::from_webgl_context(context);
+    gl.clear_color(0.0, 1.0, 0.0, 1.0);
+    gl.clear(glenum::BufferBit::Color);
+
+    Ok(())
 }
 
 #[cfg(feature = "wasm")]

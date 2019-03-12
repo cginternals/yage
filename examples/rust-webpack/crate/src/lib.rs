@@ -5,6 +5,8 @@ extern crate wasm_bindgen;
 
 use wasm_bindgen::prelude::*;
 
+use yage::gl::GL;
+
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
     // `set_panic_hook` function to get better error messages if we ever panic.
@@ -42,6 +44,6 @@ pub fn run() -> Result<(), JsValue> {
     let body: &web_sys::Node = body.as_ref();
     body.append_child(&p)?;
 
-    let _ = yage::start();
+    let _ = yage::start_new();
     Ok(())
 }

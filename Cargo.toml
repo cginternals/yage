@@ -34,6 +34,9 @@ yage-gl = { path = "yage-gl", version = "0.0.1" }
 yage-app = { path = "yage-app", version = "0.0.1" }
 yage-gltf = { path = "yage-gltf", version = "0.0.1", optional = true }
 
+# TODO!!: TMP
+glenum = "0.1.1"
+
 cfg-if = "0.1.6"
 wasm-bindgen = "0.2.37"
 
