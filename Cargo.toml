@@ -2,7 +2,7 @@
 name = "yage"
 version = "0.0.1"
 description = "Yet another graphics engine"
-authors = ["Benjamin Wasty <benny.wasty@gmail.com>"]
+authors = ["Benjamin Wasty <benjamin.wasty@cginternals.com>", "Stefan Buschmann <stefan.buschmann@cginternals.com>"]
 repository = "https://github.com/bwasty/yage"
 readme = "README.md"
 license = "MIT/Apache-2.0"
@@ -18,23 +18,25 @@ maintenance = { status = "experimental" }
 crate-type = ["cdylib", "rlib"]
 
 [features]
-wasm = ["web-sys", "js-sys", "console_error_panic_hook"]
-native = [] 
 gltf = ["yage-gltf"]
-# NOTE: to disable the default wasm feature, use `default-features = false`
-default = ["wasm", "gltf"]
+# NOTE: to disable the default gltf feature, use `default-features = false`
+default = ["gltf"]
 
 [workspace]
-members = ["yage-core", "yage-gl", "yage-app", "yage-gltf"]
+members = ["yage-core", "yage-gl", "yage-glutin", "yage-web", "yage-gltf"]
 exclude = ["examples/native-glutin", "examples/rust-webpack", "examples/native-azul"]
 
 [dependencies]
+cfg-if = "0.1.6"
+
 yage-core = { path = "yage-core", version = "0.0.1" }
 yage-gl = { path = "yage-gl", version = "0.0.1" }
-yage-app = { path = "yage-app", version = "0.0.1" }
 yage-gltf = { path = "yage-gltf", version = "0.0.1", optional = true }
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+yage-glutin = { path = "yage-glutin", version = "0.0.1" }
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+yage-web = { path = "yage-web", version = "0.0.1" }
 
-cfg-if = "0.1.6"
 wasm-bindgen = "0.2.37"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
