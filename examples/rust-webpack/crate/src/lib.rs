@@ -4,8 +4,12 @@ extern crate web_sys;
 extern crate wasm_bindgen;
 
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+
+use web_sys::WebGlRenderingContext;
 
 use yage::gl::GL;
+use yage::gl::glenum;
 
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -29,6 +33,25 @@ cfg_if! {
     }
 }
 
+fn setup_canvas() -> Result<(), JsValue> {
+    // TODO!!: most of this setup should go into yage-web
+    let document = web_sys::window().unwrap().document().unwrap();
+    let canvas = document.get_element_by_id("canvas").unwrap();
+    let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
+
+    // TODO!: make it WebGL2
+    let context: WebGlRenderingContext = canvas
+        .get_context("webgl")?
+        .unwrap()
+        .dyn_into()?;
+
+    let gl = GL::from_webgl_context(context);
+    gl.clear_color(0.0, 1.0, 0.0, 1.0);
+    gl.clear(glenum::BufferBit::Color);
+
+    Ok(())
+}
+
 // Called by our JS entry point to run the example.
 #[wasm_bindgen]
 pub fn run() -> Result<(), JsValue> {
@@ -44,6 +67,7 @@ pub fn run() -> Result<(), JsValue> {
     let body: &web_sys::Node = body.as_ref();
     body.append_child(&p)?;
 
-    let _ = yage::start_new();
+    setup_canvas();
+
     Ok(())
 }

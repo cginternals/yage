@@ -1,5 +1,5 @@
 [package]
-authors = []
+authors = ["Benjamin Wasty <benjamin.wasty@cginternals.com>", "Stefan Buschmann <stefan.buschmann@cginternals.com>"]
 categories = ["wasm"]
 description = "My super awesome Rust, WebAssembly, and Webpack project!"
 license = "Apache-2.0/MIT"
