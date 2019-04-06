@@ -3,22 +3,18 @@ use glutin::GlContext;
 use yage::gl::{GL, GlFunctions, check_error, objects::Program};
 use yage::gl::glenum;
 use yage::glutin::Window;
+use yage::glutin::Context;
 
 fn main() {
-    let mut events_loop = glutin::EventsLoop::new();
-    let window = glutin::WindowBuilder::new()
-        .with_title("A fantastic window!")
-        .with_dimensions(glutin::dpi::LogicalSize::new(300.0, 200.0));
-    let context = glutin::ContextBuilder::new();
-    let gl_window = glutin::GlWindow::new(window, context, &events_loop).unwrap();
+    // create window
+    let mut window = Window::new();
 
-    let _ = unsafe { gl_window.make_current() };
+    // activate context
+    window.make_current();
 
-    // println!("Pixel format of the window's GL context: {:?}", gl_window.get_pixel_format());
-
-    gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
-
+    // create OpenGL wrapper
     let gl = GL::new();
+
     gl.clear_color(0.1, 0.2, 0.3, 1.0);
 
     // let vs = gl.create_shader(glenum::ShaderKind::Vertex);
@@ -84,28 +80,14 @@ fn main() {
 
     let mut running = true;
     while running {
-        events_loop.poll_events(|event| {
-            // println!("{:?}", event);
-            #[allow(clippy::single_match)]
-            match event {
-                glutin::Event::WindowEvent { event, .. } => match event {
-                    glutin::WindowEvent::CloseRequested => running = false,
-                    glutin::WindowEvent::Resized(logical_size) => {
-                        let dpi_factor = gl_window.get_hidpi_factor();
-                        gl_window.resize(logical_size.to_physical(dpi_factor));
-                    },
-                    _ => (),
-                },
-                _ => ()
-            }
-        });
+        running = window.poll_events();
 
         gl.clear(glenum::BufferBit::Color);
         gl.draw_arrays(gl::TRIANGLES, 0, 3);
 
         // check_error!();
 
-        let _ = gl_window.swap_buffers();
+        window.swap_buffers();
     }
 }
 

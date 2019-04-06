@@ -1,6 +1,11 @@
+use glutin::GlContext;
+
+use crate::Context;
+
 /// Top-level window with OpenGL context.
 pub struct Window {
-    window: glutin::GlWindow
+    events_loop: glutin::EventsLoop,
+    window:      glutin::GlWindow
 }
 
 impl Window {
@@ -13,19 +18,62 @@ impl Window {
         let events_loop = glutin::EventsLoop::new();
 
         // create window builder
-        let window = glutin::WindowBuilder::new()
+        let window_builder = glutin::WindowBuilder::new()
             .with_title("A fantastic window!")
             .with_dimensions(glutin::dpi::LogicalSize::new(300.0, 200.0));
 
         // create context builder
-        let context = glutin::ContextBuilder::new();
+        let context_builder = glutin::ContextBuilder::new();
 
         // create actual OpenGL window
-        let gl_window = glutin::GlWindow::new(window, context, &events_loop).unwrap();
+        let window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
+
+        gl::load_with(|ptr| window.context().get_proc_address(ptr) as *const _);
 
         // return window
         Window {
-            window: gl_window
+            events_loop: events_loop,
+            window: window
         }
+    }
+
+    pub fn swap_buffers(&self) {
+        let _ = self.window.swap_buffers();
+    }
+
+    pub fn poll_events(&mut self) -> bool {
+        let mut running = true;
+
+        let events_loop = &mut self.events_loop;
+        let window      = &mut self.window;
+
+        events_loop.poll_events(|event| {
+            #[allow(clippy::single_match)]
+            match event {
+                glutin::Event::WindowEvent { event, .. } => match event {
+                    glutin::WindowEvent::CloseRequested => {
+                        running = false
+                    },
+                    glutin::WindowEvent::Resized(logical_size) => {
+                        let dpi_factor = window.get_hidpi_factor();
+                        window.resize(logical_size.to_physical(dpi_factor));
+                    },
+                    _ => (),
+                },
+                _ => ()
+            }
+        });
+
+        running
+    }
+}
+
+impl Context for Window {
+    fn make_current(&self) {
+        let _ = unsafe { self.window.make_current() };
+    }
+
+    fn release(&self) {
+        // [TODO]
     }
 }
