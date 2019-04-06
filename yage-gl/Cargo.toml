@@ -7,7 +7,6 @@ edition = "2018"
 [dependencies]
 glenum = "0.1.1"
 log = "0.4.6"
-simplelog = "0.5.3"
 cgmath = "0.17.0"
 [dependencies.web-sys]
 version = "0.3.14"
@@ -27,6 +26,7 @@ features = [
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 gl = "0.11.0"
+simplelog = "0.5.3"
 
 [target.wasm32-unknown-unknown.dependencies]
 js-sys = "0.3.14"

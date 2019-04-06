@@ -1,7 +1,5 @@
 use glenum::*;
 
-use super::GlFunctions;
-
 #[derive(Default)]
 pub struct GL {}
 
@@ -12,7 +10,7 @@ impl GL {
     }
 }
 
-impl GlFunctions for GL {
+impl super::GlFunctions for GL {
     type GlShader = gl::types::GLuint;
     type GlProgram = gl::types::GLuint;
     type GlBuffer = gl::types::GLuint;
