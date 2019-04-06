@@ -2,6 +2,7 @@ use glutin::GlContext;
 
 use yage::gl::{GL, GlFunctions, check_error, objects::Program};
 use yage::gl::glenum;
+use yage::glutin::Window;
 
 fn main() {
     let mut events_loop = glutin::EventsLoop::new();
@@ -47,7 +48,7 @@ fn main() {
     gl.bind_buffer(glenum::BufferKind::Array as _, Some(vb));
     gl.buffer_data(
         glenum::BufferKind::Array as _,
-        &VERTEX_DATA, 
+        &VERTEX_DATA,
         glenum::DrawMode::Static as _
     );
 
