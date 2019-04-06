@@ -63,7 +63,8 @@ impl super::GlFunctions for GL {
     }
 
     fn get_shader_parameter(&self, shader: &Self::GlShader, param: u32) -> i32 {
-        self.gl.get_shader_parameter(shader, param).as_f64().unwrap() as i32
+        // TODO!!: multi-return type problem...try in cascade? (as_f64 fails for boolean case)
+        self.gl.get_shader_parameter(shader, param).as_bool().unwrap() as i32
     }
 
     fn get_shader_info_log(&self, shader: &Self::GlShader) -> String {
@@ -83,7 +84,8 @@ impl super::GlFunctions for GL {
     }
 
     fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32 {
-        self.gl.get_program_parameter(&program, param).as_f64().unwrap() as i32
+        // TODO!!: see get_shader_parameter....
+        self.gl.get_program_parameter(&program, param).as_bool().unwrap() as i32
     }
 
     fn get_program_info_log(&self, program: &Self::GlProgram) -> String {

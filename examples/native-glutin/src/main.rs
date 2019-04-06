@@ -39,9 +39,7 @@ fn main() {
     // gl.use_program(Some(program));
 
     let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
-    check_error!();
     program.use_program();
-    check_error!();
 
     let vb = gl.create_buffer();
     gl.bind_buffer(glenum::BufferKind::Array as _, Some(vb));
