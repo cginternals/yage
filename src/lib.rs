@@ -1,7 +1,7 @@
 pub extern crate yage_core as core;
 pub extern crate yage_gl as gl;
 #[cfg(not(target_arch = "wasm32"))]
-pub extern crate yage_glutin;
+pub extern crate yage_glutin as glutin;
 #[cfg(target_arch = "wasm32")]
 pub extern crate yage_web as web;
 #[cfg(feature = "gltf")]
