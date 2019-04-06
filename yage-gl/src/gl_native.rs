@@ -151,9 +151,9 @@ impl super::GlFunctions for GL {
         buf
     }
 
-    fn bind_buffer(&self, target: u32, buffer: Option<Self::GlBuffer>) {
+    fn bind_buffer(&self, target: u32, buffer: Option<&Self::GlBuffer>) {
         unsafe {
-            gl::BindBuffer(target, buffer.unwrap_or(0));
+            gl::BindBuffer(target, *buffer.unwrap_or(&0));
         }
     }
 
@@ -174,9 +174,9 @@ impl super::GlFunctions for GL {
         vao
     }
 
-    fn bind_vertex_array(&self, vertex_array: Option<Self::GlVertexArray>) {
+    fn bind_vertex_array(&self, vertex_array: Option<&Self::GlVertexArray>) {
         unsafe {
-            gl::BindVertexArray(vertex_array.unwrap_or(0));
+            gl::BindVertexArray(*vertex_array.unwrap_or(&0));
         }
     }
 
@@ -248,9 +248,9 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn bind_texture(&self, target: u32, texture: Option<Self::GlTexture>) {
+    fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>) {
        unsafe {
-           gl::BindTexture(target, texture.unwrap_or(0));
+           gl::BindTexture(target, *texture.unwrap_or(&0));
        } 
     }
 

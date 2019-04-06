@@ -13,7 +13,7 @@ use crate::{GL, GlFunctions};
 pub struct Program<'a> {
     pub id: <GL as GlFunctions>::GlProgram,
     gl: &'a GL,
-    uniform_location_cache: HashMap<&'static str, i32>
+    uniform_location_cache: HashMap<&'static str, <GL as GlFunctions>::GlUniformLocation>
 }
 
 impl<'a> Program<'a> {
@@ -91,43 +91,44 @@ impl<'a> Program<'a> {
 
     // uniform setting functions
 
-    pub fn set_bool(&self, location: i32, value: bool) {
-        self.gl.uniform_1i(&location, value as i32);
+    pub fn set_bool(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: bool) {
+        self.gl.uniform_1i(location, value as i32);
     }
-    pub fn set_int(&self, location: i32, value: i32) {
-        self.gl.uniform_1i(&location, value);
+    pub fn set_int(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: i32) {
+        self.gl.uniform_1i(location, value);
     }
-    pub fn set_float(&self, location: i32, value: f32) {
-        self.gl.uniform_1f(&location, value);
+    pub fn set_float(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: f32) {
+        self.gl.uniform_1f(location, value);
     }
-    pub fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
-        self.gl.uniform_3fv(&location, value.as_ref());
+    pub fn set_vector3(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: &Vector3<f32>) {
+        self.gl.uniform_3fv(location, value.as_ref());
     }
-    pub fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
-        self.gl.uniform_4fv(&location, value.as_ref());
+    pub fn set_vector4(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: &Vector4<f32>) {
+        self.gl.uniform_4fv(location, value.as_ref());
     }
-    pub fn set_vec2(&self, location: i32, x: f32, y: f32) {
-        self.gl.uniform_2f(&location, x, y);
+    pub fn set_vec2(&self, location: &<GL as GlFunctions>::GlUniformLocation, x: f32, y: f32) {
+        self.gl.uniform_2f(location, x, y);
     }
-    pub fn set_vec3(&self, location: i32, x: f32, y: f32, z: f32) {
-        self.gl.uniform_3f(&location, x, y, z);
+    pub fn set_vec3(&self, location: &<GL as GlFunctions>::GlUniformLocation, x: f32, y: f32, z: f32) {
+        self.gl.uniform_3f(location, x, y, z);
     }
-    pub fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
-        self.gl.uniform_matrix_4fv(&location, mat.as_ref());
+    pub fn set_mat4(&self, location: &<GL as GlFunctions>::GlUniformLocation, mat: &Matrix4<f32>) {
+        self.gl.uniform_matrix_4fv(location, mat.as_ref());
     }
 
     /// get uniform location with caching
-    pub fn uniform_location(&mut self, name: &'static str) -> i32 {
+    pub fn uniform_location(&mut self, name: &'static str) -> <GL as GlFunctions>::GlUniformLocation {
         if let Some(loc) = self.uniform_location_cache.get(name) {
-            return *loc;
+            return loc.clone();
         }
 
         let loc = self.gl.get_uniform_location(&self.id, name);
-        if loc == -1 {
-            // TODO!: trace!
-            println!("uniform '{}' unknown for shader {:?}", name, self.id);
-        }
-        self.uniform_location_cache.insert(name, loc);
+        // TODO!!: how to check null/-1 properly depending on WebGL/OpenGL??
+        // if loc == -1 {
+        //     // TODO!: trace!
+        //     println!("uniform '{}' unknown for shader {:?}", name, self.id);
+        // }
+        self.uniform_location_cache.insert(name, loc.clone());
         loc
     } 
 

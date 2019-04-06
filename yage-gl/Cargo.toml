@@ -16,10 +16,13 @@ features = [
   # 'Element',
   'HtmlCanvasElement',
   'WebGlBuffer',
-  'WebGlRenderingContext',
+  # 'WebGlRenderingContext',
   'WebGl2RenderingContext',
+  'WebGlVertexArrayObject',
   'WebGlProgram',
   'WebGlShader',
+  'WebGlUniformLocation',
+  'WebGlTexture',
   # 'Window',
   'console'
 ]

@@ -56,11 +56,11 @@ pub trait GlFunctions {
 
     /// Named after the WebGL function. See `gl::GenBuffers` for OpenGL.
     fn create_buffer(&self) -> Self::GlBuffer;
-    fn bind_buffer(&self, target: u32, buffer: Option<Self::GlBuffer>);
+    fn bind_buffer(&self, target: u32, buffer: Option<&Self::GlBuffer>);
     fn buffer_data<T>(&self, target: u32, data: &[T], usage: u32);
 
     fn create_vertex_array(&self) -> Self::GlVertexArray;
-    fn bind_vertex_array(&self, vertex_array: Option<Self::GlVertexArray>);
+    fn bind_vertex_array(&self, vertex_array: Option<&Self::GlVertexArray>);
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -81,7 +81,7 @@ pub trait GlFunctions {
     fn point_size(&self, size: f32);
 
     fn active_texture(&self, unit: u32);
-    fn bind_texture(&self, target: u32, texture: Option<Self::GlTexture>);
+    fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>);
 
     fn blend_func(&self, src: u32, dst: u32);
 
