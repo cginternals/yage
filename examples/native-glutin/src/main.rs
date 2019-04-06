@@ -77,6 +77,10 @@ fn main() {
 
     check_error!();
 
+    unsafe {
+        gl::Viewport(0, 0, 300, 200);
+    }
+
     let mut running = true;
     while running {
         events_loop.poll_events(|event| {
