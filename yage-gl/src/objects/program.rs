@@ -11,7 +11,7 @@ use crate::{GL, GlFunctions};
 
 // TODO!!: copied from gltf-viewer (struct Shader) for debugging, partially adapted
 pub struct Program<'a> {
-    pub id: u32,
+    pub id: <GL as GlFunctions>::GlProgram,
     gl: &'a GL,
     uniform_location_cache: HashMap<&'static str, i32>
 }
@@ -36,40 +36,36 @@ impl<'a> Program<'a> {
 
     // TODO!!: generic GL/ impl Trait?
     pub fn from_source(gl: &'a GL, vertex_code: &str, fragment_code: &str, defines: &[String]) -> Program<'a> {
-        let mut program = Self {
-            id: 0,
-            gl,
-            uniform_location_cache: HashMap::new()
-        };
-
         let vertex_code = Self::add_defines(vertex_code, defines);
         let fragment_code = Self::add_defines(fragment_code, defines);
 
         // 2. compile shaders
-        unsafe {
-            // vertex shader
-            let vertex = gl.create_shader(glenum::ShaderKind::Vertex);
-            gl.shader_source(vertex, &vertex_code);
-            gl.compile_shader(vertex);
-            program.check_compile_errors(vertex, "VERTEX");
-            // fragment Shader
-            let fragment = gl.create_shader(glenum::ShaderKind::Fragment);
-            gl.shader_source(fragment, &fragment_code);
-            gl.compile_shader(fragment);
-            program.check_compile_errors(fragment, "FRAGMENT");
-            // shader Program
-            let id = gl.create_program();
-            gl.attach_shader(id, vertex);
-            gl.attach_shader(id, fragment);
-            gl.link_program(id);
-            program.check_compile_errors(id, "PROGRAM");
-            // delete the shaders as they're linked into our program now and no longer necessary
-            gl.delete_shader(vertex);
-            gl.delete_shader(fragment);
-            program.id = id;
-        }
+        // vertex shader
+        let vertex = gl.create_shader(glenum::ShaderKind::Vertex);
+        // TODO!!!: ugly clones...change to references everywhere? or Deref stuff?
+        gl.shader_source(vertex.clone(), &vertex_code);
+        gl.compile_shader(vertex.clone());
+        Self::check_compile_errors(gl, vertex.clone(), "VERTEX");
+        // fragment Shader
+        let fragment = gl.create_shader(glenum::ShaderKind::Fragment);
+        gl.shader_source(fragment.clone(), &fragment_code);
+        gl.compile_shader(fragment.clone());
+        Self::check_compile_errors(gl, fragment.clone(), "FRAGMENT");
+        // shader Program
+        let id = gl.create_program();
+        gl.attach_shader(id.clone(), vertex.clone());
+        gl.attach_shader(id.clone(), fragment.clone());
+        gl.link_program(id.clone());
+        Self::check_link_errors(gl, id.clone());
+        // delete the shaders as they're linked into our program now and no longer necessary
+        gl.delete_shader(vertex);
+        gl.delete_shader(fragment);
 
-        program
+        Self {
+            id,
+            gl,
+            uniform_location_cache: HashMap::new()
+        }
     }
 
     fn add_defines(source: &str, defines: &[String]) -> String {
@@ -90,82 +86,70 @@ impl<'a> Program<'a> {
     }
 
     /// activate the shader
-    /// ------------------------------------------------------------------------
     pub fn use_program(&self) {
-        self.gl.use_program(Some(self.id))
+        self.gl.use_program(Some(self.id.clone()))
     }
 
-    /// utility uniform functions
-    /// ------------------------------------------------------------------------
-    #[allow(dead_code)]
-    pub unsafe fn set_bool(&self, location: i32, value: bool) {
+    // uniform setting functions
+
+    pub fn set_bool(&self, location: i32, value: bool) {
         self.gl.uniform_1i(location, value as i32);
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_int(&self, location: i32, value: i32) {
+    pub fn set_int(&self, location: i32, value: i32) {
         self.gl.uniform_1i(location, value);
-
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_float(&self, location: i32, value: f32) {
+    pub fn set_float(&self, location: i32, value: f32) {
         self.gl.uniform_1f(location, value);
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
+    pub fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
         self.gl.uniform_3fv(location, value.as_ref());
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
+    pub fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
         self.gl.uniform_4fv(location, value.as_ref());
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_vec2(&self, location: i32, x: f32, y: f32) {
+    pub fn set_vec2(&self, location: i32, x: f32, y: f32) {
         self.gl.uniform_2f(location, x, y);
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_vec3(&self, location: i32, x: f32, y: f32, z: f32) {
+    pub fn set_vec3(&self, location: i32, x: f32, y: f32, z: f32) {
         self.gl.uniform_3f(location, x, y, z);
     }
-    /// ------------------------------------------------------------------------
-    pub unsafe fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
+    pub fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
         self.gl.uniform_matrix_4fv(location, mat.as_ref());
     }
 
     /// get uniform location with caching
-    pub unsafe fn uniform_location(&mut self, name: &'static str) -> i32 {
+    pub fn uniform_location(&mut self, name: &'static str) -> i32 {
         if let Some(loc) = self.uniform_location_cache.get(name) {
             return *loc;
         }
 
-        let loc = self.gl.get_uniform_location(self.id, name);
+        let loc = self.gl.get_uniform_location(self.id.clone(), name);
         if loc == -1 {
             // TODO!: trace!
-            println!("uniform '{}' unknown for shader {}", name, self.id);
+            println!("uniform '{}' unknown for shader {:?}", name, self.id);
         }
         self.uniform_location_cache.insert(name, loc);
         loc
     }
 
-    /// utility function for checking shader compilation/linking errors.
-    /// ------------------------------------------------------------------------
-    unsafe fn check_compile_errors(&self, shader_or_program: u32, type_: &str) {
-        if type_ != "PROGRAM" {
-            let success = self.gl.get_shader_parameter(shader_or_program, glenum::ShaderParameter::CompileStatus as _);
-            let log_type = if success == 1 { "WARNING" } else { "ERROR" };
-            let info_log = self.gl.get_shader_info_log(shader_or_program);
-            if info_log.is_empty() { return }
-            panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}", 
-                log_type, log_type, type_, info_log);
+    /// utility function for checking shader compilation errors.
+    fn check_compile_errors(gl: &GL, shader: <GL as GlFunctions>::GlShader, type_: &str) {
+        let success = gl.get_shader_parameter(shader.clone(), glenum::ShaderParameter::CompileStatus as _);
+        let log_type = if success == 1 { "WARNING" } else { "ERROR" };
+        let info_log = gl.get_shader_info_log(shader.clone());
+        if info_log.is_empty() { return }
+        panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}", 
+            log_type, log_type, type_, info_log);
+    }
 
-        } else {
-            let success = self.gl.get_program_parameter(shader_or_program, glenum::ShaderParameter::LinkStatus as _);
-            let log_type = if success == 1 { "WARNING" } else { "ERROR" };
-            let info_log = self.gl.get_program_info_log(shader_or_program);
-            if info_log.is_empty() { return }
-            // TODO!: warn!
-            println!("{}::PROGRAM_LINKING_{} of type: {}\n{}",
-                      log_type, log_type, type_, info_log);
-        }
-
+    /// utility function for checking program linking errors.
+    fn check_link_errors(gl: &GL, program:  <GL as GlFunctions>::GlProgram) {
+        let success = gl.get_program_parameter(program.clone(), glenum::ShaderParameter::LinkStatus as _);
+        let log_type = if success == 1 { "WARNING" } else { "ERROR" };
+        let info_log = gl.get_program_info_log(program.clone());
+        if info_log.is_empty() { return }
+        // TODO!: warn!
+        println!("{}::PROGRAM_LINKING_{} \n{}",
+                    log_type, log_type, info_log);
     }
 }

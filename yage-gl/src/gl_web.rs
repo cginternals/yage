@@ -1,101 +1,113 @@
 use glenum::*;
 
-use web_sys::WebGlRenderingContext;
+use web_sys::{
+    WebGl2RenderingContext, 
+    WebGlShader,
+    WebGlProgram,
+    WebGlBuffer,
+};
 
 pub struct GL {
-    // TODO: WebGl2RenderingContext is a different class - make type generic?
-    context: WebGlRenderingContext,
+    // TODO: support WebGL1?
+    gl: WebGl2RenderingContext,
 }
 
 impl GL {
-    pub fn from_webgl_context(context: WebGlRenderingContext) -> GL {
+    pub fn from_webgl_context(context: WebGl2RenderingContext) -> GL {
         GL {
-            context
+            gl: context
         }
     }
 }
 
 #[allow(dead_code)]
 impl super::GlFunctions for GL {
-    type GlShader = u32;
-    type GlProgram = u32;
-    type GlBuffer = u32;
+    type GlShader = WebGlShader;
+    type GlProgram = WebGlProgram;
+    type GlBuffer = WebGlBuffer;
     type GlVertexArray = u32;
     type GlTexture = u32;
     type GlUniformLocation = i32;
 
     /// specify clear values for the color buffers
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
-        self.context.clear_color(r, g, b, a);
+        self.gl.clear_color(r, g, b, a);
     }
 
     /// clear buffers to preset values
     fn clear(&self, bit: BufferBit) {
-        self.context.clear(bit as _);
+        self.gl.clear(bit as _);
     }
 
     fn viewport(&self, x: i32, y: i32, width: i32, height: i32) {
-        unimplemented!()
+        self.gl.viewport(x, y, width, height);
     }
 
     fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader {
-        unimplemented!()
+        self.gl.create_shader(kind as _).unwrap()
     }
 
     fn shader_source(&self, shader: Self::GlShader, source: &str) {
-        unimplemented!()
+        self.gl.shader_source(&shader, source);
     }
 
     fn compile_shader(&self, shader: Self::GlShader) {
-        unimplemented!()
+        self.gl.compile_shader(&shader);
     }
 
     fn delete_shader(&self, shader: Self::GlShader) {
-        unimplemented!()
+        self.gl.delete_shader(Some(&shader));
     }
 
     fn get_shader_parameter(&self, shader: Self::GlShader, param: u32) -> i32 {
-        unimplemented!()
+        self.gl.get_shader_parameter(&shader, param).as_f64().unwrap() as i32
     }
 
     fn get_shader_info_log(&self, shader: Self::GlShader) -> String {
-        unimplemented!()
+        self.gl.get_shader_info_log(&shader).unwrap()
     }
 
     fn create_program(&self) -> Self::GlProgram {
-        unimplemented!()
+        self.gl.create_program().unwrap()
     }
 
     fn attach_shader(&self, program: Self::GlProgram, shader: Self::GlShader) {
-        unimplemented!()
+        self.gl.attach_shader(&program, &shader);
     }
 
     fn link_program(&self, program: Self::GlProgram) {
-        unimplemented!()
+        self.gl.link_program(&program);
     }
 
     fn get_program_parameter(&self, program: Self::GlProgram, param: u32) -> i32 {
-        unimplemented!()
+        self.gl.get_program_parameter(&program, param).as_f64().unwrap() as i32
     }
 
     fn get_program_info_log(&self, program: Self::GlProgram) -> String {
-        unimplemented!()
+        self.gl.get_program_info_log(&program).unwrap()
     }
 
     fn use_program(&self, program: Option<Self::GlProgram>) {
-        unimplemented!()
+        self.gl.use_program(program.as_ref());
     }
 
     fn create_buffer(&self) -> Self::GlBuffer {
-        unimplemented!()
+        self.gl.create_buffer().unwrap()
     }
 
     fn bind_buffer(&self, target: u32, buffer: Option<Self::GlBuffer>) {
-        unimplemented!()
+        self.gl.bind_buffer(target, buffer.as_ref());
     }
 
     fn buffer_data<T>(&self, target: u32, data: &[T], usage: u32) {
-        unimplemented!()
+        unsafe {
+            self.gl.buffer_data_with_u8_array(
+                target, 
+                std::slice::from_raw_parts(
+                    data.as_ptr() as *const u8, data.len() * std::mem::size_of::<T>()), 
+                usage
+            );
+        }
     }
 
     fn create_vertex_array(&self) -> Self::GlVertexArray {
