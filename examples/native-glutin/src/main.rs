@@ -18,7 +18,7 @@ fn main() {
     gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
     let gl = GL::new();
-    gl.clear_color(0.0, 1.0, 0.0, 1.0);
+    gl.clear_color(0.1, 0.2, 0.3, 1.0);
 
     // let vs = gl.create_shader(glenum::ShaderKind::Vertex);
     // gl.shader_source(vs, VS_SRC);
@@ -43,6 +43,40 @@ fn main() {
     program.use_program();
     check_error!();
 
+    let vb = gl.create_buffer();
+    gl.bind_buffer(glenum::BufferKind::Array as _, Some(vb));
+    gl.buffer_data(
+        glenum::BufferKind::Array as _,
+        &VERTEX_DATA, 
+        glenum::DrawMode::Static as _
+    );
+
+    let vao = gl.create_vertex_array();
+    gl.bind_vertex_array(Some(vao));
+
+    gl.vertex_attrib_pointer(
+        0,
+        2,
+        gl::FLOAT,
+        false,
+        5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+        0,
+    );
+
+    gl.vertex_attrib_pointer(
+        1,
+        3,
+        gl::FLOAT,
+        false,
+        5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+        2 * std::mem::size_of::<f32>() as i32,
+    );
+
+    gl.enable_vertex_attrib_array(0);
+    gl.enable_vertex_attrib_array(1);
+
+    check_error!();
+
     let mut running = true;
     while running {
         events_loop.poll_events(|event| {
@@ -62,26 +96,39 @@ fn main() {
         });
 
         gl.clear(glenum::BufferBit::Color);
+        gl.draw_arrays(gl::TRIANGLES, 0, 3);
+
+        // check_error!();
+
         let _ = gl_window.swap_buffers();
     }
 }
 
 
 const VS_SRC: &str = "
-#version 100
+#version 330 core
 precision mediump float;
-attribute vec2 position;
-attribute vec3 color;
-varying vec3 v_color;
+layout (location = 0) in vec2 position;
+layout (location = 1) in vec3 color;
+out vec3 v_color;
 void main() {
     gl_Position = vec4(position, 0.0, 1.0);
     v_color = color;
 }";
 
 const FS_SRC: &str = "
-#version 100
+#version 330 core
 precision mediump float;
-varying vec3 v_color;
+in vec3 v_color;
+out vec4 FragColor;
 void main() {
-    gl_FragColor = vec4(v_color, 1.0);
+    FragColor = vec4(v_color, 1.0);
+    //FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }";
+
+#[rustfmt::skip]
+static VERTEX_DATA: [f32; 15] = [
+    -0.5, -0.5,  1.0,  0.0,  0.0,
+     0.0,  0.5,  0.0,  1.0,  0.0,
+     0.5, -0.5,  0.0,  0.0,  1.0,
+];
