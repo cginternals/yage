@@ -1,21 +1,15 @@
 use std::collections::HashMap;
-use std::ffi::CString;
 use std::fs::File;
 use std::io::Read;
 use std::str;
 
-use gl;
-use gl::types::*;
-
-// use cgmath::{Matrix, Matrix4, Vector3, Vector4};
-// use cgmath::prelude::*;
+use cgmath::{Matrix4, Vector3, Vector4};
 
 // use log::{warn, trace};
 
 use crate::{GL, GlFunctions};
 
-// TODO!!!: copied from gltf-viewer (struct Shader) for debugging, barely adapted
-// - native only (-> get rid of direct gl:: calls)
+// TODO!!: copied from gltf-viewer (struct Shader) for debugging, partially adapted
 pub struct Program<'a> {
     pub id: u32,
     gl: &'a GL,
@@ -105,36 +99,37 @@ impl<'a> Program<'a> {
     /// ------------------------------------------------------------------------
     #[allow(dead_code)]
     pub unsafe fn set_bool(&self, location: i32, value: bool) {
-        gl::Uniform1i(location, value as i32);
+        self.gl.uniform_1i(location, value as i32);
     }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_int(&self, location: i32, value: i32) {
-        gl::Uniform1i(location, value);
+        self.gl.uniform_1i(location, value);
+
     }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_float(&self, location: i32, value: f32) {
-        gl::Uniform1f(location, value);
+        self.gl.uniform_1f(location, value);
     }
     /// ------------------------------------------------------------------------
-    // pub unsafe fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
-    //     gl::Uniform3fv(location, 1, value.as_ptr());
-    // }
-    // /// ------------------------------------------------------------------------
-    // pub unsafe fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
-    //     gl::Uniform4fv(location, 1, value.as_ptr());
-    // }
+    pub unsafe fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
+        self.gl.uniform_3fv(location, value.as_ref());
+    }
+    /// ------------------------------------------------------------------------
+    pub unsafe fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
+        self.gl.uniform_4fv(location, value.as_ref());
+    }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_vec2(&self, location: i32, x: f32, y: f32) {
-        gl::Uniform2f(location, x, y);
+        self.gl.uniform_2f(location, x, y);
     }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_vec3(&self, location: i32, x: f32, y: f32, z: f32) {
-        gl::Uniform3f(location, x, y, z);
+        self.gl.uniform_3f(location, x, y, z);
     }
     /// ------------------------------------------------------------------------
-    // pub unsafe fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
-    //     gl::UniformMatrix4fv(location, 1, gl::FALSE, mat.as_ptr());
-    // }
+    pub unsafe fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
+        self.gl.uniform_matrix_4fv(location, mat.as_ref());
+    }
 
     /// get uniform location with caching
     pub unsafe fn uniform_location(&mut self, name: &'static str) -> i32 {
@@ -142,8 +137,7 @@ impl<'a> Program<'a> {
             return *loc;
         }
 
-        let c_name = CString::new(name).unwrap();
-        let loc = gl::GetUniformLocation(self.id, c_name.as_ptr());
+        let loc = self.gl.get_uniform_location(self.id, name);
         if loc == -1 {
             // TODO!: trace!
             println!("uniform '{}' unknown for shader {}", name, self.id);
@@ -154,34 +148,24 @@ impl<'a> Program<'a> {
 
     /// utility function for checking shader compilation/linking errors.
     /// ------------------------------------------------------------------------
-    unsafe fn check_compile_errors(&self, shader: u32, type_: &str) {
-        let mut success = i32::from(gl::FALSE);
-        let mut info_log = Vec::with_capacity(1024);
-        info_log.set_len(1024 - 1); // subtract 1 to skip the trailing null character
+    unsafe fn check_compile_errors(&self, shader_or_program: u32, type_: &str) {
         if type_ != "PROGRAM" {
-            gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
-            let log_type = if success == i32::from(gl::TRUE) { "WARNING" } else { "ERROR" };
-            let mut length = 0;
-            gl::GetShaderInfoLog(shader, 1024, &mut length, info_log.as_mut_ptr() as *mut GLchar);
-            if length == 0 { return }
-            panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}",
-                      log_type, log_type,
-                      type_,
-                      str::from_utf8(&info_log[0..length as usize]).unwrap());
+            let success = self.gl.get_shader_parameter(shader_or_program, glenum::ShaderParameter::CompileStatus as _);
+            let log_type = if success == 1 { "WARNING" } else { "ERROR" };
+            let info_log = self.gl.get_shader_info_log(shader_or_program);
+            if info_log.is_empty() { return }
+            panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}", 
+                log_type, log_type, type_, info_log);
 
         } else {
-            gl::GetProgramiv(shader, gl::LINK_STATUS, &mut success);
-            let log_type = if success == i32::from(gl::TRUE) { "WARNING" } else { "ERROR" };
-            let mut length = 0;
-            gl::GetProgramInfoLog(shader, 1024, &mut length, info_log.as_mut_ptr() as *mut GLchar);
-            if length == 0 { return }
+            let success = self.gl.get_program_parameter(shader_or_program, glenum::ShaderParameter::LinkStatus as _);
+            let log_type = if success == 1 { "WARNING" } else { "ERROR" };
+            let info_log = self.gl.get_program_info_log(shader_or_program);
+            if info_log.is_empty() { return }
             // TODO!: warn!
             println!("{}::PROGRAM_LINKING_{} of type: {}\n{}",
-                      log_type, log_type,
-                      type_,
-                      str::from_utf8(&info_log[0..length as usize]).unwrap());
+                      log_type, log_type, type_, info_log);
         }
 
     }
 }
-

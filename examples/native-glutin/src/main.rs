@@ -77,9 +77,7 @@ fn main() {
 
     check_error!();
 
-    unsafe {
-        gl::Viewport(0, 0, 300, 200);
-    }
+    gl.viewport(0, 0, 300, 200);
 
     let mut running = true;
     while running {
@@ -127,7 +125,6 @@ in vec3 v_color;
 out vec4 FragColor;
 void main() {
     FragColor = vec4(v_color, 1.0);
-    //FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }";
 
 #[rustfmt::skip]
