@@ -8,6 +8,7 @@ edition = "2018"
 glenum = "0.1.1"
 log = "0.4.6"
 simplelog = "0.5.3"
+cgmath = "0.17.0"
 [dependencies.web-sys]
 version = "0.3.14"
 # TODO!: remove unneeded...

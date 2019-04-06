@@ -34,6 +34,12 @@ impl GlFunctions for GL {
         }
     }
 
+    fn viewport(&self, x: i32, y: i32, width: i32, height: i32) {
+        unsafe {
+            gl::Viewport(x, y, width, height);
+        }
+    }
+
     fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader {
         unsafe { gl::CreateShader(kind as _) }
     }
@@ -61,6 +67,34 @@ impl GlFunctions for GL {
         }
     }
 
+    fn get_shader_parameter(&self, shader: Self::GlShader, param: u32) -> i32 {
+        let mut result = 0;
+        unsafe {
+            gl::GetShaderiv(shader, param, &mut result);
+        }
+        result
+    }
+
+    fn get_shader_info_log(&self, shader: Self::GlShader) -> String {
+        let mut length = self.get_shader_parameter(shader, gl::INFO_LOG_LENGTH);
+        if length > 0 {
+            let mut log = String::with_capacity(length as usize);
+            log.extend(std::iter::repeat('\0').take(length as usize));
+                unsafe {
+                    gl::GetShaderInfoLog(
+                    shader,
+                    length,
+                    &mut length,
+                    (&log[..]).as_ptr() as *mut gl::types::GLchar,
+                );
+            }
+            log.truncate(length as usize);
+            log
+        } else {
+            "".into()
+        }
+    }
+
     fn create_program(&self) -> Self::GlProgram {
         unsafe {
             gl::CreateProgram()
@@ -76,6 +110,34 @@ impl GlFunctions for GL {
     fn link_program(&self, program: Self::GlProgram) {
         unsafe {
             gl::LinkProgram(program)
+        }
+    }
+
+    fn get_program_parameter(&self, program: Self::GlProgram, param: u32) -> i32 {
+        let mut result = 0;
+        unsafe {
+            gl::GetProgramiv(program, param, &mut result);
+        }
+        result
+    }
+
+    fn get_program_info_log(&self, program: Self::GlProgram) -> String {
+        let mut length = self.get_program_parameter(program, gl::INFO_LOG_LENGTH);
+        if length > 0 {
+            let mut log = String::with_capacity(length as usize);
+            log.extend(std::iter::repeat('\0').take(length as usize));
+                unsafe {
+                    gl::GetProgramInfoLog(
+                    program,
+                    length,
+                    &mut length,
+                    (&log[..]).as_ptr() as *mut gl::types::GLchar,
+                );
+            }
+            log.truncate(length as usize);
+            log
+        } else {
+            "".into()
         }
     }
 
@@ -242,6 +304,16 @@ impl GlFunctions for GL {
     fn tex_parameteri(&self, target: u32, parameter: u32, value: i32) {
         unsafe {
             gl::TexParameteri(target, parameter, value);
+        }
+    }
+
+    fn get_uniform_location(
+        &self,
+        program: Self::GlProgram,
+        name: &str,
+    ) -> Self::GlUniformLocation {
+        unsafe {
+            gl::GetUniformLocation(program, name.as_ptr() as *const i8) as i32
         }
     }
 

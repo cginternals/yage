@@ -7,8 +7,7 @@ use std::str;
 use gl;
 use gl::types::*;
 
-// use cgmath::{Matrix, Matrix4, Vector3, Vector4};
-// use cgmath::prelude::*;
+use cgmath::{Matrix4, Vector3, Vector4};
 
 // use log::{warn, trace};
 
@@ -105,36 +104,37 @@ impl<'a> Program<'a> {
     /// ------------------------------------------------------------------------
     #[allow(dead_code)]
     pub unsafe fn set_bool(&self, location: i32, value: bool) {
-        gl::Uniform1i(location, value as i32);
+        self.gl.uniform_1i(location, value as i32);
     }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_int(&self, location: i32, value: i32) {
-        gl::Uniform1i(location, value);
+        self.gl.uniform_1i(location, value);
+
     }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_float(&self, location: i32, value: f32) {
-        gl::Uniform1f(location, value);
+        self.gl.uniform_1f(location, value);
     }
     /// ------------------------------------------------------------------------
-    // pub unsafe fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
-    //     gl::Uniform3fv(location, 1, value.as_ptr());
-    // }
-    // /// ------------------------------------------------------------------------
-    // pub unsafe fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
-    //     gl::Uniform4fv(location, 1, value.as_ptr());
-    // }
+    pub unsafe fn set_vector3(&self, location: i32, value: &Vector3<f32>) {
+        self.gl.uniform_3fv(location, value.as_ref());
+    }
+    /// ------------------------------------------------------------------------
+    pub unsafe fn set_vector4(&self, location: i32, value: &Vector4<f32>) {
+        self.gl.uniform_4fv(location, value.as_ref());
+    }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_vec2(&self, location: i32, x: f32, y: f32) {
-        gl::Uniform2f(location, x, y);
+        self.gl.uniform_2f(location, x, y);
     }
     /// ------------------------------------------------------------------------
     pub unsafe fn set_vec3(&self, location: i32, x: f32, y: f32, z: f32) {
-        gl::Uniform3f(location, x, y, z);
+        self.gl.uniform_3f(location, x, y, z);
     }
     /// ------------------------------------------------------------------------
-    // pub unsafe fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
-    //     gl::UniformMatrix4fv(location, 1, gl::FALSE, mat.as_ptr());
-    // }
+    pub unsafe fn set_mat4(&self, location: i32, mat: &Matrix4<f32>) {
+        self.gl.uniform_matrix_4fv(location, mat.as_ref());
+    }
 
     /// get uniform location with caching
     pub unsafe fn uniform_location(&mut self, name: &'static str) -> i32 {
@@ -159,15 +159,12 @@ impl<'a> Program<'a> {
         let mut info_log = Vec::with_capacity(1024);
         info_log.set_len(1024 - 1); // subtract 1 to skip the trailing null character
         if type_ != "PROGRAM" {
-            gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
+            let success = self.gl.get_shader_parameter(shader, gl::COMPILE_STATUS);
             let log_type = if success == i32::from(gl::TRUE) { "WARNING" } else { "ERROR" };
-            let mut length = 0;
-            gl::GetShaderInfoLog(shader, 1024, &mut length, info_log.as_mut_ptr() as *mut GLchar);
-            if length == 0 { return }
-            panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}",
-                      log_type, log_type,
-                      type_,
-                      str::from_utf8(&info_log[0..length as usize]).unwrap());
+            let info_log = self.gl.get_shader_info_log(shader);
+            if info_log.is_empty() { return }
+            panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}", 
+                log_type, log_type, type_, info_log);
 
         } else {
             gl::GetProgramiv(shader, gl::LINK_STATUS, &mut success);
