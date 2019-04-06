@@ -3,6 +3,7 @@ use glenum::*;
 use web_sys::WebGlRenderingContext;
 
 pub struct GL {
+    // TODO: WebGl2RenderingContext is a different class - make type generic?
     context: WebGlRenderingContext,
 }
 
