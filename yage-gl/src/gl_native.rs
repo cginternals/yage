@@ -99,7 +99,7 @@ impl GlFunctions for GL {
         unsafe {
             gl::BufferData(
                 target,
-                data.len() as isize,
+                (data.len() * 4) as isize,
                 data.as_ptr() as *const std::ffi::c_void,
                 usage
             );
