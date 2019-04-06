@@ -26,6 +26,8 @@ pub trait GlFunctions {
     type GlProgram;
     type GlBuffer;
     type GlVertexArray;
+    type GlTexture;
+    type GlUniformLocation;
 
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32);
     fn clear(&self, bit: BufferBit);
@@ -59,4 +61,48 @@ pub trait GlFunctions {
     fn enable_vertex_attrib_array(&self, index: u32);
 
     fn draw_arrays(&self, mode: u32, first: i32, count: i32);
+    fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32);
+
+    fn enable(&self, param: u32);
+    fn disable(&self, param: u32);
+
+    fn point_size(&self, size: f32);
+
+    fn active_texture(&self, unit: u32);
+    fn bind_texture(&self, target: u32, texture: Option<Self::GlTexture>);
+
+    fn blend_func(&self, src: u32, dst: u32);
+
+    fn create_texture(&self) -> Self::GlTexture;
+
+    #[allow(clippy::too_many_arguments)]
+    fn tex_image_2d(
+        &self,
+        target: u32,
+        level: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32,
+        border: i32,
+        format: u32,
+        ty: u32,
+        pixels: Option<&[u8]>,
+    );
+
+    fn generate_mipmap(&self);
+
+    fn tex_parameteri(&self, target: u32, parameter: u32, value: i32);
+
+    fn uniform_1i(&self, location: Self::GlUniformLocation, x: i32);
+    fn uniform_1f(&self, location: Self::GlUniformLocation, x: f32);
+    fn uniform_3fv(&self, location: Self::GlUniformLocation, x: &[f32; 3]);
+    fn uniform_4fv(&self, location: Self::GlUniformLocation, x: &[f32; 4]);
+    fn uniform_2f(&self, location: Self::GlUniformLocation, x: f32, y: f32);
+    fn uniform_3f(&self, location: Self::GlUniformLocation, x: f32, y: f32, z: f32);
+    fn uniform_matrix_4fv(&self, location: Self::GlUniformLocation, value: &[[f32; 4]; 4]);
+
+    // TODO!!: required calls for gltf:
+    // shader -> GetUniformLocation
+    // framebuffer
+    // viewer - polygonmode, pixelstorei, readpixels, viewport
 }
