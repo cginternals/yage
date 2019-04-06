@@ -42,10 +42,10 @@ impl super::GlFunctions for GL {
         unsafe { gl::CreateShader(kind as _) }
     }
 
-    fn shader_source(&self, shader: Self::GlShader, source: &str) {
+    fn shader_source(&self, shader: &Self::GlShader, source: &str) {
         unsafe {
             gl::ShaderSource(
-                shader, 
+                *shader, 
                 1,
                 &(source.as_ptr() as *const i8), 
                 &(source.len() as i32)
@@ -53,34 +53,34 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn compile_shader(&self, shader: Self::GlShader) {
+    fn compile_shader(&self, shader: &Self::GlShader) {
         unsafe {
-            gl::CompileShader(shader);
+            gl::CompileShader(*shader);
         }
     }
 
-    fn delete_shader(&self, shader: Self::GlShader) {
+    fn delete_shader(&self, shader: &Self::GlShader) {
         unsafe {
-            gl::DeleteShader(shader);
+            gl::DeleteShader(*shader);
         }
     }
 
-    fn get_shader_parameter(&self, shader: Self::GlShader, param: u32) -> i32 {
+    fn get_shader_parameter(&self, shader: &Self::GlShader, param: u32) -> i32 {
         let mut result = 0;
         unsafe {
-            gl::GetShaderiv(shader, param, &mut result);
+            gl::GetShaderiv(*shader, param, &mut result);
         }
         result
     }
 
-    fn get_shader_info_log(&self, shader: Self::GlShader) -> String {
+    fn get_shader_info_log(&self, shader: &Self::GlShader) -> String {
         let mut length = self.get_shader_parameter(shader, gl::INFO_LOG_LENGTH);
         if length > 0 {
             let mut log = String::with_capacity(length as usize);
             log.extend(std::iter::repeat('\0').take(length as usize));
                 unsafe {
                     gl::GetShaderInfoLog(
-                    shader,
+                    *shader,
                     length,
                     &mut length,
                     (&log[..]).as_ptr() as *mut gl::types::GLchar,
@@ -99,34 +99,34 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn attach_shader(&self, program: Self::GlProgram, shader: Self::GlShader) {
+    fn attach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader) {
         unsafe {
-            gl::AttachShader(program, shader)
+            gl::AttachShader(*program, *shader)
         }
     }
 
-    fn link_program(&self, program: Self::GlProgram) {
+    fn link_program(&self, program: &Self::GlProgram) {
         unsafe {
-            gl::LinkProgram(program)
+            gl::LinkProgram(*program)
         }
     }
 
-    fn get_program_parameter(&self, program: Self::GlProgram, param: u32) -> i32 {
+    fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32 {
         let mut result = 0;
         unsafe {
-            gl::GetProgramiv(program, param, &mut result);
+            gl::GetProgramiv(*program, param, &mut result);
         }
         result
     }
 
-    fn get_program_info_log(&self, program: Self::GlProgram) -> String {
+    fn get_program_info_log(&self, program: &Self::GlProgram) -> String {
         let mut length = self.get_program_parameter(program, gl::INFO_LOG_LENGTH);
         if length > 0 {
             let mut log = String::with_capacity(length as usize);
             log.extend(std::iter::repeat('\0').take(length as usize));
                 unsafe {
                     gl::GetProgramInfoLog(
-                    program,
+                    *program,
                     length,
                     &mut length,
                     (&log[..]).as_ptr() as *mut gl::types::GLchar,
@@ -139,9 +139,9 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn use_program(&self, program: Option<Self::GlProgram>) {
+    fn use_program(&self, program: Option<&Self::GlProgram>) {
         unsafe {
-            gl::UseProgram(program.unwrap_or(0));
+            gl::UseProgram(*program.unwrap_or(&0));
         }
     }
 
@@ -307,53 +307,53 @@ impl super::GlFunctions for GL {
 
     fn get_uniform_location(
         &self,
-        program: Self::GlProgram,
+        program: &Self::GlProgram,
         name: &str,
     ) -> Self::GlUniformLocation {
         unsafe {
-            gl::GetUniformLocation(program, name.as_ptr() as *const i8) as i32
+            gl::GetUniformLocation(*program, name.as_ptr() as *const i8) as i32
         }
     }
 
-    fn uniform_1i(&self, location: Self::GlUniformLocation, x: i32) {
+    fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32) {
         unsafe {
-            gl::Uniform1i(location, x);
+            gl::Uniform1i(*location, x);
         }
     }
 
-    fn uniform_1f(&self, location: Self::GlUniformLocation, x: f32) {
+    fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32) {
         unsafe {
-            gl::Uniform1f(location, x);
+            gl::Uniform1f(*location, x);
         }
     }
 
-    fn uniform_3fv(&self, location: Self::GlUniformLocation, x: &[f32; 3]) {
+    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]) {
         unsafe {
-            gl::Uniform3fv(location, 1, x.as_ptr());
+            gl::Uniform3fv(*location, 1, x.as_ptr());
         }
     }
 
-    fn uniform_4fv(&self, location: Self::GlUniformLocation, x: &[f32; 4]) {
+    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]) {
         unsafe {
-            gl::Uniform4fv(location, 1, x.as_ptr());
+            gl::Uniform4fv(*location, 1, x.as_ptr());
         }
     }
 
-    fn uniform_2f(&self, location: Self::GlUniformLocation, x: f32, y: f32) {
+    fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32) {
         unsafe {
-            gl::Uniform2f(location, x, y);
+            gl::Uniform2f(*location, x, y);
         }
     }
 
-    fn uniform_3f(&self, location: Self::GlUniformLocation, x: f32, y: f32, z: f32) {
+    fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32) {
         unsafe {
-            gl::Uniform3f(location, x, y, z);
+            gl::Uniform3f(*location, x, y, z);
         }
     }
 
-    fn uniform_matrix_4fv(&self, location: Self::GlUniformLocation, mat: &[[f32; 4]; 4]) {
+    fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, mat: &[[f32; 4]; 4]) {
         unsafe {
-            gl::UniformMatrix4fv(location, 1, gl::FALSE, mat.as_ptr() as _);
+            gl::UniformMatrix4fv(*location, 1, gl::FALSE, mat.as_ptr() as _);
         }
     }
 

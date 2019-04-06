@@ -40,19 +40,19 @@ pub trait GlFunctions {
     fn viewport(&self, x: i32, y: i32, width: i32, height: i32);
 
     fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader;
-    fn shader_source(&self, shader: Self::GlShader, source: &str);
-    fn compile_shader(&self, shader: Self::GlShader);
-    fn delete_shader(&self, shader: Self::GlShader);
+    fn shader_source(&self, shader: &Self::GlShader, source: &str);
+    fn compile_shader(&self, shader: &Self::GlShader);
+    fn delete_shader(&self, shader: &Self::GlShader);
     /// Named after the WebGL function. See `gl::GetShaderiv` for OpenGL.
-    fn get_shader_parameter(&self, shader: Self::GlShader, param: u32) -> i32;
-    fn get_shader_info_log(&self, shader: Self::GlShader) -> String;
+    fn get_shader_parameter(&self, shader: &Self::GlShader, param: u32) -> i32;
+    fn get_shader_info_log(&self, shader: &Self::GlShader) -> String;
 
     fn create_program(&self) -> Self::GlProgram;
-    fn attach_shader(&self, program: Self::GlProgram, shader: Self::GlShader);
-    fn link_program(&self, program: Self::GlProgram);
-    fn get_program_parameter(&self, program: Self::GlProgram, param: u32) -> i32;
-    fn get_program_info_log(&self, program: Self::GlProgram) -> String;
-    fn use_program(&self, program: Option<Self::GlProgram>);
+    fn attach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader);
+    fn link_program(&self, program: &Self::GlProgram);
+    fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32;
+    fn get_program_info_log(&self, program: &Self::GlProgram) -> String;
+    fn use_program(&self, program: Option<&Self::GlProgram>);
 
     /// Named after the WebGL function. See `gl::GenBuffers` for OpenGL.
     fn create_buffer(&self) -> Self::GlBuffer;
@@ -107,17 +107,17 @@ pub trait GlFunctions {
 
     fn get_uniform_location(
         &self,
-        program: Self::GlProgram,
+        program: &Self::GlProgram,
         name: &str,
     ) -> Self::GlUniformLocation;
 
-    fn uniform_1i(&self, location: Self::GlUniformLocation, x: i32);
-    fn uniform_1f(&self, location: Self::GlUniformLocation, x: f32);
-    fn uniform_3fv(&self, location: Self::GlUniformLocation, x: &[f32; 3]);
-    fn uniform_4fv(&self, location: Self::GlUniformLocation, x: &[f32; 4]);
-    fn uniform_2f(&self, location: Self::GlUniformLocation, x: f32, y: f32);
-    fn uniform_3f(&self, location: Self::GlUniformLocation, x: f32, y: f32, z: f32);
-    fn uniform_matrix_4fv(&self, location: Self::GlUniformLocation, value: &[[f32; 4]; 4]);
+    fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32);
+    fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32);
+    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]);
+    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]);
+    fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32);
+    fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32);
+    fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 4]; 4]);
 
     // TODO!: "optional" methods from gltf-viewer (mostly for screenshots, headless):
     // framebuffer

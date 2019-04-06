@@ -47,48 +47,48 @@ impl super::GlFunctions for GL {
         self.gl.create_shader(kind as _).unwrap()
     }
 
-    fn shader_source(&self, shader: Self::GlShader, source: &str) {
-        self.gl.shader_source(&shader, source);
+    fn shader_source(&self, shader: &Self::GlShader, source: &str) {
+        self.gl.shader_source(shader, source);
     }
 
-    fn compile_shader(&self, shader: Self::GlShader) {
-        self.gl.compile_shader(&shader);
+    fn compile_shader(&self, shader: &Self::GlShader) {
+        self.gl.compile_shader(shader);
     }
 
-    fn delete_shader(&self, shader: Self::GlShader) {
-        self.gl.delete_shader(Some(&shader));
+    fn delete_shader(&self, shader: &Self::GlShader) {
+        self.gl.delete_shader(Some(shader));
     }
 
-    fn get_shader_parameter(&self, shader: Self::GlShader, param: u32) -> i32 {
-        self.gl.get_shader_parameter(&shader, param).as_f64().unwrap() as i32
+    fn get_shader_parameter(&self, shader: &Self::GlShader, param: u32) -> i32 {
+        self.gl.get_shader_parameter(shader, param).as_f64().unwrap() as i32
     }
 
-    fn get_shader_info_log(&self, shader: Self::GlShader) -> String {
-        self.gl.get_shader_info_log(&shader).unwrap()
+    fn get_shader_info_log(&self, shader: &Self::GlShader) -> String {
+        self.gl.get_shader_info_log(shader).unwrap()
     }
 
     fn create_program(&self) -> Self::GlProgram {
         self.gl.create_program().unwrap()
     }
 
-    fn attach_shader(&self, program: Self::GlProgram, shader: Self::GlShader) {
-        self.gl.attach_shader(&program, &shader);
+    fn attach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader) {
+        self.gl.attach_shader(&program, shader);
     }
 
-    fn link_program(&self, program: Self::GlProgram) {
+    fn link_program(&self, program: &Self::GlProgram) {
         self.gl.link_program(&program);
     }
 
-    fn get_program_parameter(&self, program: Self::GlProgram, param: u32) -> i32 {
+    fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32 {
         self.gl.get_program_parameter(&program, param).as_f64().unwrap() as i32
     }
 
-    fn get_program_info_log(&self, program: Self::GlProgram) -> String {
+    fn get_program_info_log(&self, program: &Self::GlProgram) -> String {
         self.gl.get_program_info_log(&program).unwrap()
     }
 
-    fn use_program(&self, program: Option<Self::GlProgram>) {
-        self.gl.use_program(program.as_ref());
+    fn use_program(&self, program: Option<&Self::GlProgram>) {
+        self.gl.use_program(program);
     }
 
     fn create_buffer(&self) -> Self::GlBuffer {
@@ -195,37 +195,37 @@ impl super::GlFunctions for GL {
 
     fn get_uniform_location(
         &self,
-        program: Self::GlProgram,
+        program: &Self::GlProgram,
         name: &str,
     ) -> Self::GlUniformLocation {
         unimplemented!()
     }
 
-    fn uniform_1i(&self, location: Self::GlUniformLocation, x: i32) {
+    fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32) {
         unimplemented!()
     }
 
-    fn uniform_1f(&self, location: Self::GlUniformLocation, x: f32) {
+    fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32) {
         unimplemented!()
     }
 
-    fn uniform_3fv(&self, location: Self::GlUniformLocation, x: &[f32; 3]) {
+    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]) {
         unimplemented!()
     }
 
-    fn uniform_4fv(&self, location: Self::GlUniformLocation, x: &[f32; 4]) {
+    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]) {
         unimplemented!()
     }
 
-    fn uniform_2f(&self, location: Self::GlUniformLocation, x: f32, y: f32) {
+    fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32) {
         unimplemented!()
     }
 
-    fn uniform_3f(&self, location: Self::GlUniformLocation, x: f32, y: f32, z: f32) {
+    fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32) {
         unimplemented!()
     }
 
-    fn uniform_matrix_4fv(&self, location: Self::GlUniformLocation, mat: &[[f32; 4]; 4]) {
+    fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, mat: &[[f32; 4]; 4]) {
         unimplemented!()
     }
 }
