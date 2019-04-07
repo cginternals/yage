@@ -23,7 +23,6 @@ impl GL {
     }
 }
 
-#[allow(dead_code)]
 impl super::GlFunctions for GL {
     type GlShader = WebGlShader;
     type GlProgram = WebGlProgram;
@@ -113,6 +112,10 @@ impl super::GlFunctions for GL {
                 usage
             );
         }
+    }
+
+    fn delete_buffer(&self, buffer: &Self::GlBuffer) {
+        self.gl.delete_buffer(Some(&buffer));
     }
 
     fn create_vertex_array(&self) -> Self::GlVertexArray {

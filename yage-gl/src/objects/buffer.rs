@@ -5,7 +5,7 @@ pub struct Buffer<'a> {
     gl: &'a GL,
     /// Target for use in `glBindBuffer`
     target: u32,
-    vbo: <GL as GlFunctions>::GlBuffer,
+    buffer_handle: <GL as GlFunctions>::GlBuffer,
 }
 
 impl<'a> Buffer<'a> {
@@ -18,7 +18,7 @@ impl<'a> Buffer<'a> {
         Self {
             gl,
             target,
-            vbo: gl.create_buffer()
+            buffer_handle: gl.create_buffer()
         }
     }
 
@@ -38,7 +38,7 @@ impl<'a> Buffer<'a> {
 
     /// Binds the buffer.
     pub fn bind(&self) {
-        self.gl.bind_buffer(self.target, Some(&self.vbo));
+        self.gl.bind_buffer(self.target, Some(&self.buffer_handle));
     }
 
     /// Unbinds the buffer.
@@ -59,8 +59,7 @@ impl<'a> Buffer<'a> {
 
 impl<'a> Drop for Buffer<'a> {
     fn drop(&mut self) {
-        // TODO!!!: implement delete_buffer...
-        // self.gl.delete_buffer(&self.vbo);
+        self.gl.delete_buffer(&self.buffer_handle);
     }
 }
 

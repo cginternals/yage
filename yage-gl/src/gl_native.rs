@@ -3,8 +3,6 @@ use glenum::*;
 #[derive(Default)]
 pub struct GL {}
 
-#[allow(dead_code)]
-// TODO!: rename to Gl? or upper-case GlFunctions?
 impl GL {
     pub fn new() -> GL {
         GL {}
@@ -166,6 +164,12 @@ impl super::GlFunctions for GL {
                 data.as_ptr() as *const std::ffi::c_void,
                 usage
             );
+        }
+    }
+
+    fn delete_buffer(&self, buffer: &Self::GlBuffer) {
+        unsafe {
+            gl::DeleteBuffers(1, buffer);
         }
     }
 
