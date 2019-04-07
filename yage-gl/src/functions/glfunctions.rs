@@ -73,6 +73,7 @@ pub trait GlFunctions {
     fn blend_func(&self, src: u32, dst: u32);
 
     fn create_texture(&self) -> Self::GlTexture;
+    fn delete_texture(&self, texture: &Self::GlTexture);
 
     #[allow(clippy::too_many_arguments)]
     fn tex_image_2d(

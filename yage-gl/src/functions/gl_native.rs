@@ -294,6 +294,12 @@ impl super::GlFunctions for GL {
         tex
     }
 
+    fn delete_texture(&self, texture: &Self::GlTexture) {
+        unsafe {
+            gl::DeleteTextures(1, texture);
+        }
+    }
+
     fn tex_image_2d(
         &self,
         target: u32,

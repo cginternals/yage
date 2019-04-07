@@ -206,6 +206,10 @@ impl super::GlFunctions for GL {
         self.gl.create_texture().unwrap()
     }
 
+    fn delete_texture(&self, texture: &Self::GlTexture) {
+        self.gl.delete_texture(Some(texture));
+    }
+
     fn tex_image_2d(
         &self,
         target: u32,
