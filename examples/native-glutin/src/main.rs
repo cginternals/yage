@@ -1,13 +1,17 @@
-use glutin::GlContext;
-
 use yage::gl::{GL, GlFunctions, check_error, objects::Program};
 use yage::gl::glenum;
+use yage::glutin::Application;
 use yage::glutin::Window;
 use yage::glutin::Context;
 
 fn main() {
+    // create application
+    let mut application = Application::new();
+
+let app = &mut application;
+
     // create window
-    let mut window = Window::new();
+    let window = Window::new(app);
 
     // activate context
     window.make_current();
@@ -80,7 +84,7 @@ fn main() {
 
     let mut running = true;
     while running {
-        running = window.poll_events();
+        running = app.poll_events();
 
         gl.clear(glenum::BufferBit::Color);
         gl.draw_arrays(gl::TRIANGLES, 0, 3);

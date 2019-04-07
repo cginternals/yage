@@ -1,21 +1,30 @@
 use glutin::GlContext;
+use glutin::WindowId;
 
+use crate::Application;
 use crate::Context;
 
 /// Top-level window with OpenGL context.
 pub struct Window {
-    events_loop: glutin::EventsLoop,
-    window:      glutin::GlWindow
+    window: glutin::GlWindow
 }
 
 impl Window {
-    /// Create a new window.
+    /// Create a new window for an application
     ///
-    /// # Return
-    /// a new instance of Window.
-    pub fn new() -> Window {
-        // create event loop
-        let events_loop = glutin::EventsLoop::new();
+    /// This creates a new top-level window and transfers ownership
+    /// to the specified application.
+    ///
+    /// # Parameters
+    ///
+    /// - `application`: Application for which the window is created.
+    ///
+    /// # Returns
+    ///
+    /// Reference to the new window.
+    pub fn new(application: &mut Application) -> &mut Window {
+        // get event loop
+        let events_loop = application.events_loop();
 
         // create window builder
         let window_builder = glutin::WindowBuilder::new()
@@ -26,21 +35,33 @@ impl Window {
         let context_builder = glutin::ContextBuilder::new();
 
         // create actual OpenGL window
-        let window = glutin::GlWindow::new(window_builder, context_builder, &events_loop).unwrap();
+        let gl_window = glutin::GlWindow::new(window_builder, context_builder, events_loop).unwrap();
 
-        gl::load_with(|ptr| window.context().get_proc_address(ptr) as *const _);
+        // [TODO] initialize OpenGL in context
+        gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
-        // return window
-        Window {
-            events_loop: events_loop,
-            window: window
-        }
+        // create window
+        let window = Window {
+            window: gl_window
+        };
+
+        // move window into application and return reference
+        application.add_window(window)
+    }
+
+    pub fn id(&self) -> WindowId {
+        self.window.id()
+    }
+
+    pub fn get_gl_window(&self) -> &glutin::GlWindow {
+        &self.window
     }
 
     pub fn swap_buffers(&self) {
         let _ = self.window.swap_buffers();
     }
 
+/*
     pub fn poll_events(&mut self) -> bool {
         let mut running = true;
 
@@ -66,6 +87,7 @@ impl Window {
 
         running
     }
+*/
 }
 
 impl Context for Window {
