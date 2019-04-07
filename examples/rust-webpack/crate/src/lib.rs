@@ -8,7 +8,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::WebGl2RenderingContext;
 
-use yage::gl::{GL, GlFunctions, glenum, objects::Program};
+use yage::gl::{GL, GlFunctions, glenum, objects::{Program, Buffer}};
 
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -50,18 +50,14 @@ fn setup_canvas() -> Result<(), JsValue> {
     let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
     program.use_program();
 
-    let vb = gl.create_buffer();
-    gl.bind_buffer(glenum::BufferKind::Array as _, Some(&vb));
-    gl.buffer_data(
-        glenum::BufferKind::Array as _,
-        &VERTEX_DATA, 
-        glenum::DrawMode::Static as _
-    );
+    let vertex_buffer = Buffer::new(&gl, glenum::BufferKind::Array as _);
+    vertex_buffer.bind();
+    vertex_buffer.set_data(&VERTEX_DATA, glenum::DrawMode::Static as _);
 
     let vao = gl.create_vertex_array();
     gl.bind_vertex_array(Some(&vao));
 
-    gl.vertex_attrib_pointer(
+    vertex_buffer.attrib_enable(
         0,
         2,
         glenum::DataType::Float as _,
@@ -70,7 +66,7 @@ fn setup_canvas() -> Result<(), JsValue> {
         0,
     );
 
-    gl.vertex_attrib_pointer(
+    vertex_buffer.attrib_enable(
         1,
         3,
         glenum::DataType::Float as _,
@@ -78,9 +74,6 @@ fn setup_canvas() -> Result<(), JsValue> {
         5 * std::mem::size_of::<f32>() as i32,
         2 * std::mem::size_of::<f32>() as i32,
     );
-
-    gl.enable_vertex_attrib_array(0);
-    gl.enable_vertex_attrib_array(1);
 
     // check_error!();
 

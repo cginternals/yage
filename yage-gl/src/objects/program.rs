@@ -17,7 +17,6 @@ pub struct Program<'a> {
 }
 
 impl<'a> Program<'a> {
-    #[allow(dead_code)]
     pub fn new(gl: &'a GL, vertex_path: &str, fragment_path: &str, defines: &[String]) -> Program<'a> {
         // 1. retrieve the vertex/fragment source code from filesystem
         let mut v_shader_file = File::open(vertex_path).unwrap_or_else(|_| panic!("Failed to open {}", vertex_path));
@@ -119,6 +118,7 @@ impl<'a> Program<'a> {
     /// get uniform location with caching
     pub fn uniform_location(&mut self, name: &'static str) -> <GL as GlFunctions>::GlUniformLocation {
         if let Some(loc) = self.uniform_location_cache.get(name) {
+            #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL 
             return loc.clone();
         }
 
@@ -128,6 +128,7 @@ impl<'a> Program<'a> {
         //     // TODO!: trace!
         //     println!("uniform '{}' unknown for shader {:?}", name, self.id);
         // }
+        #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL 
         self.uniform_location_cache.insert(name, loc.clone());
         loc
     } 

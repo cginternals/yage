@@ -58,6 +58,8 @@ pub trait GlFunctions {
     fn create_buffer(&self) -> Self::GlBuffer;
     fn bind_buffer(&self, target: u32, buffer: Option<&Self::GlBuffer>);
     fn buffer_data<T>(&self, target: u32, data: &[T], usage: u32);
+    fn buffer_sub_data<T>(&self, target: u32, offset: isize, data: &[T]);
+    fn delete_buffer(&self, buffer: &Self::GlBuffer);
 
     fn create_vertex_array(&self) -> Self::GlVertexArray;
     fn bind_vertex_array(&self, vertex_array: Option<&Self::GlVertexArray>);
@@ -71,6 +73,7 @@ pub trait GlFunctions {
         offset: i32,
     );
     fn enable_vertex_attrib_array(&self, index: u32);
+    fn disable_vertex_attrib_array(&self, index: u32);
 
     fn draw_arrays(&self, mode: u32, first: i32, count: i32);
     fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32);

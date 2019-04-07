@@ -23,7 +23,6 @@ impl GL {
     }
 }
 
-#[allow(dead_code)]
 impl super::GlFunctions for GL {
     type GlShader = WebGlShader;
     type GlProgram = WebGlProgram;
@@ -115,6 +114,21 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn buffer_sub_data<T>(&self, target: u32, offset: isize, data: &[T]) {
+        unsafe {
+            self.gl.buffer_sub_data_with_i32_and_u8_array(
+                target, 
+                offset as i32, 
+                std::slice::from_raw_parts_mut(
+                    data.as_ptr() as *mut u8, data.len() * std::mem::size_of::<T>()), 
+            );
+        }
+    }
+
+    fn delete_buffer(&self, buffer: &Self::GlBuffer) {
+        self.gl.delete_buffer(Some(&buffer));
+    }
+
     fn create_vertex_array(&self) -> Self::GlVertexArray {
         self.gl.create_vertex_array().unwrap()
     }
@@ -144,6 +158,10 @@ impl super::GlFunctions for GL {
 
     fn enable_vertex_attrib_array(&self, index: u32) {
         self.gl.enable_vertex_attrib_array(index);
+    }
+
+    fn disable_vertex_attrib_array(&self, index: u32) {
+        self.gl.disable_vertex_attrib_array(index);
     }
 
     fn draw_arrays(&self, mode: u32, first: i32, count: i32) {
