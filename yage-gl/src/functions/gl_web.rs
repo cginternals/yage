@@ -137,6 +137,10 @@ impl super::GlFunctions for GL {
         self.gl.bind_vertex_array(vertex_array)
     }
 
+    fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
+        self.gl.delete_vertex_array(Some(vertex_array));
+    }
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,

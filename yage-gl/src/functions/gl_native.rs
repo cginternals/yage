@@ -196,6 +196,12 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
+        unsafe {
+            gl::DeleteVertexArrays(1, vertex_array);
+        }
+    }
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,

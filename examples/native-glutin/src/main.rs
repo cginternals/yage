@@ -1,7 +1,11 @@
 use glutin::GlContext;
 
-use yage::gl::{GL, GlFunctions, check_error, objects::{Program, Buffer}};
-use yage::gl::glenum;
+use yage::gl::{
+    GL, GlFunctions,
+    glenum,
+    check_error, 
+    objects::{Program, Buffer, VertexArray}
+};
 
 fn main() {
     let mut events_loop = glutin::EventsLoop::new();
@@ -25,8 +29,8 @@ fn main() {
     vertex_buffer.bind();
     vertex_buffer.set_data(&VERTEX_DATA, glenum::DrawMode::Static as _);
 
-    let vao = gl.create_vertex_array();
-    gl.bind_vertex_array(Some(&vao));
+    let vao = VertexArray::new(&gl);
+    vao.bind();
 
     vertex_buffer.attrib_enable(
         0, 

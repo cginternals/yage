@@ -46,6 +46,7 @@ pub trait GlFunctions {
 
     fn create_vertex_array(&self) -> Self::GlVertexArray;
     fn bind_vertex_array(&self, vertex_array: Option<&Self::GlVertexArray>);
+    fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray);
     fn vertex_attrib_pointer(
         &self,
         index: u32,
