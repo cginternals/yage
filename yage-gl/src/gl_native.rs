@@ -4,6 +4,7 @@ use glenum::*;
 pub struct GL {}
 
 #[allow(dead_code)]
+// TODO!: rename to Gl? or upper-case GlFunctions?
 impl GL {
     pub fn new() -> GL {
         GL {}
