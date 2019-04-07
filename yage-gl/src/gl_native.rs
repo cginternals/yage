@@ -167,6 +167,17 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn buffer_sub_data<T>(&self, target: u32, offset: isize, data: &[T]) {
+        unsafe {
+            gl::BufferSubData(
+                target,
+                offset,
+                (data.len() * std::mem::size_of::<T>()) as isize,
+                data.as_ptr() as *const std::ffi::c_void,
+            )
+        }
+    }
+
     fn delete_buffer(&self, buffer: &Self::GlBuffer) {
         unsafe {
             gl::DeleteBuffers(1, buffer);
@@ -209,6 +220,12 @@ impl super::GlFunctions for GL {
     fn enable_vertex_attrib_array(&self, index: u32) {
         unsafe {
             gl::EnableVertexAttribArray(index);
+        }
+    }
+
+    fn disable_vertex_attrib_array(&self, index: u32) {
+        unsafe {
+            gl::DisableVertexAttribArray(index);
         }
     }
 
