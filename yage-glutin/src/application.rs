@@ -34,7 +34,7 @@ impl Application {
     /// # Returns
     ///
     /// Mutable reference to the window.
-    pub fn add_window(&mut self, window: Window) -> &mut Window {
+    pub fn add_window(&mut self, window: Window) {
         let id = window.id();
 
         // move window
@@ -42,7 +42,11 @@ impl Application {
         self.windows.insert(id, window);
 
         // return reference to window
-        self.windows.get_mut(&id).unwrap()
+        // self.windows.get_mut(&id).unwrap()
+    }
+
+    pub fn first_window(&self) -> &Window {
+        self.windows.values().next().unwrap()
     }
 
     /// Borrow events loop

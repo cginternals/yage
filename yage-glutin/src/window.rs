@@ -1,7 +1,6 @@
 use glutin::GlContext;
 use glutin::WindowId;
 
-use crate::Application;
 use crate::Context;
 
 /// Top-level window with OpenGL context.
@@ -22,10 +21,7 @@ impl Window {
     /// # Returns
     ///
     /// Reference to the new window.
-    pub fn new(application: &mut Application) -> &mut Window {
-        // get event loop
-        let events_loop = application.events_loop();
-
+    pub fn new(events_loop: &glutin::EventsLoop) -> Window {
         // create window builder
         let window_builder = glutin::WindowBuilder::new()
             .with_title("A fantastic window!")
@@ -41,12 +37,12 @@ impl Window {
         gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
         // create window
-        let window = Window {
+        Window {
             window: gl_window
-        };
+        }
 
         // move window into application and return reference
-        application.add_window(window)
+        // application.add_window(window)
     }
 
     pub fn id(&self) -> WindowId {

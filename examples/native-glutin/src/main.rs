@@ -6,15 +6,15 @@ use yage::glutin::Context;
 
 fn main() {
     // create application
-    let mut application = Application::new();
-
-let app = &mut application;
+    let mut app = Application::new();
 
     // create window
-    let window = Window::new(app);
+    let window = Window::new(app.events_loop());
+
+    app.add_window(window);
 
     // activate context
-    window.make_current();
+    app.first_window().make_current();
 
     // create OpenGL wrapper
     let gl = GL::new();
@@ -91,7 +91,7 @@ let app = &mut application;
 
         // check_error!();
 
-        window.swap_buffers();
+        app.first_window().swap_buffers();
     }
 }
 
