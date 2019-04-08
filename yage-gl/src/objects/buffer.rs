@@ -91,4 +91,3 @@ impl<'a> Drop for Buffer<'a> {
         self.gl.delete_buffer(&self.buffer_handle);
     }
 }
-

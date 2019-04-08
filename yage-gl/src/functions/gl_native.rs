@@ -196,6 +196,12 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
+        unsafe {
+            gl::DeleteVertexArrays(1, vertex_array);
+        }
+    }
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -286,6 +292,12 @@ impl super::GlFunctions for GL {
         let mut tex = 0;
         unsafe { gl::GenTextures(1, &mut tex); }
         tex
+    }
+
+    fn delete_texture(&self, texture: &Self::GlTexture) {
+        unsafe {
+            gl::DeleteTextures(1, texture);
+        }
     }
 
     fn tex_image_2d(

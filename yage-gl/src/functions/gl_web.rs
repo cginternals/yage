@@ -137,6 +137,10 @@ impl super::GlFunctions for GL {
         self.gl.bind_vertex_array(vertex_array)
     }
 
+    fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
+        self.gl.delete_vertex_array(Some(vertex_array));
+    }
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -200,6 +204,10 @@ impl super::GlFunctions for GL {
 
     fn create_texture(&self) -> Self::GlTexture {
         self.gl.create_texture().unwrap()
+    }
+
+    fn delete_texture(&self, texture: &Self::GlTexture) {
+        self.gl.delete_texture(Some(texture));
     }
 
     fn tex_image_2d(

@@ -8,7 +8,12 @@ use wasm_bindgen::JsCast;
 
 use web_sys::WebGl2RenderingContext;
 
-use yage::gl::{GL, GlFunctions, glenum, objects::{Program, Buffer}};
+use yage::gl::{
+    GL, GlFunctions, 
+    glenum,
+    objects::{Program, Buffer, VertexArray}
+};
+
 
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -54,8 +59,8 @@ fn setup_canvas() -> Result<(), JsValue> {
     vertex_buffer.bind();
     vertex_buffer.set_data(&VERTEX_DATA, glenum::DrawMode::Static as _);
 
-    let vao = gl.create_vertex_array();
-    gl.bind_vertex_array(Some(&vao));
+    let vao = VertexArray::new(&gl);
+    vao.bind();
 
     vertex_buffer.attrib_enable(
         0,
