@@ -63,7 +63,6 @@ impl<'a> Buffer<'a> {
         self.gl.disable_vertex_attrib_array(index);
     }
 
-    // TODO!: boolean param for bind? (-> without would be simpler)
     /// Bind the buffer and return BufferUpdater that can be used for updating
     ///
     /// # Example
@@ -77,8 +76,8 @@ impl<'a> Buffer<'a> {
     /// Caution: assumes that you do nothing between calls to the updater that would
     /// unbind it!
     pub fn update(&self) -> BufferUpdater {
-        self.bind();
-        BufferUpdater { buffer: self }
+        // TODO!: boolean param for bind also here? (-> without would be simpler)
+        BufferUpdater::new(self, true)
     }
 }
 
@@ -92,7 +91,18 @@ pub struct BufferUpdater<'a> {
     buffer: &'a Buffer<'a>,
 }
 
+/// Builder-like object for updating without multiple binds.
 impl<'a> BufferUpdater<'a> {
+    /// It is expected that this is usually only constructed via Buffer::update().
+    /// For exceptional cases where binding is not desired (already bound),
+    /// this constructor can be used with `bind` set to `false`.
+    pub fn new(buffer: &'a Buffer, bind: bool) -> Self {
+        if bind {
+            buffer.bind()
+        }
+        Self { buffer }
+    }
+
     // TODO!!: self vs &self return types??
 
     /// Creates the buffer object's data store.
