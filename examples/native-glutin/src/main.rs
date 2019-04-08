@@ -9,12 +9,10 @@ fn main() {
     let mut app = Application::new();
 
     // create window
-    let window = Window::new(app.events_loop());
-
-    app.add_window(window);
+    let window_id = app.add_window(Window::new(&app));
 
     // activate context
-    app.first_window().make_current();
+    app.window(window_id).unwrap().make_current();
 
     // create OpenGL wrapper
     let gl = GL::new();
@@ -82,16 +80,15 @@ fn main() {
         gl::Viewport(0, 0, 300, 200);
     }
 
-    let mut running = true;
-    while running {
-        running = app.poll_events();
+    while app.is_running() {
+        app.poll_events();
 
         gl.clear(glenum::BufferBit::Color);
         gl.draw_arrays(gl::TRIANGLES, 0, 3);
 
         // check_error!();
 
-        app.first_window().swap_buffers();
+        app.window(window_id).unwrap().swap_buffers();
     }
 }
 
