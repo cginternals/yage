@@ -5,4 +5,4 @@ authors = ["Benjamin Wasty <benjamin.wasty@cginternals.com>", "Stefan Buschmann 
 edition = "2018"
 
 [dependencies]
-gltf = { version = "0.11.2", features = ["names"] }
+gltf = { version = "0.11.3", features = ["names"] }
