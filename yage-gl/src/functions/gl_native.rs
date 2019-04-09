@@ -475,7 +475,6 @@ impl super::GlFunctions for GL {
 
     fn check_framebuffer_status(&self, target: u32) -> u32 {
         unsafe { gl::CheckFramebufferStatus(target) }
-    fn delete_renderbuffer(&self, renderbuffer: &Self::GlRenderbuffer);
     }
 
     fn polygon_mode(&self, face: u32, mode: u32) {

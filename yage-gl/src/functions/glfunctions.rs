@@ -149,4 +149,15 @@ pub trait GlFunctions {
         kind: u32,
         data: &mut [u8],
     );
+
+    // TODO!: drawArraysInstanced, vertex_attrib_divisor,
+    // image3D, cubemap, stencil_func etc., blendFuncSeparate
+    // depthMask, depth_func
+    // glClearBuffer, glClearStencil, glClearDepth
+    // glDrawBuffers
+    // glIsFramebuffer
+    //
+    // tf: createTransformFeedback,
+    // bindTransformFeedback, bindBufferBase
+    // transformFeedbackVaryings
 }
