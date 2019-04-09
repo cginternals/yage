@@ -16,6 +16,8 @@ impl super::GlFunctions for GL {
     type GlVertexArray = gl::types::GLuint;
     type GlTexture = gl::types::GLuint;
     type GlUniformLocation = gl::types::GLint;
+    type GlFramebuffer = gl::types::GLuint;
+    type GlRenderbuffer = gl::types::GLuint;
 
     /// specify clear values for the color buffers
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
@@ -44,10 +46,10 @@ impl super::GlFunctions for GL {
     fn shader_source(&self, shader: &Self::GlShader, source: &str) {
         unsafe {
             gl::ShaderSource(
-                *shader, 
+                *shader,
                 1,
-                &(source.as_ptr() as *const i8), 
-                &(source.len() as i32)
+                &(source.as_ptr() as *const i8),
+                &(source.len() as i32),
             );
         }
     }
@@ -77,8 +79,8 @@ impl super::GlFunctions for GL {
         if length > 0 {
             let mut log = String::with_capacity(length as usize);
             log.extend(std::iter::repeat('\0').take(length as usize));
-                unsafe {
-                    gl::GetShaderInfoLog(
+            unsafe {
+                gl::GetShaderInfoLog(
                     *shader,
                     length,
                     &mut length,
@@ -93,21 +95,15 @@ impl super::GlFunctions for GL {
     }
 
     fn create_program(&self) -> Self::GlProgram {
-        unsafe {
-            gl::CreateProgram()
-        }
+        unsafe { gl::CreateProgram() }
     }
 
     fn attach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader) {
-        unsafe {
-            gl::AttachShader(*program, *shader)
-        }
+        unsafe { gl::AttachShader(*program, *shader) }
     }
 
     fn link_program(&self, program: &Self::GlProgram) {
-        unsafe {
-            gl::LinkProgram(*program)
-        }
+        unsafe { gl::LinkProgram(*program) }
     }
 
     fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32 {
@@ -123,8 +119,8 @@ impl super::GlFunctions for GL {
         if length > 0 {
             let mut log = String::with_capacity(length as usize);
             log.extend(std::iter::repeat('\0').take(length as usize));
-                unsafe {
-                    gl::GetProgramInfoLog(
+            unsafe {
+                gl::GetProgramInfoLog(
                     *program,
                     length,
                     &mut length,
@@ -146,7 +142,9 @@ impl super::GlFunctions for GL {
 
     fn create_buffer(&self) -> Self::GlBuffer {
         let mut buf = 0;
-        unsafe { gl::GenBuffers(1, &mut buf); }
+        unsafe {
+            gl::GenBuffers(1, &mut buf);
+        }
         buf
     }
 
@@ -162,7 +160,7 @@ impl super::GlFunctions for GL {
                 target,
                 (data.len() * std::mem::size_of::<T>()) as isize,
                 data.as_ptr() as *const std::ffi::c_void,
-                usage
+                usage,
             );
         }
     }
@@ -186,7 +184,9 @@ impl super::GlFunctions for GL {
 
     fn create_vertex_array(&self) -> Self::GlVertexArray {
         let mut vao = 0;
-        unsafe { gl::GenVertexArrays(1, &mut vao); }
+        unsafe {
+            gl::GenVertexArrays(1, &mut vao);
+        }
         vao
     }
 
@@ -277,9 +277,9 @@ impl super::GlFunctions for GL {
     }
 
     fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>) {
-       unsafe {
-           gl::BindTexture(target, *texture.unwrap_or(&0));
-       } 
+        unsafe {
+            gl::BindTexture(target, *texture.unwrap_or(&0));
+        }
     }
 
     fn blend_func(&self, src: u32, dst: u32) {
@@ -290,7 +290,9 @@ impl super::GlFunctions for GL {
 
     fn create_texture(&self) -> Self::GlTexture {
         let mut tex = 0;
-        unsafe { gl::GenTextures(1, &mut tex); }
+        unsafe {
+            gl::GenTextures(1, &mut tex);
+        }
         tex
     }
 
@@ -344,9 +346,7 @@ impl super::GlFunctions for GL {
         program: &Self::GlProgram,
         name: &str,
     ) -> Self::GlUniformLocation {
-        unsafe {
-            gl::GetUniformLocation(*program, name.as_ptr() as *const i8) as i32
-        }
+        unsafe { gl::GetUniformLocation(*program, name.as_ptr() as *const i8) as i32 }
     }
 
     fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32) {
@@ -391,4 +391,124 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn create_framebuffer(&self) -> Self::GlFramebuffer {
+        let mut fb = 0;
+        unsafe {
+            gl::GenFramebuffers(1, &mut fb);
+        }
+        fb
+    }
+
+    fn delete_framebuffer(&self, framebuffer: &Self::GlFramebuffer) {
+        unsafe {
+            gl::DeleteFramebuffers(1, framebuffer);
+        }
+    }
+
+    fn bind_framebuffer(&self, target: u32, framebuffer: Option<&Self::GlFramebuffer>) {
+        unsafe {
+            gl::BindFramebuffer(target, *framebuffer.unwrap_or(&0));
+        }
+    }
+
+    fn framebuffer_texture_2d(
+        &self,
+        target: u32,
+        attachment: u32,
+        texture_target: u32,
+        texture: Option<&Self::GlTexture>,
+        level: i32,
+    ) {
+        unsafe {
+            gl::FramebufferTexture2D(
+                target,
+                attachment,
+                texture_target,
+                *texture.unwrap_or(&0),
+                level,
+            );
+        }
+    }
+
+    fn create_renderbuffer(&self) -> Self::GlRenderbuffer {
+        let mut rb = 0;
+        unsafe {
+            gl::GenRenderbuffers(1, &mut rb);
+        }
+        rb
+    }
+
+    fn delete_renderbuffer(&self, renderbuffer: &Self::GlRenderbuffer) {
+        unsafe {
+            gl::DeleteRenderbuffers(1, renderbuffer);
+        }
+    }
+
+    fn bind_renderbuffer(&self, target: u32, renderbuffer: Option<&Self::GlRenderbuffer>) {
+        unsafe {
+            gl::BindRenderbuffer(target, *renderbuffer.unwrap_or(&0));
+        }
+    }
+
+    fn renderbuffer_storage(&self, target: u32, internal_format: u32, width: i32, height: i32) {
+        unsafe {
+            gl::RenderbufferStorage(target, internal_format, width, height);
+        }
+    }
+
+    fn framebuffer_renderbuffer(
+        &self,
+        target: u32,
+        attachment: u32,
+        renderbuffer_target: u32,
+        renderbuffer: Option<&Self::GlRenderbuffer>,
+    ) {
+        unsafe {
+            gl::FramebufferRenderbuffer(
+                target,
+                attachment,
+                renderbuffer_target,
+                *renderbuffer.unwrap_or(&0),
+            );
+        }
+    }
+
+    fn check_framebuffer_status(&self, target: u32) -> u32 {
+        unsafe { gl::CheckFramebufferStatus(target) }
+    }
+
+    fn polygon_mode(&self, face: u32, mode: u32) {
+        unsafe {
+            gl::PolygonMode(face, mode);
+        }
+    }
+
+    fn pixel_storei(&self, storage: u32, value: i32) {
+        unsafe {
+            gl::PixelStorei(storage, value);
+        }
+    }
+
+    fn read_pixels(
+        &self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        format: u32,
+        kind: u32,
+        data: &mut [u8],
+    ) {
+        unsafe {
+            gl::ReadPixels(
+                x as _,
+                y as _,
+                width as _,
+                height as _,
+                format as _,
+                kind as _,
+                data.as_mut_ptr() as _,
+            );
+        }
+    }
 }

@@ -1,13 +1,13 @@
 use glenum::BufferBit;
 
 /// Trait for many GL functions
-/// 
+///
 /// Associated types are used to support different handles types in native GL and WebGL
 /// (integers vs opaque JS types like `WebGLShader`)
 /// Please refer to the OpenGL/WebGL documentation for details about each
 /// function (hint: http://docs.gl/).
 /// Some functions are named differently in WebGL than in OpenGL - we use the WebGL nomenclature
-/// since they are clearer (e.g. create_buffer for gl::GenBuffers, 
+/// since they are clearer (e.g. create_buffer for gl::GenBuffers,
 /// get_shader_parameter for gl::GetShaderiv)
 pub trait GlFunctions {
     type GlShader;
@@ -16,6 +16,8 @@ pub trait GlFunctions {
     type GlVertexArray;
     type GlTexture;
     type GlUniformLocation;
+    type GlFramebuffer;
+    type GlRenderbuffer;
 
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32);
     fn clear(&self, bit: BufferBit);
@@ -107,7 +109,55 @@ pub trait GlFunctions {
     fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32);
     fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 4]; 4]);
 
-    // TODO!: "optional" methods from gltf-viewer (mostly for screenshots, headless):
-    // framebuffer
-    // viewer - polygonmode, pixelstorei, readpixels 
+    fn create_framebuffer(&self) -> Self::GlFramebuffer;
+    fn delete_framebuffer(&self, framebuffer: &Self::GlFramebuffer);
+    fn bind_framebuffer(&self, target: u32, framebuffer: Option<&Self::GlFramebuffer>);
+    fn framebuffer_texture_2d(
+        &self,
+        target: u32,
+        attachment: u32,
+        texture_target: u32,
+        texture: Option<&Self::GlTexture>,
+        level: i32,
+    );
+
+    fn create_renderbuffer(&self) -> Self::GlRenderbuffer;
+    fn delete_renderbuffer(&self, renderbuffer: &Self::GlRenderbuffer);
+    fn bind_renderbuffer(&self, target: u32, renderbuffer: Option<&Self::GlRenderbuffer>);
+    fn renderbuffer_storage(&self, target: u32, internal_format: u32, width: i32, height: i32);
+    fn framebuffer_renderbuffer(
+        &self,
+        target: u32,
+        attachment: u32,
+        renderbuffer_target: u32,
+        renderbuffer: Option<&Self::GlRenderbuffer>,
+    );
+    fn check_framebuffer_status(&self, target: u32) -> u32;
+
+    fn polygon_mode(&self, face: u32, mode: u32);
+
+    fn pixel_storei(&self, storage: u32, value: i32);
+
+    #[allow(clippy::too_many_arguments)]
+    fn read_pixels(
+        &self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        format: u32,
+        kind: u32,
+        data: &mut [u8],
+    );
+
+    // TODO!: drawArraysInstanced, vertex_attrib_divisor,
+    // image3D, cubemap, stencil_func etc., blendFuncSeparate
+    // depthMask, depth_func
+    // glClearBuffer, glClearStencil, glClearDepth
+    // glDrawBuffers
+    // glIsFramebuffer
+    //
+    // tf: createTransformFeedback,
+    // bindTransformFeedback, bindBufferBase
+    // transformFeedbackVaryings
 }
