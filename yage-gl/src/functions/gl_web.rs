@@ -76,6 +76,10 @@ impl super::GlFunctions for GL {
         self.gl.attach_shader(&program, shader);
     }
 
+    fn detach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader) {
+        self.gl.detach_shader(&program, shader);
+    }
+
     fn link_program(&self, program: &Self::GlProgram) {
         self.gl.link_program(&program);
     }
@@ -159,6 +163,10 @@ impl super::GlFunctions for GL {
             .vertex_attrib_pointer_with_i32(index, size, data_type, normalized, stride, offset);
     }
 
+    fn vertex_attrib_divisor(&self, index: u32, divisor: u32) {
+        self.gl.vertex_attrib_divisor(index, divisor);
+    }
+
     fn enable_vertex_attrib_array(&self, index: u32) {
         self.gl.enable_vertex_attrib_array(index);
     }
@@ -171,9 +179,30 @@ impl super::GlFunctions for GL {
         self.gl.draw_arrays(mode, first, count);
     }
 
+    fn draw_arrays_instanced(&self, mode: u32, first: i32, count: i32, instance_count: i32) {
+        self.gl.draw_arrays_instanced(mode, first, count, instance_count);
+    }
+
     fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32) {
         self.gl
             .draw_elements_with_i32(mode, count, element_type, offset);
+    }
+
+    fn draw_elements_instanced(
+        &self,
+        mode: u32,
+        count: i32,
+        element_type: u32,
+        offset: i32,
+        instance_count: i32,
+    ) {
+        self.gl.draw_elements_instanced_with_i32(
+            mode as u32,
+            count,
+            element_type as u32,
+            offset,
+            instance_count,
+        );
     }
 
     fn enable(&self, param: u32) {
@@ -200,6 +229,10 @@ impl super::GlFunctions for GL {
 
     fn blend_func(&self, src: u32, dst: u32) {
         self.gl.blend_func(src, dst);
+    }
+
+    fn blend_func_separate(&self, src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32) {
+        self.gl.blend_func_separate(src_rgb, dst_rgb, src_alpha, dst_alpha);
     }
 
     fn create_texture(&self) -> Self::GlTexture {
@@ -363,5 +396,48 @@ impl super::GlFunctions for GL {
         // TODO: unused_must_use - return Result?
         let _ = self.gl.read_pixels_with_opt_u8_array(x, y, width, height,
             format, type_, Some(data));
+    }
+
+    fn depth_func(&self, func: u32) {
+        self.gl.depth_func(func);
+    }
+
+    fn depth_mask(&self, value: bool) {
+        self.gl.depth_mask(value);
+    }
+
+    fn stencil_func(&self, func: u32, reference: i32, mask: u32){
+        self.gl.stencil_func(func, reference, mask);
+    }
+
+    fn stencil_mask(&self, mask: u32){
+        self.gl.stencil_mask(mask);
+    }
+
+    fn stencil_op(&self, stencil_fail: u32, depth_fail: u32, pass: u32){
+        self.gl.stencil_op(stencil_fail, depth_fail, pass);
+    }
+
+    fn cull_face(&self, value: u32) {
+        self.gl.cull_face(value);
+    }
+
+    fn scissor(&self, x: i32, y: i32, width: i32, height: i32) {
+        self.gl.scissor(x, y, width, height);
+    }
+
+    fn get_error(&self) -> u32 {
+        self.gl.get_error()
+    }
+
+    fn read_buffer(&self, mode: u32) {
+        self.gl.read_buffer(mode);
+    }
+
+    /// unimplemented (yet)
+    fn draw_buffers(&self, buffers: &[u32]) {
+        // TODO!!: requires JsValue...?
+        // self.gl.draw_buffers(buffers);
+        unimplemented!()
     }
 }

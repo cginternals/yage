@@ -102,6 +102,12 @@ impl super::GlFunctions for GL {
         unsafe { gl::AttachShader(*program, *shader) }
     }
 
+    fn detach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader) {
+        unsafe {
+            gl::DetachShader(*program, *shader);
+        }
+    }
+
     fn link_program(&self, program: &Self::GlProgram) {
         unsafe { gl::LinkProgram(*program) }
     }
@@ -223,6 +229,12 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn vertex_attrib_divisor(&self, index: u32, divisor: u32) {
+        unsafe {
+            gl::VertexAttribDivisor(index, divisor);
+        }
+    }
+
     fn enable_vertex_attrib_array(&self, index: u32) {
         unsafe {
             gl::EnableVertexAttribArray(index);
@@ -241,6 +253,12 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn draw_arrays_instanced(&self, mode: u32, first: i32, count: i32, instance_count: i32) {
+        unsafe {
+            gl::DrawArraysInstanced(mode, first, count, instance_count);
+        }
+    }
+
     fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32) {
         unsafe {
             gl::DrawElements(
@@ -248,6 +266,25 @@ impl super::GlFunctions for GL {
                 count,
                 element_type as u32,
                 offset as *const std::ffi::c_void,
+            );
+        }
+    }
+
+    fn draw_elements_instanced(
+        &self,
+        mode: u32,
+        count: i32,
+        element_type: u32,
+        offset: i32,
+        instance_count: i32,
+    ) {
+        unsafe {
+            gl::DrawElementsInstanced(
+                mode,
+                count,
+                element_type,
+                offset as *const std::ffi::c_void,
+                instance_count,
             );
         }
     }
@@ -285,6 +322,12 @@ impl super::GlFunctions for GL {
     fn blend_func(&self, src: u32, dst: u32) {
         unsafe {
             gl::BlendFunc(src, dst);
+        }
+    }
+
+    fn blend_func_separate(&self, src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32) {
+        unsafe {
+            gl::BlendFuncSeparate(src_rgb, dst_rgb, src_alpha, dst_alpha);
         }
     }
 
@@ -510,5 +553,61 @@ impl super::GlFunctions for GL {
                 data.as_mut_ptr() as _,
             );
         }
+    }
+
+    fn depth_func(&self, func: u32) {
+        unsafe {
+            gl::DepthFunc(func);
+        }
+    }
+
+    fn depth_mask(&self, value: bool) {
+        unsafe {
+            gl::DepthMask(value as _);
+        }
+    }
+
+    fn stencil_func(&self, func: u32, reference: i32, mask: u32) {
+        unsafe {
+            gl::StencilFunc(func, reference, mask);
+        }
+    }
+
+    fn stencil_mask(&self, mask: u32) {
+        unsafe {
+            gl::StencilMask(mask);
+        }
+    }
+
+    fn stencil_op(&self, stencil_fail: u32, depth_fail: u32, pass: u32) {
+        unsafe {
+            gl::StencilOp(stencil_fail, depth_fail, pass);
+        }
+    }
+
+    fn cull_face(&self, value: u32) {
+        unsafe {
+            gl::CullFace(value);
+        }
+    }
+
+    fn scissor(&self, x: i32, y: i32, width: i32, height: i32) {
+        unsafe {
+            gl::Scissor(x, y, width, height);
+        }
+    }
+
+    fn get_error(&self) -> u32 {
+        unsafe { gl::GetError() }
+    }
+
+    fn read_buffer(&self, mode: u32) {
+        unsafe {
+            gl::ReadBuffer(mode);
+        }
+    }
+
+    fn draw_buffers(&self, buffers: &[u32]) {
+        unsafe { gl::DrawBuffers(buffers.len() as i32, buffers.as_ptr()) }
     }
 }

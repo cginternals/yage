@@ -34,6 +34,7 @@ pub trait GlFunctions {
 
     fn create_program(&self) -> Self::GlProgram;
     fn attach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader);
+    fn detach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader);
     fn link_program(&self, program: &Self::GlProgram);
     fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32;
     fn get_program_info_log(&self, program: &Self::GlProgram) -> String;
@@ -58,11 +59,21 @@ pub trait GlFunctions {
         stride: i32,
         offset: i32,
     );
+    fn vertex_attrib_divisor(&self, index: u32, divisor: u32);
     fn enable_vertex_attrib_array(&self, index: u32);
     fn disable_vertex_attrib_array(&self, index: u32);
 
     fn draw_arrays(&self, mode: u32, first: i32, count: i32);
+    fn draw_arrays_instanced(&self, mode: u32, first: i32, count: i32, instance_count: i32);
     fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32);
+    fn draw_elements_instanced(
+        &self,
+        mode: u32,
+        count: i32,
+        element_type: u32,
+        offset: i32,
+        instance_count: i32,
+    );
 
     fn enable(&self, param: u32);
     fn disable(&self, param: u32);
@@ -73,6 +84,7 @@ pub trait GlFunctions {
     fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>);
 
     fn blend_func(&self, src: u32, dst: u32);
+    fn blend_func_separate(&self, src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32);
 
     fn create_texture(&self) -> Self::GlTexture;
     fn delete_texture(&self, texture: &Self::GlTexture);
@@ -150,12 +162,32 @@ pub trait GlFunctions {
         data: &mut [u8],
     );
 
-    // TODO!: drawArraysInstanced, vertex_attrib_divisor,
-    // image3D, cubemap, stencil_func etc., blendFuncSeparate
-    // depthMask, depth_func
+    fn depth_func(&self, func: u32);
+    fn depth_mask(&self, value: bool);
+
+    fn stencil_func(&self, func: u32, reference: i32, mask: u32);
+    fn stencil_mask(&self, mask: u32);
+    fn stencil_op(&self, stencil_fail: u32, depth_fail: u32, pass: u32);
+
+    fn cull_face(&self, value: u32);
+    fn scissor(&self, x: i32, y: i32, width: i32, height: i32);
+
+    fn get_error(&self) -> u32;
+
+    fn read_buffer(&self, mode: u32);
+    fn draw_buffers(&self, buffers: &[u32]);
+
+    // TODO!:
+    // texImage3D, cubemap,
     // glClearBuffer, glClearStencil, glClearDepth
     // glDrawBuffers
     // glIsFramebuffer
+    // glBlitFramebuffer
+    // glIsBuffer
+    // get_parameter / GetIntegerv
+    // bindAttribLocation, getAttribLocation
+    // isTexture
+    // glFinish
     //
     // tf: createTransformFeedback,
     // bindTransformFeedback, bindBufferBase
