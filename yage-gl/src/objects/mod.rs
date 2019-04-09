@@ -9,3 +9,9 @@ pub use program::*;
 
 mod texture;
 pub use texture::*;
+
+mod framebuffer;
+pub use framebuffer::*;
+
+mod renderbuffer;
+pub use renderbuffer::*;
