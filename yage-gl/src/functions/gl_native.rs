@@ -1,3 +1,5 @@
+use std::ffi::c_void;
+
 use glenum::*;
 
 #[derive(Default)]
@@ -18,6 +20,7 @@ impl super::GlFunctions for GL {
     type GlUniformLocation = gl::types::GLint;
     type GlFramebuffer = gl::types::GLuint;
     type GlRenderbuffer = gl::types::GLuint;
+    type GlTransformFeedback = gl::types::GLuint;
 
     /// specify clear values for the color buffers
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
@@ -30,6 +33,18 @@ impl super::GlFunctions for GL {
     fn clear(&self, bit: BufferBit) {
         unsafe {
             gl::Clear(bit as _);
+        }
+    }
+
+    fn clear_depth(&self, depth: f32) {
+        unsafe {
+            gl::ClearDepthf(depth);
+        }
+    }
+
+    fn clear_stencil(&self, stencil: i32) {
+        unsafe {
+            gl::ClearStencil(stencil);
         }
     }
 
@@ -165,7 +180,7 @@ impl super::GlFunctions for GL {
             gl::BufferData(
                 target,
                 (data.len() * std::mem::size_of::<T>()) as isize,
-                data.as_ptr() as *const std::ffi::c_void,
+                data.as_ptr() as *const c_void,
                 usage,
             );
         }
@@ -177,7 +192,7 @@ impl super::GlFunctions for GL {
                 target,
                 offset,
                 (data.len() * std::mem::size_of::<T>()) as isize,
-                data.as_ptr() as *const std::ffi::c_void,
+                data.as_ptr() as *const c_void,
             )
         }
     }
@@ -208,6 +223,16 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32 {
+        unsafe { gl::GetAttribLocation(*program, name.as_ptr() as *const i8) }
+    }
+
+    fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str) {
+        unsafe {
+            gl::BindAttribLocation(*program, index, name.as_ptr() as *const i8);
+        }
+    }
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -224,7 +249,7 @@ impl super::GlFunctions for GL {
                 data_type,
                 normalized as u8,
                 stride,
-                offset as *const std::ffi::c_void,
+                offset as *const c_void,
             );
         }
     }
@@ -265,7 +290,7 @@ impl super::GlFunctions for GL {
                 mode as u32,
                 count,
                 element_type as u32,
-                offset as *const std::ffi::c_void,
+                offset as *const c_void,
             );
         }
     }
@@ -283,7 +308,7 @@ impl super::GlFunctions for GL {
                 mode,
                 count,
                 element_type,
-                offset as *const std::ffi::c_void,
+                offset as *const c_void,
                 instance_count,
             );
         }
@@ -354,7 +379,7 @@ impl super::GlFunctions for GL {
         height: i32,
         border: i32,
         format: u32,
-        ty: u32,
+        type_: u32,
         pixels: Option<&[u8]>,
     ) {
         unsafe {
@@ -366,8 +391,37 @@ impl super::GlFunctions for GL {
                 height,
                 border,
                 format,
-                ty,
-                pixels.map(|p| p.as_ptr()).unwrap_or(std::ptr::null()) as *const std::ffi::c_void,
+                type_,
+                pixels.map(|p| p.as_ptr()).unwrap_or(std::ptr::null()) as *const c_void,
+            );
+        }
+    }
+
+    fn tex_image_3d(
+        &self,
+        target: u32,
+        level: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32,
+        depth: i32,
+        border: i32,
+        format: u32,
+        type_: u32,
+        pixels: Option<&[u8]>,
+    ) {
+        unsafe {
+            gl::TexImage3D(
+                target,
+                level,
+                internal_format,
+                width,
+                height,
+                depth,
+                border,
+                format,
+                type_,
+                pixels.map(|p| p.as_ptr()).unwrap_or(std::ptr::null()) as *const c_void,
             );
         }
     }
@@ -520,6 +574,26 @@ impl super::GlFunctions for GL {
         unsafe { gl::CheckFramebufferStatus(target) }
     }
 
+    fn blit_framebuffer(
+        &self,
+        src_x0: i32,
+        src_y0: i32,
+        src_x1: i32,
+        src_y1: i32,
+        dst_x0: i32,
+        dst_y0: i32,
+        dst_x1: i32,
+        dst_y1: i32,
+        mask: u32,
+        filter: u32,
+    ) {
+        unsafe {
+            gl::BlitFramebuffer(
+                src_x0, src_y0, src_x1, src_y1, dst_x0, dst_y0, dst_x1, dst_y1, mask, filter,
+            );
+        }
+    }
+
     fn polygon_mode(&self, face: u32, mode: u32) {
         unsafe {
             gl::PolygonMode(face, mode);
@@ -609,5 +683,33 @@ impl super::GlFunctions for GL {
 
     fn draw_buffers(&self, buffers: &[u32]) {
         unsafe { gl::DrawBuffers(buffers.len() as i32, buffers.as_ptr()) }
+    }
+
+    fn is_buffer(&self, buffer: &Self::GlBuffer) -> bool {
+        unsafe { gl::IsBuffer(*buffer) != 0 }
+    }
+
+    fn is_frambuffer(&self, framebuffer: &Self::GlFramebuffer) -> bool {
+        unsafe { gl::IsFramebuffer(*framebuffer) != 0 }
+    }
+
+    fn is_texture(&self, texture: &Self::GlTexture) -> bool {
+        unsafe { gl::IsTexture(*texture) != 0 }
+    }
+
+    fn finish(&self) {
+        unsafe { gl::Finish() }
+    }
+
+    fn flush(&self) {
+        unsafe { gl::Flush() }
+    }
+
+    fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
+        let mut feedback = 0;
+        unsafe {
+            gl::GenTransformFeedbacks(1, &mut feedback);
+        }
+        feedback
     }
 }

@@ -2,7 +2,7 @@ use glenum::*;
 
 use web_sys::{
     WebGl2RenderingContext, WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlRenderbuffer,
-    WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject,
+    WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject, WebGlTransformFeedback
 };
 
 pub struct GL {
@@ -25,6 +25,7 @@ impl super::GlFunctions for GL {
     type GlUniformLocation = WebGlUniformLocation;
     type GlFramebuffer = WebGlFramebuffer;
     type GlRenderbuffer = WebGlRenderbuffer;
+    type GlTransformFeedback = WebGlTransformFeedback;
 
     /// specify clear values for the color buffers
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
@@ -34,6 +35,14 @@ impl super::GlFunctions for GL {
     /// clear buffers to preset values
     fn clear(&self, bit: BufferBit) {
         self.gl.clear(bit as _);
+    }
+
+    fn clear_depth(&self, depth: f32) {
+        self.gl.clear_depth(depth);
+    }
+
+    fn clear_stencil(&self, stencil: i32) {
+        self.gl.clear_stencil(stencil);
     }
 
     fn viewport(&self, x: i32, y: i32, width: i32, height: i32) {
@@ -148,6 +157,14 @@ impl super::GlFunctions for GL {
 
     fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
         self.gl.delete_vertex_array(Some(vertex_array));
+    }
+
+    fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32 {
+        self.gl.get_attrib_location(program, name)
+    }
+
+    fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str) {
+        self.gl.bind_attrib_location(program, index, name);
     }
 
     fn vertex_attrib_pointer(
@@ -271,6 +288,37 @@ impl super::GlFunctions for GL {
             );
     }
 
+    fn tex_image_3d(
+        &self,
+        target: u32,
+        level: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32,
+        depth: i32,
+        border: i32,
+        format: u32,
+        ty: u32,
+        pixels: Option<&[u8]>,
+    ) {
+        // TODO!: unused_must_use - return Result?
+        let _ = self
+            .gl
+            .tex_image_3d_with_u8_array_and_src_offset(
+                target,
+                level,
+                internal_format,
+                width,
+                height,
+                depth,
+                border,
+                format,
+                ty,
+                pixels.unwrap(), // TODO!: none case?
+                0
+            );
+    }
+
     fn generate_mipmap(&self) {
         self.gl.generate_mipmap(glenum::TextureKind::Texture2d as _);
     }
@@ -373,6 +421,24 @@ impl super::GlFunctions for GL {
         self.gl.check_framebuffer_status(target)
     }
 
+    fn blit_framebuffer(
+        &self,
+        src_x0: i32,
+        src_y0: i32,
+        src_x1: i32,
+        src_y1: i32,
+        dst_x0: i32,
+        dst_y0: i32,
+        dst_x1: i32,
+        dst_y1: i32,
+        mask: u32,
+        filter: u32,
+    ) {
+        self.gl.blit_framebuffer(
+            src_x0, src_y0, src_x1, src_y1, dst_x0, dst_y0, dst_x1, dst_y1, mask, filter
+        );
+    }
+
     /// Unimplemented - method missing in WebGL (and ES2, ES3)
     fn polygon_mode(&self, _face: u32, _mode: u32) {
         // TODO!: log warning instead of panic?
@@ -435,9 +501,32 @@ impl super::GlFunctions for GL {
     }
 
     /// unimplemented (yet)
-    fn draw_buffers(&self, buffers: &[u32]) {
+    fn draw_buffers(&self, _buffers: &[u32]) {
         // TODO!!: requires JsValue...?
         // self.gl.draw_buffers(buffers);
         unimplemented!()
+    }
+
+    fn is_buffer(&self, buffer: &Self::GlBuffer) -> bool {
+        self.gl.is_buffer(Some(buffer))
+    }
+
+    fn is_frambuffer(&self, framebuffer: &Self::GlFramebuffer) -> bool {
+        self.gl.is_framebuffer(Some(framebuffer))
+    }
+
+    fn is_texture(&self, texture: &Self::GlTexture) -> bool {
+        self.gl.is_texture(Some(texture))
+    }
+
+    fn finish(&self) {
+       self.gl.finish();
+    }
+    fn flush(&self) {
+        self.gl.flush();
+    }
+
+    fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
+        self.gl.create_transform_feedback().unwrap()
     }
 }

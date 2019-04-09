@@ -18,9 +18,13 @@ pub trait GlFunctions {
     type GlUniformLocation;
     type GlFramebuffer;
     type GlRenderbuffer;
+    type GlTransformFeedback;
 
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32);
     fn clear(&self, bit: BufferBit);
+    fn clear_depth(&self, depth: f32);
+    fn clear_stencil(&self, stencil: i32);
+    // TODO: glClearBuffer - 4 variants...
 
     fn viewport(&self, x: i32, y: i32, width: i32, height: i32);
 
@@ -50,6 +54,9 @@ pub trait GlFunctions {
     fn create_vertex_array(&self) -> Self::GlVertexArray;
     fn bind_vertex_array(&self, vertex_array: Option<&Self::GlVertexArray>);
     fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray);
+
+    fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32;
+    fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str);
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -99,7 +106,22 @@ pub trait GlFunctions {
         height: i32,
         border: i32,
         format: u32,
-        ty: u32,
+        type_: u32,
+        pixels: Option<&[u8]>,
+    );
+
+    #[allow(clippy::too_many_arguments)]
+    fn tex_image_3d(
+        &self,
+        target: u32,
+        level: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32,
+        depth: i32,
+        border: i32,
+        format: u32,
+        type_: u32,
         pixels: Option<&[u8]>,
     );
 
@@ -145,6 +167,20 @@ pub trait GlFunctions {
         renderbuffer: Option<&Self::GlRenderbuffer>,
     );
     fn check_framebuffer_status(&self, target: u32) -> u32;
+    #[allow(clippy::too_many_arguments)]
+    fn blit_framebuffer(
+        &self,
+        src_x0: i32,
+        src_y0: i32,
+        src_x1: i32,
+        src_y1: i32,
+        dst_x0: i32,
+        dst_y0: i32,
+        dst_x1: i32,
+        dst_y1: i32,
+        mask: u32,
+        filter: u32,
+    );
 
     fn polygon_mode(&self, face: u32, mode: u32);
 
@@ -177,19 +213,25 @@ pub trait GlFunctions {
     fn read_buffer(&self, mode: u32);
     fn draw_buffers(&self, buffers: &[u32]);
 
-    // TODO!:
-    // texImage3D, cubemap,
-    // glClearBuffer, glClearStencil, glClearDepth
-    // glDrawBuffers
-    // glIsFramebuffer
-    // glBlitFramebuffer
-    // glIsBuffer
+    fn is_buffer(&self, buffer: &Self::GlBuffer) -> bool;
+    fn is_frambuffer(&self, framebuffer: &Self::GlFramebuffer) -> bool;
+    fn is_texture(&self, texture: &Self::GlTexture) -> bool;
+
+    fn finish(&self);
+    fn flush(&self);
+
+    fn create_transform_feedback(&self) -> Self::GlTransformFeedback;
+    // fn bind_transform_feedback(&self, target: u32, tf: Option<&Self::GlTransformFeedback>);
+    // fn bind_buffer_base(&self, target: u32, index: u32, buffer: Option<&Self::GlBuffer>);
+    // fn transform_feedback_varyings(
+    //     &self,
+    //     program: &WebGlProgram,
+    //     varyings: &[&str],
+    //     buffer_mode: u32,
+    // );
+
+    // TODO!!!:
+    // , cubemap,
     // get_parameter / GetIntegerv
-    // bindAttribLocation, getAttribLocation
-    // isTexture
-    // glFinish
-    //
-    // tf: createTransformFeedback,
-    // bindTransformFeedback, bindBufferBase
-    // transformFeedbackVaryings
+    // reorder based on quick reference sections...
 }
