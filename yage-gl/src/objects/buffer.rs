@@ -1,6 +1,6 @@
 use crate::{GL, GlFunctions};
 
-/// Wrapper around an OpenGL array or element array buffer. 
+/// Wrapper around an OpenGL array or element array buffer.
 pub struct Buffer<'a> {
     gl: &'a GL,
     /// Target for use in `glBindBuffer`
@@ -9,8 +9,8 @@ pub struct Buffer<'a> {
 }
 
 impl<'a> Buffer<'a> {
-    /// Creates an empty buffer. 
-    /// 
+    /// Creates an empty buffer.
+    ///
     /// # Parameters
     /// - `gl`: GL context
     /// - `target`: must be a valid glenum for `glBindBuffer`
@@ -22,10 +22,15 @@ impl<'a> Buffer<'a> {
         }
     }
 
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlBuffer {
+        &self.buffer_handle
+    }
+
     /// Creates the buffer object's data store.
-    /// 
+    ///
     /// Expects the buffer to be bound.
-    /// 
+    ///
     /// # Parameters
     /// - `data`: buffer data
     /// - `usage`: must be a valid glenum for `glBufferData`
@@ -34,9 +39,9 @@ impl<'a> Buffer<'a> {
     }
 
     /// Updates a subset of a buffer object's data store.
-    /// 
+    ///
     /// Expects the buffer to be bound.
-    /// 
+    ///
     /// # Parameters
     /// - `offset`: offset into the buffer object's data store in bytes
     /// - `data`: buffer data
@@ -55,9 +60,9 @@ impl<'a> Buffer<'a> {
     }
 
     /// Specifies the memory layout of the buffer for a binding point.
-    /// 
+    ///
     /// Expects the buffer to be bound.
-    /// 
+    ///
     /// # Parameters
     /// - `index` - Index of the vertex attribute that is to be setup and enabled.
     /// - `size` - Number of components per vertex attribute.

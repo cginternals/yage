@@ -23,6 +23,11 @@ impl<'a> Framebuffer<'a> {
         }
     }
 
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlFramebuffer {
+        &self.handle
+    }
+
     /// Binds the framebuffer.
     pub fn bind(&self) {
         self.gl.bind_framebuffer(self.target, Some(&self.handle));

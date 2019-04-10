@@ -1,6 +1,6 @@
 use crate::{GL, GlFunctions};
 
-/// Wrapper around an OpenGL texture. 
+/// Wrapper around an OpenGL texture.
 pub struct Texture<'a> {
     gl: &'a GL,
     /// Target for use in `glBindTexture`
@@ -9,8 +9,8 @@ pub struct Texture<'a> {
 }
 
 impl<'a> Texture<'a> {
-    /// Creates an texture. 
-    /// 
+    /// Creates an texture.
+    ///
     /// # Parameters
     /// - `gl`: GL context
     /// - `target`: must be a valid glenum for `glBindTexture`
@@ -20,6 +20,11 @@ impl<'a> Texture<'a> {
             target,
             texture_handle: gl.create_texture()
         }
+    }
+
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlTexture {
+        &self.texture_handle
     }
 
     /// Binds the texture.
@@ -33,7 +38,7 @@ impl<'a> Texture<'a> {
     }
 
     /// Sets the texture object's magnification and minification filter.
-    /// 
+    ///
     /// # Parameters:
     /// - `mag`: Value for the TEXTURE_MAG_FILTER parameter
     /// - `min`: Value for the TEXTURE_MIN_FILTER parameter
@@ -43,7 +48,7 @@ impl<'a> Texture<'a> {
     }
 
     /// Sets the texture object's wrapping function for s and t coordinates.
-    /// 
+    ///
     /// # Parameters:
     /// - `wrap_s`: Value for the TEXTURE_WRAP_S parameter
     /// - `wrap_t`: Value for the TEXTURE_WRAP_T parameter
@@ -53,22 +58,22 @@ impl<'a> Texture<'a> {
     }
 
     /// Pass image data to the texture object.
-    /// 
+    ///
     /// # Parameters:
     /// - `level`: level-of-detail number
-    /// - `internal_format`: 
-    /// - `width`: 
-    /// - `height`: 
-    /// - `border`: 
-    /// - `format`: 
+    /// - `internal_format`:
+    /// - `width`:
+    /// - `height`:
+    /// - `border`:
+    /// - `format`:
     /// - `ty`: type
     /// - `pixels`: pixel data
     #[allow(clippy::too_many_arguments)]
     pub fn image_2d(
-        &self, 
-        level: i32, 
-        internal_format: i32, 
-        width: i32, 
+        &self,
+        level: i32,
+        internal_format: i32,
+        width: i32,
         height: i32,
         border: i32,
         format: u32,
@@ -76,7 +81,7 @@ impl<'a> Texture<'a> {
         pixels: Option<&[u8]>
     ) {
         self.gl.tex_image_2d(
-            self.target, level, internal_format, 
+            self.target, level, internal_format,
             width, height, border, format, ty, pixels);
     }
 }

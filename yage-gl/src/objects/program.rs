@@ -85,6 +85,11 @@ impl<'a> Program<'a> {
         lines.join("\n")
     }
 
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlProgram {
+        &self.program_handle
+    }
+
     /// activate the shader
     pub fn use_program(&self) {
         self.gl.use_program(Some(&self.program_handle))
@@ -120,7 +125,7 @@ impl<'a> Program<'a> {
     /// get uniform location with caching
     pub fn uniform_location(&mut self, name: &'static str) -> <GL as GlFunctions>::GlUniformLocation {
         if let Some(loc) = self.uniform_location_cache.get(name) {
-            #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL 
+            #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL
             return loc.clone();
         }
 
@@ -130,10 +135,10 @@ impl<'a> Program<'a> {
         //     // TODO!: trace!
         //     println!("uniform '{}' unknown for shader {:?}", name, self.id);
         // }
-        #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL 
+        #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL
         self.uniform_location_cache.insert(name, loc.clone());
         loc
-    } 
+    }
 
     /// utility function for checking shader compilation errors.
     fn check_compile_errors(gl: &GL, shader: &<GL as GlFunctions>::GlShader, type_: &str) {
@@ -141,7 +146,7 @@ impl<'a> Program<'a> {
         let log_type = if success == 1 { "WARNING" } else { "ERROR" };
         let info_log = gl.get_shader_info_log(shader);
         if info_log.is_empty() { return }
-        panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}", 
+        panic!("{}::SHADER_COMPILATION_{} of type: {}\n{}",
             log_type, log_type, type_, info_log);
     }
 

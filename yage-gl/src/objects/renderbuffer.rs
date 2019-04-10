@@ -20,6 +20,11 @@ impl<'a> Renderbuffer<'a> {
         }
     }
 
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlRenderbuffer {
+        &self.handle
+    }
+
     /// Binds the renderbuffer.
     pub fn bind(&self) {
         self.gl.bind_renderbuffer(glenum::Buffers::Renderbuffer as _, Some(&self.handle));
