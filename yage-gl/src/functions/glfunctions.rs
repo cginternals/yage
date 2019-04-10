@@ -125,7 +125,7 @@ pub trait GlFunctions {
         pixels: Option<&[u8]>,
     );
 
-    fn generate_mipmap(&self);
+    fn generate_mipmap(&self, target: u32);
 
     fn tex_parameteri(&self, target: u32, parameter: u32, value: i32);
 
@@ -220,7 +220,11 @@ pub trait GlFunctions {
     fn finish(&self);
     fn flush(&self);
 
-    fn create_transform_feedback(&self) -> Self::GlTransformFeedback;
+    fn get_parameter_i32(&self, parameter: u32) -> i32;
+
+    // TODO!: transform feeback (NOTE: create is implemented, but commented out)
+    // fn create_transform_feedback(&self) -> Self::GlTransformFeedback;
+    // fn delete_transform_feedback(&self, tf: Option<&WebGlTransformFeedback>);
     // fn bind_transform_feedback(&self, target: u32, tf: Option<&Self::GlTransformFeedback>);
     // fn bind_buffer_base(&self, target: u32, index: u32, buffer: Option<&Self::GlBuffer>);
     // fn transform_feedback_varyings(
@@ -229,9 +233,13 @@ pub trait GlFunctions {
     //     varyings: &[&str],
     //     buffer_mode: u32,
     // );
+    // fn begin_transform_feedback(&self, primitive_mode: u32);
+    // fn pause_transform_feedback(&self);
+    // fn resume_transform_feedback(&self);
+    // fn end_transform_feedback(&self);
+    // fn is_transform_feedback(&self, tf: Option<&WebGlTransformFeedback>) -> bool;
 
-    // TODO!!!:
-    // , cubemap,
+    // TODO!:
     // get_parameter / GetIntegerv
     // reorder based on quick reference sections...
 }

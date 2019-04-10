@@ -319,8 +319,8 @@ impl super::GlFunctions for GL {
             );
     }
 
-    fn generate_mipmap(&self) {
-        self.gl.generate_mipmap(glenum::TextureKind::Texture2d as _);
+    fn generate_mipmap(&self, target: u32) {
+        self.gl.generate_mipmap(target);
     }
 
     fn tex_parameteri(&self, target: u32, parameter: u32, value: i32) {
@@ -522,11 +522,19 @@ impl super::GlFunctions for GL {
     fn finish(&self) {
        self.gl.finish();
     }
+
     fn flush(&self) {
         self.gl.flush();
     }
 
-    fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
-        self.gl.create_transform_feedback().unwrap()
+    fn get_parameter_i32(&self, parameter: u32) -> i32 {
+        self.gl.get_parameter(parameter)
+            .unwrap()
+            .as_f64()
+            .unwrap() as i32
     }
+
+    // fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
+    //     self.gl.create_transform_feedback().unwrap()
+    // }
 }

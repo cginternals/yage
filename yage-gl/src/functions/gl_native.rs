@@ -426,9 +426,9 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn generate_mipmap(&self) {
+    fn generate_mipmap(&self, target: u32) {
         unsafe {
-            gl::GenerateMipmap(gl::TEXTURE_2D);
+            gl::GenerateMipmap(target);
         }
     }
 
@@ -705,11 +705,19 @@ impl super::GlFunctions for GL {
         unsafe { gl::Flush() }
     }
 
-    fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
-        let mut feedback = 0;
+    fn get_parameter_i32(&self, parameter: u32) -> i32 {
+        let mut value = 0;
         unsafe {
-            gl::GenTransformFeedbacks(1, &mut feedback);
+            gl::GetIntegerv(parameter, &mut value);
         }
-        feedback
+        value
     }
+
+    // fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
+    //     let mut feedback = 0;
+    //     unsafe {
+    //         gl::GenTransformFeedbacks(1, &mut feedback);
+    //     }
+    //     feedback
+    // }
 }

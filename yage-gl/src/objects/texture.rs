@@ -47,6 +47,7 @@ impl<'a> Texture<'a> {
         self.gl.tex_parameteri(self.target, glenum::TextureParameter::TextureMinFilter as _, min);
     }
 
+    // TODO!!: Option<wrap_r> or seperate 3D texture object?
     /// Sets the texture object's wrapping function for s and t coordinates.
     ///
     /// # Parameters:
@@ -83,6 +84,10 @@ impl<'a> Texture<'a> {
         self.gl.tex_image_2d(
             self.target, level, internal_format,
             width, height, border, format, ty, pixels);
+    }
+
+    pub fn generate_mipmap(&self) {
+        self.gl.generate_mipmap(self.target);
     }
 }
 
