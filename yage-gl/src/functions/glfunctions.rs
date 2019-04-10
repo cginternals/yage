@@ -20,13 +20,12 @@ pub trait GlFunctions {
     type GlRenderbuffer;
     type GlTransformFeedback;
 
-    fn clear_color(&self, r: f32, g: f32, b: f32, a: f32);
-    fn clear(&self, bit: BufferBit);
-    fn clear_depth(&self, depth: f32);
-    fn clear_stencil(&self, stencil: i32);
-    // TODO: glClearBuffer - 4 variants...
+    // View and Clip
 
+    fn scissor(&self, x: i32, y: i32, width: i32, height: i32);
     fn viewport(&self, x: i32, y: i32, width: i32, height: i32);
+
+    // Programs and Shaders
 
     fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader;
     fn shader_source(&self, shader: &Self::GlShader, source: &str);
@@ -43,6 +42,10 @@ pub trait GlFunctions {
     fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32;
     fn get_program_info_log(&self, program: &Self::GlProgram) -> String;
     fn use_program(&self, program: Option<&Self::GlProgram>);
+    fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32;
+    fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str);
+
+    // Buffer Objects
 
     /// Named after the WebGL function. See `gl::GenBuffers` for OpenGL.
     fn create_buffer(&self) -> Self::GlBuffer;
@@ -50,13 +53,16 @@ pub trait GlFunctions {
     fn buffer_data<T>(&self, target: u32, data: &[T], usage: u32);
     fn buffer_sub_data<T>(&self, target: u32, offset: isize, data: &[T]);
     fn delete_buffer(&self, buffer: &Self::GlBuffer);
+    fn is_buffer(&self, buffer: &Self::GlBuffer) -> bool;
+
+    // Vertex Array Objects
 
     fn create_vertex_array(&self) -> Self::GlVertexArray;
     fn bind_vertex_array(&self, vertex_array: Option<&Self::GlVertexArray>);
     fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray);
 
-    fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32;
-    fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str);
+    // Uniforms and Attributes
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -66,13 +72,29 @@ pub trait GlFunctions {
         stride: i32,
         offset: i32,
     );
-    fn vertex_attrib_divisor(&self, index: u32, divisor: u32);
     fn enable_vertex_attrib_array(&self, index: u32);
     fn disable_vertex_attrib_array(&self, index: u32);
 
+    fn get_uniform_location(
+        &self,
+        program: &Self::GlProgram,
+        name: &str,
+    ) -> Self::GlUniformLocation;
+    fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32);
+    fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32);
+    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]);
+    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]);
+    fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32);
+    fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32);
+    fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 4]; 4]);
+
+    // Writing to the Draw Buffer
+
     fn draw_arrays(&self, mode: u32, first: i32, count: i32);
-    fn draw_arrays_instanced(&self, mode: u32, first: i32, count: i32, instance_count: i32);
     fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32);
+
+    fn vertex_attrib_divisor(&self, index: u32, divisor: u32);
+    fn draw_arrays_instanced(&self, mode: u32, first: i32, count: i32, instance_count: i32);
     fn draw_elements_instanced(
         &self,
         mode: u32,
@@ -82,16 +104,20 @@ pub trait GlFunctions {
         instance_count: i32,
     );
 
+    // Special Functions
+
     fn enable(&self, param: u32);
     fn disable(&self, param: u32);
+    fn finish(&self);
+    fn flush(&self);
+    fn get_error(&self) -> u32;
+    fn get_parameter_i32(&self, parameter: u32) -> i32;
+    fn pixel_storei(&self, storage: u32, value: i32);
 
-    fn point_size(&self, size: f32);
+    // Texture Objects
 
     fn active_texture(&self, unit: u32);
     fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>);
-
-    fn blend_func(&self, src: u32, dst: u32);
-    fn blend_func_separate(&self, src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32);
 
     fn create_texture(&self) -> Self::GlTexture;
     fn delete_texture(&self, texture: &Self::GlTexture);
@@ -129,19 +155,9 @@ pub trait GlFunctions {
 
     fn tex_parameteri(&self, target: u32, parameter: u32, value: i32);
 
-    fn get_uniform_location(
-        &self,
-        program: &Self::GlProgram,
-        name: &str,
-    ) -> Self::GlUniformLocation;
+    fn is_texture(&self, texture: &Self::GlTexture) -> bool;
 
-    fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32);
-    fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32);
-    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]);
-    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]);
-    fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32);
-    fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32);
-    fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 4]; 4]);
+    // Framebuffer Objects
 
     fn create_framebuffer(&self) -> Self::GlFramebuffer;
     fn delete_framebuffer(&self, framebuffer: &Self::GlFramebuffer);
@@ -154,11 +170,6 @@ pub trait GlFunctions {
         texture: Option<&Self::GlTexture>,
         level: i32,
     );
-
-    fn create_renderbuffer(&self) -> Self::GlRenderbuffer;
-    fn delete_renderbuffer(&self, renderbuffer: &Self::GlRenderbuffer);
-    fn bind_renderbuffer(&self, target: u32, renderbuffer: Option<&Self::GlRenderbuffer>);
-    fn renderbuffer_storage(&self, target: u32, internal_format: u32, width: i32, height: i32);
     fn framebuffer_renderbuffer(
         &self,
         target: u32,
@@ -166,6 +177,7 @@ pub trait GlFunctions {
         renderbuffer_target: u32,
         renderbuffer: Option<&Self::GlRenderbuffer>,
     );
+    fn is_frambuffer(&self, framebuffer: &Self::GlFramebuffer) -> bool;
     fn check_framebuffer_status(&self, target: u32) -> u32;
     #[allow(clippy::too_many_arguments)]
     fn blit_framebuffer(
@@ -181,10 +193,34 @@ pub trait GlFunctions {
         mask: u32,
         filter: u32,
     );
+    fn read_buffer(&self, mode: u32);
 
-    fn polygon_mode(&self, face: u32, mode: u32);
+    // Renderbuffer Objects
 
-    fn pixel_storei(&self, storage: u32, value: i32);
+    fn create_renderbuffer(&self) -> Self::GlRenderbuffer;
+    fn delete_renderbuffer(&self, renderbuffer: &Self::GlRenderbuffer);
+    fn bind_renderbuffer(&self, target: u32, renderbuffer: Option<&Self::GlRenderbuffer>);
+    fn renderbuffer_storage(&self, target: u32, internal_format: u32, width: i32, height: i32);
+
+    // Per-Fragment Operations
+
+    fn blend_func(&self, src: u32, dst: u32);
+    fn blend_func_separate(&self, src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32);
+    fn depth_func(&self, func: u32);
+    fn stencil_func(&self, func: u32, reference: i32, mask: u32);
+    fn stencil_op(&self, stencil_fail: u32, depth_fail: u32, pass: u32);
+
+    // Whole Framebuffer Operations
+
+    fn clear(&self, bit: BufferBit);
+    fn clear_color(&self, r: f32, g: f32, b: f32, a: f32);
+    fn clear_depth(&self, depth: f32);
+    fn clear_stencil(&self, stencil: i32);
+
+    fn depth_mask(&self, value: bool);
+    fn stencil_mask(&self, mask: u32);
+
+    // Read Back Pixels
 
     #[allow(clippy::too_many_arguments)]
     fn read_pixels(
@@ -198,29 +234,18 @@ pub trait GlFunctions {
         data: &mut [u8],
     );
 
-    fn depth_func(&self, func: u32);
-    fn depth_mask(&self, value: bool);
-
-    fn stencil_func(&self, func: u32, reference: i32, mask: u32);
-    fn stencil_mask(&self, mask: u32);
-    fn stencil_op(&self, stencil_fail: u32, depth_fail: u32, pass: u32);
+    // Rasterization
 
     fn cull_face(&self, value: u32);
-    fn scissor(&self, x: i32, y: i32, width: i32, height: i32);
+    fn point_size(&self, size: f32);
+    fn polygon_mode(&self, face: u32, mode: u32);
 
-    fn get_error(&self) -> u32;
+    // Multiple Render Targets
 
-    fn read_buffer(&self, mode: u32);
     fn draw_buffers(&self, buffers: &[u32]);
+    // TODO: glClearBuffer - 4 variants...
 
-    fn is_buffer(&self, buffer: &Self::GlBuffer) -> bool;
-    fn is_frambuffer(&self, framebuffer: &Self::GlFramebuffer) -> bool;
-    fn is_texture(&self, texture: &Self::GlTexture) -> bool;
-
-    fn finish(&self);
-    fn flush(&self);
-
-    fn get_parameter_i32(&self, parameter: u32) -> i32;
+    // Transform Feedback
 
     // TODO!: transform feeback (NOTE: create is implemented, but commented out)
     // fn create_transform_feedback(&self) -> Self::GlTransformFeedback;
