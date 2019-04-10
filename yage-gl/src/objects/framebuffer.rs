@@ -3,6 +3,7 @@ use glenum;
 use crate::{GL, GlFunctions};
 
 /// Wrapper around an OpenGL frame buffer.
+// TODO!!: incomplete
 pub struct Framebuffer<'a> {
     gl: &'a GL,
     /// Target for use in `glBindFrameBuffer`

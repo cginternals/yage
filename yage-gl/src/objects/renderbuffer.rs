@@ -3,6 +3,7 @@ use glenum;
 use crate::{GL, GlFunctions};
 
 /// Wrapper around an OpenGL renderbuffer.
+// TODO!!: incomplete
 pub struct Renderbuffer<'a> {
     gl: &'a GL,
     handle: <GL as GlFunctions>::GlRenderbuffer,
