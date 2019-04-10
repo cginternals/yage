@@ -715,17 +715,17 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn point_size(&self, size: f32) {
-        unsafe {
-            gl::PointSize(size);
-        }
-    }
-
     // Rasterization
 
     fn cull_face(&self, value: u32) {
         unsafe {
             gl::CullFace(value);
+        }
+    }
+
+    fn point_size(&self, size: f32) {
+        unsafe {
+            gl::PointSize(size);
         }
     }
 
