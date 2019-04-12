@@ -8,7 +8,7 @@ use crate::Context;
 /// Top-level window with OpenGL context.
 ///
 pub struct Window {
-    window: glutin::GlWindow
+    window: glutin::GlWindow,
 }
 
 impl Window {
@@ -37,12 +37,12 @@ impl Window {
         let context_builder = glutin::ContextBuilder::new();
 
         // create actual OpenGL window
-        let gl_window = glutin::GlWindow::new(window_builder, context_builder, application.events_loop()).unwrap();
+        let gl_window =
+            glutin::GlWindow::new(window_builder, context_builder, application.events_loop())
+                .unwrap();
 
         // create window
-        Window {
-            window: gl_window
-        }
+        Window { window: gl_window }
     }
 
     ///

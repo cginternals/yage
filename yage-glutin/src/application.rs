@@ -8,7 +8,7 @@ use crate::Window;
 pub struct Application {
     events_loop: glutin::EventsLoop,
     windows: HashMap<glutin::WindowId, Window>,
-    running: bool
+    running: bool,
 }
 
 impl Application {
@@ -27,7 +27,7 @@ impl Application {
         Application {
             events_loop,
             windows: HashMap::new(),
-            running: true
+            running: true,
         }
     }
 
@@ -114,8 +114,8 @@ impl Application {
     pub fn poll_events(&mut self) {
         // get references to data we want to access, because closure borrows self
         let events_loop = &mut self.events_loop;
-        let windows     = &self.windows;
-        let running     = &mut self.running;
+        let windows = &self.windows;
+        let running = &mut self.running;
 
         // poll events
         events_loop.poll_events(|event| {
@@ -133,21 +133,21 @@ impl Application {
                         // window closed
                         glutin::WindowEvent::CloseRequested => {
                             *running = false;
-                        },
+                        }
 
                         // window resized
                         glutin::WindowEvent::Resized(logical_size) => {
                             let dpi_factor = gl_window.get_hidpi_factor();
                             gl_window.resize(logical_size.to_physical(dpi_factor));
-                        },
+                        }
 
                         // other event
                         _ => (),
                     }
-                },
+                }
 
                 // other event
-                _ => ()
+                _ => (),
             }
         });
     }
