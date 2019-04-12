@@ -1,7 +1,5 @@
 use std::ffi::c_void;
 
-use glenum::*;
-
 #[derive(Default)]
 pub struct GL {}
 
@@ -660,9 +658,9 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn clear(&self, bit: BufferBit) {
+    fn clear(&self, mask: u32) {
         unsafe {
-            gl::Clear(bit as _);
+            gl::Clear(mask);
         }
     }
 

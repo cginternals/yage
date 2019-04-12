@@ -1,5 +1,3 @@
-use glenum::*;
-
 use web_sys::{
     WebGl2RenderingContext, WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlRenderbuffer,
     WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject, WebGlTransformFeedback
@@ -498,8 +496,8 @@ impl super::GlFunctions for GL {
 
     // Whole Framebuffer Operations
 
-    fn clear(&self, bit: BufferBit) {
-        self.gl.clear(bit as _);
+    fn clear(&self, mask: u32) {
+        self.gl.clear(mask);
     }
 
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {

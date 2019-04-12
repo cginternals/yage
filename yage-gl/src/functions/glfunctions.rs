@@ -1,5 +1,3 @@
-use glenum::BufferBit;
-
 /// Trait for many GL functions
 ///
 /// Associated types are used to support different handles types in native GL and WebGL
@@ -212,7 +210,7 @@ pub trait GlFunctions {
 
     // Whole Framebuffer Operations
 
-    fn clear(&self, bit: BufferBit);
+    fn clear(&self, mask: u32);
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32);
     fn clear_depth(&self, depth: f32);
     fn clear_stencil(&self, stencil: i32);
