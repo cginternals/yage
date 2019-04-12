@@ -75,8 +75,8 @@ impl Application {
     ///
     /// Mutable reference to the window.
     ///
-    pub fn window(&mut self, id: glutin::WindowId) -> Option<&mut Window> {
-        self.windows.get_mut(&id)
+    pub fn window(&self, id: glutin::WindowId) -> Option<&Window> {
+        self.windows.get(&id)
     }
 
     ///

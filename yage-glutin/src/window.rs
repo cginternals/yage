@@ -73,6 +73,17 @@ impl Window {
     pub fn swap_buffers(&self) {
         let _ = self.window.swap_buffers();
     }
+
+    ///
+    /// Set window title
+    ///
+    /// # Parameters
+    ///
+    /// - `title`: The new window title
+    ///
+    pub fn set_title(&self, title: &str) {
+        self.window.set_title(title);
+    }
 }
 
 impl Context for Window {
