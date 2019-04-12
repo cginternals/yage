@@ -9,6 +9,7 @@ pub struct Application {
     events_loop: glutin::EventsLoop,
     windows: HashMap<glutin::WindowId, Window>,
     running: bool,
+    exit_code: i32,
 }
 
 impl Application {
@@ -28,6 +29,7 @@ impl Application {
             events_loop,
             windows: HashMap::new(),
             running: true,
+            exit_code: 0,
         }
     }
 
@@ -100,12 +102,28 @@ impl Application {
     }
 
     ///
-    /// Stop events loop
+    /// Get exit code
+    ///
+    /// # Returns
+    ///
+    /// Exit code (0 for no error, > 0 for error)
+    ///
+    pub fn exit_code(&self) -> i32 {
+        self.exit_code
+    }
+
+    ///
+    /// Exit application
     ///
     /// This will stop the events loop and thereby exit the application.
     ///
-    pub fn stop(&mut self) {
+    /// # Parameters
+    ///
+    /// - `exit_code`: Exit code (0 for no error, > 0 for error)
+    ///
+    pub fn stop(&mut self, exit_code: i32) {
         self.running = false;
+        self.exit_code = exit_code;
     }
 
     ///
@@ -170,8 +188,8 @@ impl Application {
             self.poll_events();
         }
 
-        // return value
-        0
+        // return exit code
+        self.exit_code
     }
 }
 
