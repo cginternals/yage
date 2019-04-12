@@ -25,7 +25,7 @@ impl Application {
 
         // return application
         Application {
-            events_loop: events_loop,
+            events_loop,
             windows: HashMap::new(),
             running: true
         }
@@ -172,5 +172,11 @@ impl Application {
 
         // return value
         0
+    }
+}
+
+impl Default for Application {
+    fn default() -> Application {
+        Application::new()
     }
 }

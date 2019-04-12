@@ -39,9 +39,6 @@ impl Window {
         // create actual OpenGL window
         let gl_window = glutin::GlWindow::new(window_builder, context_builder, application.events_loop()).unwrap();
 
-        // [TODO] initialize OpenGL in context
-        gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
-
         // create window
         Window {
             window: gl_window
