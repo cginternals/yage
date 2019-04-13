@@ -65,7 +65,7 @@ impl Application {
     }
 
     ///
-    /// Borrow mutable reference to a specific window
+    /// Borrow reference to a specific window
     ///
     /// # Parameters
     ///
@@ -73,10 +73,19 @@ impl Application {
     ///
     /// # Returns
     ///
-    /// Mutable reference to the window.
+    /// Reference to the window.
+    ///
+    /// # Undefined Behavior
+    ///
+    /// When the application only has a single window, the return value
+    /// will always be that window, regardless of the given id.
     ///
     pub fn window(&self, id: glutin::WindowId) -> Option<&Window> {
-        self.windows.get(&id)
+        if self.windows.len() == 1 {
+            self.windows.values().next()
+        } else {
+            self.windows.get(&id)
+        }
     }
 
     ///
@@ -134,6 +143,7 @@ impl Application {
         let events_loop = &mut self.events_loop;
         let windows = &self.windows;
         let running = &mut self.running;
+        let first_window = windows.values().next();
 
         // poll events
         events_loop.poll_events(|event| {
@@ -143,7 +153,13 @@ impl Application {
                 // window events
                 glutin::Event::WindowEvent { event, window_id } => {
                     // get window
-                    let window = windows.get(&window_id).unwrap();
+                    let window = if !first_window.is_some() {
+                        first_window.unwrap()
+                    } else {
+                        windows.get(&window_id).unwrap()
+                    };
+
+                    // get GlWindow
                     let gl_window = window.get_gl_window();
 
                     // dispatch window event
