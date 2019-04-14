@@ -20,11 +20,9 @@ impl Window {
     /// into the application using Application::add_window().
     ///
     /// # Parameters
-    ///
     /// - `application`: Application for which the window is created.
     ///
     /// # Returns
-    ///
     /// A new instance of Window.
     ///
     pub fn new(application: &Application) -> Window {
@@ -49,7 +47,6 @@ impl Window {
     /// Get window ID
     ///
     /// # Returns
-    ///
     /// The ID of the window.
     ///
     pub fn id(&self) -> WindowId {
@@ -60,7 +57,6 @@ impl Window {
     /// Borrow reference to the wrapped OpenGL window
     ///
     /// # Returns
-    ///
     /// Reference to the OpenGL window.
     ///
     pub fn get_gl_window(&self) -> &glutin::GlWindow {
@@ -78,7 +74,6 @@ impl Window {
     /// Set window title
     ///
     /// # Parameters
-    ///
     /// - `title`: The new window title
     ///
     pub fn set_title(&self, title: &str) {

@@ -17,7 +17,6 @@ impl Application {
     /// Create an application instance
     ///
     /// # Returns
-    ///
     /// A new instance of Application.
     ///
     pub fn new() -> Application {
@@ -37,11 +36,9 @@ impl Application {
     /// Add window to the application
     ///
     /// # Parameters
-    ///
     /// - `window`: Window that is transferred to the application.
     ///
     /// # Returns
-    ///
     /// Window ID.
     ///
     pub fn add_window(&mut self, window: Window) -> glutin::WindowId {
@@ -57,7 +54,6 @@ impl Application {
     /// Get windows that belong to the application
     ///
     /// # Returns
-    ///
     /// Map of window IDs -> Window.
     ///
     pub fn windows(&self) -> &HashMap<glutin::WindowId, Window> {
@@ -68,15 +64,12 @@ impl Application {
     /// Borrow reference to a specific window
     ///
     /// # Parameters
-    ///
     /// - `id`: Window ID
     ///
     /// # Returns
-    ///
     /// Reference to the window.
     ///
     /// # Undefined Behavior
-    ///
     /// When the application only has a single window, the return value
     /// will always be that window, regardless of the given id.
     ///
@@ -92,7 +85,6 @@ impl Application {
     /// Borrow events loop
     ///
     /// # Returns
-    ///
     /// Reference to the events loop.
     ///
     pub fn events_loop(&self) -> &glutin::EventsLoop {
@@ -103,7 +95,6 @@ impl Application {
     /// Check if events loop is still running
     ///
     /// # Returns
-    ///
     /// State of the events loop.
     ///
     pub fn is_running(&self) -> bool {
@@ -114,7 +105,6 @@ impl Application {
     /// Get exit code
     ///
     /// # Returns
-    ///
     /// Exit code (0 for no error, > 0 for error)
     ///
     pub fn exit_code(&self) -> i32 {
@@ -127,7 +117,6 @@ impl Application {
     /// This will stop the events loop and thereby exit the application.
     ///
     /// # Parameters
-    ///
     /// - `exit_code`: Exit code (0 for no error, > 0 for error)
     ///
     pub fn stop(&mut self, exit_code: i32) {
@@ -195,7 +184,6 @@ impl Application {
     /// on the Application object.
     ///
     /// # Returns
-    ///
     /// Exit code (0 for no error, > 0 for error)
     ///
     pub fn run(&mut self) -> i32 {
