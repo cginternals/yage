@@ -1,8 +1,6 @@
-use glenum::*;
-
 use web_sys::{
     WebGl2RenderingContext, WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlRenderbuffer,
-    WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject,
+    WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject, WebGlTransformFeedback
 };
 
 pub struct GL {
@@ -25,20 +23,19 @@ impl super::GlFunctions for GL {
     type GlUniformLocation = WebGlUniformLocation;
     type GlFramebuffer = WebGlFramebuffer;
     type GlRenderbuffer = WebGlRenderbuffer;
+    type GlTransformFeedback = WebGlTransformFeedback;
 
-    /// specify clear values for the color buffers
-    fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
-        self.gl.clear_color(r, g, b, a);
-    }
-
-    /// clear buffers to preset values
-    fn clear(&self, bit: BufferBit) {
-        self.gl.clear(bit as _);
-    }
+    // View and Clip
 
     fn viewport(&self, x: i32, y: i32, width: i32, height: i32) {
         self.gl.viewport(x, y, width, height);
     }
+
+    fn scissor(&self, x: i32, y: i32, width: i32, height: i32) {
+        self.gl.scissor(x, y, width, height);
+    }
+
+    // Programs and Shaders
 
     fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader {
         self.gl.create_shader(kind as _).unwrap()
@@ -76,6 +73,10 @@ impl super::GlFunctions for GL {
         self.gl.attach_shader(&program, shader);
     }
 
+    fn detach_shader(&self, program: &Self::GlProgram, shader: &Self::GlShader) {
+        self.gl.detach_shader(&program, shader);
+    }
+
     fn link_program(&self, program: &Self::GlProgram) {
         self.gl.link_program(&program);
     }
@@ -95,6 +96,16 @@ impl super::GlFunctions for GL {
     fn use_program(&self, program: Option<&Self::GlProgram>) {
         self.gl.use_program(program);
     }
+
+    fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32 {
+        self.gl.get_attrib_location(program, name)
+    }
+
+    fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str) {
+        self.gl.bind_attrib_location(program, index, name);
+    }
+
+    // Buffer Objects
 
     fn create_buffer(&self) -> Self::GlBuffer {
         self.gl.create_buffer().unwrap()
@@ -134,6 +145,12 @@ impl super::GlFunctions for GL {
         self.gl.delete_buffer(Some(&buffer));
     }
 
+    fn is_buffer(&self, buffer: &Self::GlBuffer) -> bool {
+        self.gl.is_buffer(Some(buffer))
+    }
+
+    // Vertex Array Objects
+
     fn create_vertex_array(&self) -> Self::GlVertexArray {
         self.gl.create_vertex_array().unwrap()
     }
@@ -145,6 +162,8 @@ impl super::GlFunctions for GL {
     fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
         self.gl.delete_vertex_array(Some(vertex_array));
     }
+
+    // Uniforms and Attributes
 
     fn vertex_attrib_pointer(
         &self,
@@ -165,85 +184,6 @@ impl super::GlFunctions for GL {
 
     fn disable_vertex_attrib_array(&self, index: u32) {
         self.gl.disable_vertex_attrib_array(index);
-    }
-
-    fn draw_arrays(&self, mode: u32, first: i32, count: i32) {
-        self.gl.draw_arrays(mode, first, count);
-    }
-
-    fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32) {
-        self.gl
-            .draw_elements_with_i32(mode, count, element_type, offset);
-    }
-
-    fn enable(&self, param: u32) {
-        self.gl.enable(param);
-    }
-
-    fn disable(&self, param: u32) {
-        self.gl.disable(param);
-    }
-
-    /// Unimplemented - method missing in WebGL (and ES2, ES3)
-    fn point_size(&self, _size: f32) {
-        // TODO!: log warning instead of panic?
-        unimplemented!("method not available in WebGL")
-    }
-
-    fn active_texture(&self, unit: u32) {
-        self.gl.active_texture(unit);
-    }
-
-    fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>) {
-        self.gl.bind_texture(target, texture);
-    }
-
-    fn blend_func(&self, src: u32, dst: u32) {
-        self.gl.blend_func(src, dst);
-    }
-
-    fn create_texture(&self) -> Self::GlTexture {
-        self.gl.create_texture().unwrap()
-    }
-
-    fn delete_texture(&self, texture: &Self::GlTexture) {
-        self.gl.delete_texture(Some(texture));
-    }
-
-    fn tex_image_2d(
-        &self,
-        target: u32,
-        level: i32,
-        internal_format: i32,
-        width: i32,
-        height: i32,
-        border: i32,
-        format: u32,
-        ty: u32,
-        pixels: Option<&[u8]>,
-    ) {
-        // TODO!: unused_must_use - return Result?
-        let _ = self
-            .gl
-            .tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
-                target,
-                level,
-                internal_format,
-                width,
-                height,
-                border,
-                format,
-                ty,
-                pixels,
-            );
-    }
-
-    fn generate_mipmap(&self) {
-        self.gl.generate_mipmap(glenum::TextureKind::Texture2d as _);
-    }
-
-    fn tex_parameteri(&self, target: u32, parameter: u32, value: i32) {
-        self.gl.tex_parameteri(target, parameter, value);
     }
 
     fn get_uniform_location(
@@ -284,6 +224,170 @@ impl super::GlFunctions for GL {
         unimplemented!();
     }
 
+    // Writing to the Draw Buffer
+
+    fn draw_arrays(&self, mode: u32, first: i32, count: i32) {
+        self.gl.draw_arrays(mode, first, count);
+    }
+
+    fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32) {
+        self.gl
+            .draw_elements_with_i32(mode, count, element_type, offset);
+    }
+
+    fn vertex_attrib_divisor(&self, index: u32, divisor: u32) {
+        self.gl.vertex_attrib_divisor(index, divisor);
+    }
+
+    fn draw_arrays_instanced(&self, mode: u32, first: i32, count: i32, instance_count: i32) {
+        self.gl.draw_arrays_instanced(mode, first, count, instance_count);
+    }
+
+    fn draw_elements_instanced(
+        &self,
+        mode: u32,
+        count: i32,
+        element_type: u32,
+        offset: i32,
+        instance_count: i32,
+    ) {
+        self.gl.draw_elements_instanced_with_i32(
+            mode as u32,
+            count,
+            element_type as u32,
+            offset,
+            instance_count,
+        );
+    }
+
+    // Special Functions
+
+    fn enable(&self, param: u32) {
+        self.gl.enable(param);
+    }
+
+    fn disable(&self, param: u32) {
+        self.gl.disable(param);
+    }
+
+    fn finish(&self) {
+       self.gl.finish();
+    }
+
+    fn flush(&self) {
+        self.gl.flush();
+    }
+
+    fn get_error(&self) -> u32 {
+        self.gl.get_error()
+    }
+
+    fn get_parameter_i32(&self, parameter: u32) -> i32 {
+        self.gl.get_parameter(parameter)
+            .unwrap()
+            .as_f64()
+            .unwrap() as i32
+    }
+
+    fn pixel_storei(&self, storage: u32, value: i32) {
+        self.gl.pixel_storei(storage, value);
+    }
+
+    /// Unimplemented - method missing in WebGL (and ES2, ES3)
+    fn point_size(&self, _size: f32) {
+        // TODO!: log warning instead of panic?
+        unimplemented!("method not available in WebGL")
+    }
+
+    // Texture Objects
+
+    fn active_texture(&self, unit: u32) {
+        self.gl.active_texture(unit);
+    }
+
+    fn bind_texture(&self, target: u32, texture: Option<&Self::GlTexture>) {
+        self.gl.bind_texture(target, texture);
+    }
+
+    fn create_texture(&self) -> Self::GlTexture {
+        self.gl.create_texture().unwrap()
+    }
+
+    fn delete_texture(&self, texture: &Self::GlTexture) {
+        self.gl.delete_texture(Some(texture));
+    }
+
+    fn tex_image_2d(
+        &self,
+        target: u32,
+        level: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32,
+        border: i32,
+        format: u32,
+        ty: u32,
+        pixels: Option<&[u8]>,
+    ) {
+        // TODO!: unused_must_use - return Result?
+        let _ = self
+            .gl
+            .tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+                target,
+                level,
+                internal_format,
+                width,
+                height,
+                border,
+                format,
+                ty,
+                pixels,
+            );
+    }
+
+    fn tex_image_3d(
+        &self,
+        target: u32,
+        level: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32,
+        depth: i32,
+        border: i32,
+        format: u32,
+        ty: u32,
+        pixels: Option<&[u8]>,
+    ) {
+        // TODO!: unused_must_use - return Result?
+        let _ = self
+            .gl
+            .tex_image_3d_with_u8_array_and_src_offset(
+                target,
+                level,
+                internal_format,
+                width,
+                height,
+                depth,
+                border,
+                format,
+                ty,
+                pixels.unwrap(), // TODO!: none case?
+                0
+            );
+    }
+
+    fn generate_mipmap(&self, target: u32) {
+        self.gl.generate_mipmap(target);
+    }
+
+    fn tex_parameteri(&self, target: u32, parameter: u32, value: i32) {
+        self.gl.tex_parameteri(target, parameter, value);
+    }
+
+    fn is_texture(&self, texture: &Self::GlTexture) -> bool {
+        self.gl.is_texture(Some(texture))
+    }
+
     fn create_framebuffer(&self) -> Self::GlFramebuffer {
         self.gl.create_framebuffer().unwrap()
     }
@@ -308,6 +412,49 @@ impl super::GlFunctions for GL {
             .framebuffer_texture_2d(target, attachment, texture_target, texture, level);
     }
 
+    fn framebuffer_renderbuffer(
+        &self,
+        target: u32,
+        attachment: u32,
+        renderbuffer_target: u32,
+        renderbuffer: Option<&Self::GlRenderbuffer>,
+    ) {
+        self.gl
+            .framebuffer_renderbuffer(target, attachment, renderbuffer_target, renderbuffer);
+    }
+
+    fn is_frambuffer(&self, framebuffer: &Self::GlFramebuffer) -> bool {
+        self.gl.is_framebuffer(Some(framebuffer))
+    }
+
+    fn check_framebuffer_status(&self, target: u32) -> u32 {
+        self.gl.check_framebuffer_status(target)
+    }
+
+    fn blit_framebuffer(
+        &self,
+        src_x0: i32,
+        src_y0: i32,
+        src_x1: i32,
+        src_y1: i32,
+        dst_x0: i32,
+        dst_y0: i32,
+        dst_x1: i32,
+        dst_y1: i32,
+        mask: u32,
+        filter: u32,
+    ) {
+        self.gl.blit_framebuffer(
+            src_x0, src_y0, src_x1, src_y1, dst_x0, dst_y0, dst_x1, dst_y1, mask, filter
+        );
+    }
+
+    fn read_buffer(&self, mode: u32) {
+        self.gl.read_buffer(mode);
+    }
+
+    // Renderbuffer Objects
+
     fn create_renderbuffer(&self) -> Self::GlRenderbuffer {
         self.gl.create_renderbuffer().unwrap()
     }
@@ -325,30 +472,55 @@ impl super::GlFunctions for GL {
             .renderbuffer_storage(target, internal_format, width, height);
     }
 
-    fn framebuffer_renderbuffer(
-        &self,
-        target: u32,
-        attachment: u32,
-        renderbuffer_target: u32,
-        renderbuffer: Option<&Self::GlRenderbuffer>,
-    ) {
-        self.gl
-            .framebuffer_renderbuffer(target, attachment, renderbuffer_target, renderbuffer);
+    // Per-Fragment Operations
+
+    fn depth_func(&self, func: u32) {
+        self.gl.depth_func(func);
     }
 
-    fn check_framebuffer_status(&self, target: u32) -> u32 {
-        self.gl.check_framebuffer_status(target)
+    fn blend_func(&self, src: u32, dst: u32) {
+        self.gl.blend_func(src, dst);
     }
 
-    /// Unimplemented - method missing in WebGL (and ES2, ES3)
-    fn polygon_mode(&self, _face: u32, _mode: u32) {
-        // TODO!: log warning instead of panic?
-        unimplemented!("method not available in WebGL")
+    fn blend_func_separate(&self, src_rgb: u32, dst_rgb: u32, src_alpha: u32, dst_alpha: u32) {
+        self.gl.blend_func_separate(src_rgb, dst_rgb, src_alpha, dst_alpha);
     }
 
-    fn pixel_storei(&self, storage: u32, value: i32) {
-        self.gl.pixel_storei(storage, value);
+    fn stencil_func(&self, func: u32, reference: i32, mask: u32){
+        self.gl.stencil_func(func, reference, mask);
     }
+
+    fn stencil_op(&self, stencil_fail: u32, depth_fail: u32, pass: u32){
+        self.gl.stencil_op(stencil_fail, depth_fail, pass);
+    }
+
+    // Whole Framebuffer Operations
+
+    fn clear(&self, mask: u32) {
+        self.gl.clear(mask);
+    }
+
+    fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
+        self.gl.clear_color(r, g, b, a);
+    }
+
+    fn clear_depth(&self, depth: f32) {
+        self.gl.clear_depth(depth);
+    }
+
+    fn clear_stencil(&self, stencil: i32) {
+        self.gl.clear_stencil(stencil);
+    }
+
+    fn stencil_mask(&self, mask: u32){
+        self.gl.stencil_mask(mask);
+    }
+
+    fn depth_mask(&self, value: bool) {
+        self.gl.depth_mask(value);
+    }
+
+    // Read Back Pixels
 
     fn read_pixels(
         &self,
@@ -364,4 +536,31 @@ impl super::GlFunctions for GL {
         let _ = self.gl.read_pixels_with_opt_u8_array(x, y, width, height,
             format, type_, Some(data));
     }
+
+    // Rasterization
+
+    fn cull_face(&self, value: u32) {
+        self.gl.cull_face(value);
+    }
+
+    /// Unimplemented - method missing in WebGL (and ES2, ES3)
+    fn polygon_mode(&self, _face: u32, _mode: u32) {
+        // TODO!: log warning instead of panic?
+        unimplemented!("method not available in WebGL")
+    }
+
+    // Multiple Render Targets
+
+    /// unimplemented (yet)
+    fn draw_buffers(&self, _buffers: &[u32]) {
+        // TODO!!: requires JsValue...?
+        // self.gl.draw_buffers(buffers);
+        unimplemented!()
+    }
+
+    // Transform Feedback
+
+    // fn create_transform_feedback(&self) -> Self::GlTransformFeedback {
+    //     self.gl.create_transform_feedback().unwrap()
+    // }
 }

@@ -1,16 +1,16 @@
-use crate::{GL, GlFunctions};
+use crate::{GlFunctions, GL};
 
-/// Wrapper around an OpenGL array or element array buffer. 
+/// Wrapper around an OpenGL array or element array buffer.
 pub struct Buffer<'a> {
     gl: &'a GL,
     /// Target for use in `glBindBuffer`
     target: u32,
-    buffer_handle: <GL as GlFunctions>::GlBuffer,
+    handle: <GL as GlFunctions>::GlBuffer,
 }
 
 impl<'a> Buffer<'a> {
-    /// Creates an empty buffer. 
-    /// 
+    /// Creates an empty buffer.
+    ///
     /// # Parameters
     /// - `gl`: GL context
     /// - `target`: must be a valid glenum for `glBindBuffer`
@@ -18,14 +18,19 @@ impl<'a> Buffer<'a> {
         Self {
             gl,
             target,
-            buffer_handle: gl.create_buffer()
+            handle: gl.create_buffer(),
         }
     }
 
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlBuffer {
+        &self.handle
+    }
+
     /// Creates the buffer object's data store.
-    /// 
+    ///
     /// Expects the buffer to be bound.
-    /// 
+    ///
     /// # Parameters
     /// - `data`: buffer data
     /// - `usage`: must be a valid glenum for `glBufferData`
@@ -34,9 +39,9 @@ impl<'a> Buffer<'a> {
     }
 
     /// Updates a subset of a buffer object's data store.
-    /// 
+    ///
     /// Expects the buffer to be bound.
-    /// 
+    ///
     /// # Parameters
     /// - `offset`: offset into the buffer object's data store in bytes
     /// - `data`: buffer data
@@ -46,7 +51,7 @@ impl<'a> Buffer<'a> {
 
     /// Binds the buffer.
     pub fn bind(&self) {
-        self.gl.bind_buffer(self.target, Some(&self.buffer_handle));
+        self.gl.bind_buffer(self.target, Some(&self.handle));
     }
 
     /// Unbinds the buffer.
@@ -55,9 +60,9 @@ impl<'a> Buffer<'a> {
     }
 
     /// Specifies the memory layout of the buffer for a binding point.
-    /// 
+    ///
     /// Expects the buffer to be bound.
-    /// 
+    ///
     /// # Parameters
     /// - `index` - Index of the vertex attribute that is to be setup and enabled.
     /// - `size` - Number of components per vertex attribute.
@@ -74,8 +79,8 @@ impl<'a> Buffer<'a> {
         stride: i32,
         offset: i32,
     ) {
-        self.gl.vertex_attrib_pointer(
-            index, size, data_type, normalized, stride, offset);
+        self.gl
+            .vertex_attrib_pointer(index, size, data_type, normalized, stride, offset);
         self.gl.enable_vertex_attrib_array(index);
     }
 
@@ -88,6 +93,6 @@ impl<'a> Buffer<'a> {
 
 impl<'a> Drop for Buffer<'a> {
     fn drop(&mut self) {
-        self.gl.delete_buffer(&self.buffer_handle);
+        self.gl.delete_buffer(&self.handle);
     }
 }
