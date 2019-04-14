@@ -1,11 +1,11 @@
-use crate::{GL, GlFunctions};
+use crate::{GlFunctions, GL};
 
 /// Wrapper around an OpenGL array or element array buffer.
 pub struct Buffer<'a> {
     gl: &'a GL,
     /// Target for use in `glBindBuffer`
     target: u32,
-    buffer_handle: <GL as GlFunctions>::GlBuffer,
+    handle: <GL as GlFunctions>::GlBuffer,
 }
 
 impl<'a> Buffer<'a> {
@@ -18,13 +18,13 @@ impl<'a> Buffer<'a> {
         Self {
             gl,
             target,
-            buffer_handle: gl.create_buffer()
+            handle: gl.create_buffer(),
         }
     }
 
     /// Getter for the OpenGL/WebGL handle
     pub fn handle(&self) -> &<GL as GlFunctions>::GlBuffer {
-        &self.buffer_handle
+        &self.handle
     }
 
     /// Creates the buffer object's data store.
@@ -51,7 +51,7 @@ impl<'a> Buffer<'a> {
 
     /// Binds the buffer.
     pub fn bind(&self) {
-        self.gl.bind_buffer(self.target, Some(&self.buffer_handle));
+        self.gl.bind_buffer(self.target, Some(&self.handle));
     }
 
     /// Unbinds the buffer.
@@ -79,8 +79,8 @@ impl<'a> Buffer<'a> {
         stride: i32,
         offset: i32,
     ) {
-        self.gl.vertex_attrib_pointer(
-            index, size, data_type, normalized, stride, offset);
+        self.gl
+            .vertex_attrib_pointer(index, size, data_type, normalized, stride, offset);
         self.gl.enable_vertex_attrib_array(index);
     }
 
@@ -93,6 +93,6 @@ impl<'a> Buffer<'a> {
 
 impl<'a> Drop for Buffer<'a> {
     fn drop(&mut self) {
-        self.gl.delete_buffer(&self.buffer_handle);
+        self.gl.delete_buffer(&self.handle);
     }
 }

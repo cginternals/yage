@@ -1,11 +1,11 @@
-use crate::{GL, GlFunctions};
+use crate::{GlFunctions, GL};
 
 /// Wrapper around an OpenGL texture.
 pub struct Texture<'a> {
     gl: &'a GL,
     /// Target for use in `glBindTexture`
     target: u32,
-    texture_handle: <GL as GlFunctions>::GlTexture,
+    handle: <GL as GlFunctions>::GlTexture,
 }
 
 impl<'a> Texture<'a> {
@@ -18,18 +18,18 @@ impl<'a> Texture<'a> {
         Self {
             gl,
             target,
-            texture_handle: gl.create_texture()
+            handle: gl.create_texture(),
         }
     }
 
     /// Getter for the OpenGL/WebGL handle
     pub fn handle(&self) -> &<GL as GlFunctions>::GlTexture {
-        &self.texture_handle
+        &self.handle
     }
 
     /// Binds the texture.
     pub fn bind(&self) {
-        self.gl.bind_texture(self.target, Some(&self.texture_handle));
+        self.gl.bind_texture(self.target, Some(&self.handle));
     }
 
     /// Unbinds the texture.
@@ -43,8 +43,16 @@ impl<'a> Texture<'a> {
     /// - `mag`: Value for the TEXTURE_MAG_FILTER parameter
     /// - `min`: Value for the TEXTURE_MIN_FILTER parameter
     pub fn filter(&self, mag: i32, min: i32) {
-        self.gl.tex_parameteri(self.target, glenum::TextureParameter::TextureMagFilter as _, mag);
-        self.gl.tex_parameteri(self.target, glenum::TextureParameter::TextureMinFilter as _, min);
+        self.gl.tex_parameteri(
+            self.target,
+            glenum::TextureParameter::TextureMagFilter as _,
+            mag,
+        );
+        self.gl.tex_parameteri(
+            self.target,
+            glenum::TextureParameter::TextureMinFilter as _,
+            min,
+        );
     }
 
     // TODO!!: Option<wrap_r> or seperate 3D texture object?
@@ -54,8 +62,16 @@ impl<'a> Texture<'a> {
     /// - `wrap_s`: Value for the TEXTURE_WRAP_S parameter
     /// - `wrap_t`: Value for the TEXTURE_WRAP_T parameter
     pub fn wrap(&self, wrap_s: i32, wrap_t: i32) {
-        self.gl.tex_parameteri(self.target, glenum::TextureParameter::TextureWrapS as _, wrap_s);
-        self.gl.tex_parameteri(self.target, glenum::TextureParameter::TextureWrapT as _, wrap_t);
+        self.gl.tex_parameteri(
+            self.target,
+            glenum::TextureParameter::TextureWrapS as _,
+            wrap_s,
+        );
+        self.gl.tex_parameteri(
+            self.target,
+            glenum::TextureParameter::TextureWrapT as _,
+            wrap_t,
+        );
     }
 
     /// Pass image data to the texture object.
@@ -79,11 +95,19 @@ impl<'a> Texture<'a> {
         border: i32,
         format: u32,
         ty: u32,
-        pixels: Option<&[u8]>
+        pixels: Option<&[u8]>,
     ) {
         self.gl.tex_image_2d(
-            self.target, level, internal_format,
-            width, height, border, format, ty, pixels);
+            self.target,
+            level,
+            internal_format,
+            width,
+            height,
+            border,
+            format,
+            ty,
+            pixels,
+        );
     }
 
     pub fn generate_mipmap(&self) {
@@ -91,9 +115,8 @@ impl<'a> Texture<'a> {
     }
 }
 
-
 impl<'a> Drop for Texture<'a> {
     fn drop(&mut self) {
-        self.gl.delete_texture(&self.texture_handle);
+        self.gl.delete_texture(&self.handle);
     }
 }
