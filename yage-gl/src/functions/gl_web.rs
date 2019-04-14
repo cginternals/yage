@@ -1,13 +1,8 @@
 use glenum::*;
 
 use web_sys::{
-    WebGl2RenderingContext, 
-    WebGlShader,
-    WebGlProgram,
-    WebGlUniformLocation,
-    WebGlTexture,
-    WebGlBuffer,
-    WebGlVertexArrayObject,
+    WebGl2RenderingContext, WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlRenderbuffer,
+    WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject,
 };
 
 pub struct GL {
@@ -17,9 +12,7 @@ pub struct GL {
 
 impl GL {
     pub fn from_webgl_context(context: WebGl2RenderingContext) -> GL {
-        GL {
-            gl: context
-        }
+        GL { gl: context }
     }
 }
 
@@ -30,6 +23,8 @@ impl super::GlFunctions for GL {
     type GlVertexArray = WebGlVertexArrayObject;
     type GlTexture = WebGlTexture;
     type GlUniformLocation = WebGlUniformLocation;
+    type GlFramebuffer = WebGlFramebuffer;
+    type GlRenderbuffer = WebGlRenderbuffer;
 
     /// specify clear values for the color buffers
     fn clear_color(&self, r: f32, g: f32, b: f32, a: f32) {
@@ -63,7 +58,10 @@ impl super::GlFunctions for GL {
 
     fn get_shader_parameter(&self, shader: &Self::GlShader, param: u32) -> i32 {
         // TODO!!: multi-return type problem...try in cascade? (as_f64 fails for boolean case)
-        self.gl.get_shader_parameter(shader, param).as_bool().unwrap() as i32
+        self.gl
+            .get_shader_parameter(shader, param)
+            .as_bool()
+            .unwrap() as i32
     }
 
     fn get_shader_info_log(&self, shader: &Self::GlShader) -> String {
@@ -84,7 +82,10 @@ impl super::GlFunctions for GL {
 
     fn get_program_parameter(&self, program: &Self::GlProgram, param: u32) -> i32 {
         // TODO!!: see get_shader_parameter....
-        self.gl.get_program_parameter(&program, param).as_bool().unwrap() as i32
+        self.gl
+            .get_program_parameter(&program, param)
+            .as_bool()
+            .unwrap() as i32
     }
 
     fn get_program_info_log(&self, program: &Self::GlProgram) -> String {
@@ -106,10 +107,12 @@ impl super::GlFunctions for GL {
     fn buffer_data<T>(&self, target: u32, data: &[T], usage: u32) {
         unsafe {
             self.gl.buffer_data_with_u8_array(
-                target, 
+                target,
                 std::slice::from_raw_parts(
-                    data.as_ptr() as *const u8, data.len() * std::mem::size_of::<T>()), 
-                usage
+                    data.as_ptr() as *const u8,
+                    data.len() * std::mem::size_of::<T>(),
+                ),
+                usage,
             );
         }
     }
@@ -117,10 +120,12 @@ impl super::GlFunctions for GL {
     fn buffer_sub_data<T>(&self, target: u32, offset: isize, data: &[T]) {
         unsafe {
             self.gl.buffer_sub_data_with_i32_and_u8_array(
-                target, 
-                offset as i32, 
+                target,
+                offset as i32,
                 std::slice::from_raw_parts_mut(
-                    data.as_ptr() as *mut u8, data.len() * std::mem::size_of::<T>()), 
+                    data.as_ptr() as *mut u8,
+                    data.len() * std::mem::size_of::<T>(),
+                ),
             );
         }
     }
@@ -137,6 +142,10 @@ impl super::GlFunctions for GL {
         self.gl.bind_vertex_array(vertex_array)
     }
 
+    fn delete_vertex_array(&self, vertex_array: &Self::GlVertexArray) {
+        self.gl.delete_vertex_array(Some(vertex_array));
+    }
+
     fn vertex_attrib_pointer(
         &self,
         index: u32,
@@ -146,14 +155,8 @@ impl super::GlFunctions for GL {
         stride: i32,
         offset: i32,
     ) {
-        self.gl.vertex_attrib_pointer_with_i32(
-            index,
-            size,
-            data_type,
-            normalized,
-            stride,
-            offset
-        );
+        self.gl
+            .vertex_attrib_pointer_with_i32(index, size, data_type, normalized, stride, offset);
     }
 
     fn enable_vertex_attrib_array(&self, index: u32) {
@@ -169,7 +172,8 @@ impl super::GlFunctions for GL {
     }
 
     fn draw_elements(&self, mode: u32, count: i32, element_type: u32, offset: i32) {
-        self.gl.draw_elements_with_i32(mode, count, element_type, offset);
+        self.gl
+            .draw_elements_with_i32(mode, count, element_type, offset);
     }
 
     fn enable(&self, param: u32) {
@@ -202,6 +206,10 @@ impl super::GlFunctions for GL {
         self.gl.create_texture().unwrap()
     }
 
+    fn delete_texture(&self, texture: &Self::GlTexture) {
+        self.gl.delete_texture(Some(texture));
+    }
+
     fn tex_image_2d(
         &self,
         target: u32,
@@ -215,17 +223,19 @@ impl super::GlFunctions for GL {
         pixels: Option<&[u8]>,
     ) {
         // TODO!: unused_must_use - return Result?
-        let _ = self.gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
-            target,
-            level,
-            internal_format,
-            width,
-            height,
-            border,
-            format,
-            ty,
-            pixels,
-        );
+        let _ = self
+            .gl
+            .tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+                target,
+                level,
+                internal_format,
+                width,
+                height,
+                border,
+                format,
+                ty,
+                pixels,
+            );
     }
 
     fn generate_mipmap(&self) {
@@ -272,5 +282,86 @@ impl super::GlFunctions for GL {
         // TODO!!: how to convert properly?
         // self.gl.uniform_matrix4fv_with_f32_array(Some(location), false, std::mem::transmute(mat));
         unimplemented!();
+    }
+
+    fn create_framebuffer(&self) -> Self::GlFramebuffer {
+        self.gl.create_framebuffer().unwrap()
+    }
+
+    fn delete_framebuffer(&self, framebuffer: &Self::GlFramebuffer) {
+        self.gl.delete_framebuffer(Some(framebuffer));
+    }
+
+    fn bind_framebuffer(&self, target: u32, framebuffer: Option<&Self::GlFramebuffer>) {
+        self.gl.bind_framebuffer(target, framebuffer);
+    }
+
+    fn framebuffer_texture_2d(
+        &self,
+        target: u32,
+        attachment: u32,
+        texture_target: u32,
+        texture: Option<&Self::GlTexture>,
+        level: i32,
+    ) {
+        self.gl
+            .framebuffer_texture_2d(target, attachment, texture_target, texture, level);
+    }
+
+    fn create_renderbuffer(&self) -> Self::GlRenderbuffer {
+        self.gl.create_renderbuffer().unwrap()
+    }
+
+    fn delete_renderbuffer(&self, renderbuffer: &Self::GlRenderbuffer) {
+        self.gl.delete_renderbuffer(Some(renderbuffer));
+    }
+
+    fn bind_renderbuffer(&self, target: u32, renderbuffer: Option<&Self::GlRenderbuffer>) {
+        self.gl.bind_renderbuffer(target, renderbuffer);
+    }
+
+    fn renderbuffer_storage(&self, target: u32, internal_format: u32, width: i32, height: i32) {
+        self.gl
+            .renderbuffer_storage(target, internal_format, width, height);
+    }
+
+    fn framebuffer_renderbuffer(
+        &self,
+        target: u32,
+        attachment: u32,
+        renderbuffer_target: u32,
+        renderbuffer: Option<&Self::GlRenderbuffer>,
+    ) {
+        self.gl
+            .framebuffer_renderbuffer(target, attachment, renderbuffer_target, renderbuffer);
+    }
+
+    fn check_framebuffer_status(&self, target: u32) -> u32 {
+        self.gl.check_framebuffer_status(target)
+    }
+
+    /// Unimplemented - method missing in WebGL (and ES2, ES3)
+    fn polygon_mode(&self, _face: u32, _mode: u32) {
+        // TODO!: log warning instead of panic?
+        unimplemented!("method not available in WebGL")
+    }
+
+    fn pixel_storei(&self, storage: u32, value: i32) {
+        self.gl.pixel_storei(storage, value);
+    }
+
+    fn read_pixels(
+        &self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        format: u32,
+        type_: u32,
+        data: &mut [u8],
+    ) {
+        // TODO: unused_must_use - return Result?
+        let _ = self.gl.read_pixels_with_opt_u8_array(x, y, width, height,
+            format, type_, Some(data));
     }
 }

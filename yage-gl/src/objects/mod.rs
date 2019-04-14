@@ -1,5 +1,11 @@
-pub mod buffer;
+mod buffer;
 pub use buffer::*;
 
-pub mod program;
+mod vertex_array;
+pub use vertex_array::*;
+
+mod program;
 pub use program::*;
+
+mod texture;
+pub use texture::*;

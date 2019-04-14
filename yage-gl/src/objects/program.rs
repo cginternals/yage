@@ -9,16 +9,17 @@ use cgmath::{Matrix4, Vector3, Vector4};
 
 use crate::{GL, GlFunctions};
 
-// TODO!!: copied from gltf-viewer (struct Shader) for debugging, partially adapted
+/// Wrapper object for OpenGL Programs.
 pub struct Program<'a> {
-    pub id: <GL as GlFunctions>::GlProgram,
     gl: &'a GL,
+    program_handle: <GL as GlFunctions>::GlProgram,
     uniform_location_cache: HashMap<&'static str, <GL as GlFunctions>::GlUniformLocation>
 }
 
 impl<'a> Program<'a> {
-    pub fn new(gl: &'a GL, vertex_path: &str, fragment_path: &str, defines: &[String]) -> Program<'a> {
-        // 1. retrieve the vertex/fragment source code from filesystem
+    /// Creates program from vertex and fragment shader paths and preprocessor defines.
+    pub fn from_file(gl: &'a GL, vertex_path: &str, fragment_path: &str, defines: &[String]) -> Program<'a> {
+        // retrieve the vertex/fragment source code from filesystem
         let mut v_shader_file = File::open(vertex_path).unwrap_or_else(|_| panic!("Failed to open {}", vertex_path));
         let mut f_shader_file = File::open(fragment_path).unwrap_or_else(|_| panic!("Failed to open {}", fragment_path));
         let mut vertex_code = String::new();
@@ -33,12 +34,12 @@ impl<'a> Program<'a> {
         Self::from_source(gl, &vertex_code, &fragment_code, defines)
     }
 
-    // TODO!!: generic GL/ impl Trait?
+    /// Creates program from vertex and fragment shader sources and preprocessor defines.
     pub fn from_source(gl: &'a GL, vertex_code: &str, fragment_code: &str, defines: &[String]) -> Program<'a> {
         let vertex_code = Self::add_defines(vertex_code, defines);
         let fragment_code = Self::add_defines(fragment_code, defines);
 
-        // 2. compile shaders
+        // compile shaders
         // vertex shader
         let vertex = gl.create_shader(glenum::ShaderKind::Vertex);
         gl.shader_source(&vertex, &vertex_code);
@@ -50,22 +51,23 @@ impl<'a> Program<'a> {
         gl.compile_shader(&fragment);
         Self::check_compile_errors(gl, &fragment, "FRAGMENT");
         // shader Program
-        let id = gl.create_program();
-        gl.attach_shader(&id, &vertex);
-        gl.attach_shader(&id, &fragment);
-        gl.link_program(&id);
-        Self::check_link_errors(gl, &id);
+        let program_handle = gl.create_program();
+        gl.attach_shader(&program_handle, &vertex);
+        gl.attach_shader(&program_handle, &fragment);
+        gl.link_program(&program_handle);
+        Self::check_link_errors(gl, &program_handle);
         // delete the shaders as they're linked into our program now and no longer necessary
         gl.delete_shader(&vertex);
         gl.delete_shader(&fragment);
 
         Self {
-            id,
+            program_handle,
             gl,
             uniform_location_cache: HashMap::new()
         }
     }
 
+    /// Util to add preprocessor defines.
     fn add_defines(source: &str, defines: &[String]) -> String {
         // insert preprocessor defines after #version if exists
         // (#version must occur before any other statement in the program)
@@ -85,7 +87,7 @@ impl<'a> Program<'a> {
 
     /// activate the shader
     pub fn use_program(&self) {
-        self.gl.use_program(Some(&self.id))
+        self.gl.use_program(Some(&self.program_handle))
     }
 
     // uniform setting functions
@@ -122,7 +124,7 @@ impl<'a> Program<'a> {
             return loc.clone();
         }
 
-        let loc = self.gl.get_uniform_location(&self.id, name);
+        let loc = self.gl.get_uniform_location(&self.program_handle, name);
         // TODO!!: how to check null/-1 properly depending on WebGL/OpenGL??
         // if loc == -1 {
         //     // TODO!: trace!
