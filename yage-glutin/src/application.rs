@@ -142,11 +142,7 @@ impl Application {
                 // window events
                 glutin::Event::WindowEvent { event, window_id } => {
                     // get window
-                    let window = if !first_window.is_some() {
-                        first_window.unwrap()
-                    } else {
-                        windows.get(&window_id).unwrap()
-                    };
+                    let window = first_window.unwrap_or_else(|| windows.get(&window_id).unwrap());
 
                     // get GlWindow
                     let gl_window = window.get_gl_window();
