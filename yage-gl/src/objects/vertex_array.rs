@@ -7,8 +7,8 @@ pub struct VertexArray<'a> {
 }
 
 impl<'a> VertexArray<'a> {
-    /// Creates a vertex array. 
-    /// 
+    /// Creates a vertex array.
+    ///
     /// # Parameters
     /// - `gl`: GL context
     pub fn new(gl: &'a GL) -> Self {
@@ -17,7 +17,12 @@ impl<'a> VertexArray<'a> {
             array_handle: gl.create_vertex_array()
         }
     }
-    
+
+    /// Getter for the OpenGL/WebGL handle
+    pub fn handle(&self) -> &<GL as GlFunctions>::GlVertexArray {
+        &self.array_handle
+    }
+
     /// Binds the vertex array.
     pub fn bind(&self) {
         self.gl.bind_vertex_array(Some(&self.array_handle));
