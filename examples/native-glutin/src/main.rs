@@ -66,7 +66,7 @@ fn main() {
     while app.is_running() {
         app.poll_events();
 
-        gl.clear(glenum::BufferBit::Color);
+        gl.clear(glenum::BufferBit::Color as u32);
         gl.draw_arrays(gl::TRIANGLES, 0, 3);
 
         // check_error!();
