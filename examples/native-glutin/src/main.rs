@@ -1,10 +1,10 @@
 use glutin::GlContext;
 
-use yage::gl::{
+use yage::core::{
     GL, GlFunctions,
     glenum,
     check_error,
-    objects::{Program, Buffer, VertexArray}
+    Program, Buffer, VertexArray
 };
 use yage::glutin::{
     Application,

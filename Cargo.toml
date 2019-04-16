@@ -23,14 +23,13 @@ gltf = ["yage-gltf"]
 default = ["gltf"]
 
 [workspace]
-members = ["yage-core", "yage-gl", "yage-glutin", "yage-web", "yage-gltf"]
+members = ["yage-core", "yage-glutin", "yage-web", "yage-gltf"]
 exclude = ["examples/native-glutin", "examples/rust-webpack", "examples/native-azul"]
 
 [dependencies]
 cfg-if = "0.1.7"
 
 yage-core = { path = "yage-core", version = "0.0.1" }
-yage-gl = { path = "yage-gl", version = "0.0.1" }
 yage-gltf = { path = "yage-gltf", version = "0.0.1", optional = true }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 yage-glutin = { path = "yage-glutin", version = "0.0.1" }
