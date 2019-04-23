@@ -3,7 +3,6 @@ use glutin::WindowId;
 
 use yage_core::Context;
 use yage_core::Canvas;
-use yage_core::GpuObject;
 use yage_core::Renderer;
 
 use crate::Application;
@@ -120,17 +119,14 @@ impl Window {
     pub fn render(&mut self) {
         self.canvas.render();
     }
-
-    ///
-    /// Swap OpenGL buffers
-    ///
-    pub fn swap_buffers(&self) {
-        let _ = self.window.swap_buffers();
-    }
 }
 
 impl Context for Window {
     fn make_current(&self) {
         let _ = unsafe { self.window.make_current() };
+    }
+
+    fn swap(&self) {
+        let _ = self.window.swap_buffers();
     }
 }

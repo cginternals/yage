@@ -38,7 +38,7 @@ fn main() {
 
         // swap buffers
         // [TODO] will be removed
-        app.window(window_id).unwrap().swap_buffers();
+        app.window(window_id).unwrap().swap();
     }
 
     // de-initialize renderer

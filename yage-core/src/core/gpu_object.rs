@@ -1,4 +1,3 @@
-
 ///
 /// A GPU object represents or owns data on the GPU.
 ///
