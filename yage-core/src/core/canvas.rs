@@ -54,6 +54,24 @@ impl Canvas {
     pub fn set_renderer<T: 'static + Renderer>(&mut self, renderer: T) {
         self.renderer = Some(Box::new(renderer));
     }
+
+    pub fn init(&mut self) {
+        if let Some(ref mut renderer) = self.renderer {
+            renderer.init();
+        }
+    }
+
+    pub fn deinit(&mut self) {
+        if let Some(ref mut renderer) = self.renderer {
+            renderer.deinit();
+        }
+    }
+
+    pub fn render(&mut self) {
+        if let Some(ref mut renderer) = self.renderer {
+            renderer.render();
+        }
+    }
 }
 
 impl Default for Canvas {

@@ -29,7 +29,6 @@ impl ExampleRenderer {
         let gl = Rc::new(GL::new());
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
-        program.use_program();
 
         let vertex_buffer = Buffer::new(&gl, glenum::BufferKind::Array as _);
         vertex_buffer.bind();
@@ -77,6 +76,15 @@ impl Renderer for ExampleRenderer {
     }
 
     fn render(&self) {
+        self.gl.viewport(0, 0, 300, 200);
+
+        self.gl.clear(glenum::BufferBit::Color as u32);
+
+        self.program.use_program();
+        self.vao.bind();
+        self.gl.draw_arrays(gl::TRIANGLES, 0, 3);
+
+        // check_error!();
     }
 }
 

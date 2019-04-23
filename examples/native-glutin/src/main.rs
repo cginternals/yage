@@ -1,11 +1,5 @@
 use glutin::GlContext;
 
-use yage::core::{
-    GL, GlFunctions,
-    glenum,
-    check_error,
-    Program, Buffer, VertexArray
-};
 use yage::glutin::{
     Application,
     Context,
@@ -30,25 +24,28 @@ fn main() {
     let gl_window = app.window(window_id).unwrap().get_gl_window();
     gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
-    // create OpenGL wrapper
-    let gl = GL::new();
-
-    // [TODO] create renderer
+    // create renderer
     let renderer = ExampleRenderer::new();
+    app.window_mut(window_id).unwrap().canvas_mut().set_renderer(renderer);
 
-    let canvas = app.window_mut(window_id).unwrap().canvas_mut();
-    canvas.set_renderer(renderer);
+    // initialize renderer
+    // [TODO] will be removed
+    app.window_mut(window_id).unwrap().canvas_mut().init();
 
-    gl.viewport(0, 0, 300, 200);
-
+    // run main loop
     while app.is_running() {
         app.poll_events();
 
-        gl.clear(glenum::BufferBit::Color as u32);
-        gl.draw_arrays(gl::TRIANGLES, 0, 3);
+        // execute renderer
+        // [TODO] will be removed
+        app.window_mut(window_id).unwrap().canvas_mut().render();
 
-        // check_error!();
-
+        // swap buffers
+        // [TODO] will be removed
         app.window(window_id).unwrap().swap_buffers();
     }
+
+    // de-initialize renderer
+    // [TODO] will be removed
+    app.window_mut(window_id).unwrap().canvas_mut().deinit();
 }
