@@ -1,22 +1,24 @@
+use std::rc::Rc;
+
 use glenum;
 
-use crate::{GL, GlFunctions};
+use crate::{GlFunctions, GL};
 
 /// Wrapper around an OpenGL renderbuffer.
 // TODO!!: incomplete
-pub struct Renderbuffer<'a> {
-    gl: &'a GL,
+pub struct Renderbuffer {
+    gl: Rc<GL>,
     handle: <GL as GlFunctions>::GlRenderbuffer,
 }
 
-impl<'a> Renderbuffer<'a> {
+impl Renderbuffer {
     /// Creates a renderbuffer.
     ///
     /// # Parameters
     /// - `gl`: GL context
-    pub fn new(gl: &'a GL) -> Self {
+    pub fn new(gl: &Rc<GL>) -> Self {
         Self {
-            gl,
+            gl: gl.clone(),
             handle: gl.create_renderbuffer()
         }
     }
@@ -37,7 +39,7 @@ impl<'a> Renderbuffer<'a> {
     }
 }
 
-impl<'a> Drop for Renderbuffer<'a> {
+impl Drop for Renderbuffer {
     fn drop(&mut self) {
         self.gl.delete_renderbuffer(&self.handle);
     }

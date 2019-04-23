@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::str;
+use std::rc::Rc;
 
 use cgmath::{Matrix4, Vector3, Vector4};
 
@@ -10,20 +11,20 @@ use cgmath::{Matrix4, Vector3, Vector4};
 use crate::{GlFunctions, GL};
 
 /// Wrapper object for OpenGL Programs.
-pub struct Program<'a> {
-    gl: &'a GL,
+pub struct Program {
+    gl: Rc<GL>,
     handle: <GL as GlFunctions>::GlProgram,
     uniform_location_cache: HashMap<&'static str, <GL as GlFunctions>::GlUniformLocation>,
 }
 
-impl<'a> Program<'a> {
+impl Program {
     /// Creates program from vertex and fragment shader paths and preprocessor defines.
     pub fn from_file(
-        gl: &'a GL,
+        gl: &Rc<GL>,
         vertex_path: &str,
         fragment_path: &str,
         defines: &[String],
-    ) -> Program<'a> {
+    ) -> Program {
         // retrieve the vertex/fragment source code from filesystem
         let mut v_shader_file =
             File::open(vertex_path).unwrap_or_else(|_| panic!("Failed to open {}", vertex_path));
@@ -43,11 +44,11 @@ impl<'a> Program<'a> {
 
     /// Creates program from vertex and fragment shader sources and preprocessor defines.
     pub fn from_source(
-        gl: &'a GL,
+        gl: &Rc<GL>,
         vertex_code: &str,
         fragment_code: &str,
         defines: &[String],
-    ) -> Program<'a> {
+    ) -> Program {
         let vertex_code = Self::add_defines(vertex_code, defines);
         let fragment_code = Self::add_defines(fragment_code, defines);
 
@@ -74,7 +75,7 @@ impl<'a> Program<'a> {
 
         Self {
             handle,
-            gl,
+            gl: gl.clone(),
             uniform_location_cache: HashMap::new(),
         }
     }

@@ -1,22 +1,24 @@
+use std::rc::Rc;
+
 use crate::{GlFunctions, GL};
 
 /// Wrapper around an OpenGL texture.
-pub struct Texture<'a> {
-    gl: &'a GL,
+pub struct Texture {
+    gl: Rc<GL>,
     /// Target for use in `glBindTexture`
     target: u32,
     handle: <GL as GlFunctions>::GlTexture,
 }
 
-impl<'a> Texture<'a> {
+impl Texture {
     /// Creates an texture.
     ///
     /// # Parameters
     /// - `gl`: GL context
     /// - `target`: must be a valid glenum for `glBindTexture`
-    pub fn new(gl: &'a GL, target: u32) -> Self {
+    pub fn new(gl: &Rc<GL>, target: u32) -> Self {
         Self {
-            gl,
+            gl: gl.clone(),
             target,
             handle: gl.create_texture(),
         }
@@ -115,7 +117,7 @@ impl<'a> Texture<'a> {
     }
 }
 
-impl<'a> Drop for Texture<'a> {
+impl Drop for Texture {
     fn drop(&mut self) {
         self.gl.delete_texture(&self.handle);
     }

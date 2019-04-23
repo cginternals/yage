@@ -1,24 +1,24 @@
-use glenum;
+use std::rc::Rc;
 
-use crate::{GL, GlFunctions};
+use crate::{GlFunctions, GL};
 
 /// Wrapper around an OpenGL frame buffer.
 // TODO!!: incomplete
-pub struct Framebuffer<'a> {
-    gl: &'a GL,
+pub struct Framebuffer {
+    gl: Rc<GL>,
     /// Target for use in `glBindFrameBuffer`
     pub target: u32,
     handle: <GL as GlFunctions>::GlFramebuffer,
 }
 
-impl<'a> Framebuffer<'a> {
+impl Framebuffer {
     /// Creates a framebuffer.
     ///
     /// # Parameters
     /// - `gl`: GL context
-    pub fn new(gl: &'a GL) -> Self {
+    pub fn new(gl: &Rc<GL>) -> Self {
         Self {
-            gl,
+            gl: gl.clone(),
             target: glenum::Buffers::Framebuffer as _,
             handle: gl.create_framebuffer()
         }
@@ -40,7 +40,7 @@ impl<'a> Framebuffer<'a> {
     }
 }
 
-impl<'a> Drop for Framebuffer<'a> {
+impl Drop for Framebuffer {
     fn drop(&mut self) {
         self.gl.delete_framebuffer(&self.handle);
     }

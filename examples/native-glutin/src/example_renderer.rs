@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use yage::core::{
     GL, GlFunctions,
     glenum,
@@ -10,7 +12,7 @@ use yage::core::{
 /// Example renderer that renders a single triangle.
 ///
 pub struct ExampleRenderer {
-    gl: GL,
+    gl: Rc<GL>,
     program: Program,
     vertex_buffer: Buffer,
     vao: VertexArray
@@ -24,7 +26,7 @@ impl ExampleRenderer {
     /// A new instance of Renderer.
     ///
     pub fn new() -> ExampleRenderer {
-        let gl = GL::new();
+        let gl = Rc::new(GL::new());
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
         program.use_program();
