@@ -21,7 +21,7 @@ fn main() {
     app.window(window_id).unwrap().make_current();
 
     // create renderer
-    let renderer = ExampleRenderer::new();
+    let renderer = ExampleRenderer::new(app.window(window_id).unwrap().gl());
     app.window_mut(window_id).unwrap().canvas_mut().set_renderer(renderer);
 
     // initialize renderer

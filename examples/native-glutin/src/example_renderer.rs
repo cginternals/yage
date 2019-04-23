@@ -22,12 +22,13 @@ impl ExampleRenderer {
     ///
     /// Create a renderer instance
     ///
-    /// # Returns
-    /// A new instance of Renderer.
+    /// # Parameters
+    /// - `gl`: GL context
     ///
-    pub fn new() -> ExampleRenderer {
-        let gl = Rc::new(GL::new());
-
+    /// # Returns
+    /// A new instance of ExampleRenderer.
+    ///
+    pub fn new(gl: &Rc<GL>) -> ExampleRenderer {
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
 
         let vertex_buffer = Buffer::new(&gl, glenum::BufferKind::Array as _);
@@ -59,7 +60,7 @@ impl ExampleRenderer {
 
         // return renderer
         ExampleRenderer {
-            gl,
+            gl: gl.clone(),
             program,
             vertex_buffer,
             vao
@@ -78,8 +79,6 @@ impl GpuObject for ExampleRenderer {
 
 impl Renderer for ExampleRenderer {
     fn render(&mut self) {
-        self.gl.viewport(0, 0, 300, 200);
-
         self.gl.clear(glenum::BufferBit::Color as u32);
 
         self.program.use_program();

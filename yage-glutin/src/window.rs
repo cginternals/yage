@@ -1,6 +1,10 @@
+use std::rc::Rc;
+
 use glutin::GlContext;
 use glutin::WindowId;
 
+use yage_core::GL;
+use yage_core::GlFunctions;
 use yage_core::Context;
 use yage_core::Canvas;
 use yage_core::Renderer;
@@ -12,6 +16,7 @@ use crate::Application;
 ///
 pub struct Window {
     window: glutin::GlWindow,
+    gl: Rc<GL>,
     canvas: Canvas
 }
 
@@ -38,7 +43,7 @@ impl Window {
         // create context builder
         let context_builder = glutin::ContextBuilder::new();
 
-        // create actual OpenGL window
+        // create OpenGL window
         let gl_window =
             glutin::GlWindow::new(window_builder, context_builder, application.events_loop())
                 .unwrap();
@@ -46,10 +51,13 @@ impl Window {
         // resolve OpenGL functions
         gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
+        let gl = Rc::new(GL::new());
+
         // create window
         Window {
             window: gl_window,
-            canvas: Canvas::new()
+            gl: gl.clone(),
+            canvas: Canvas::new(&gl)
         }
     }
 
@@ -122,6 +130,10 @@ impl Window {
 }
 
 impl Context for Window {
+    fn gl(&self) -> &Rc<GL> {
+        &self.gl
+    }
+
     fn make_current(&self) {
         let _ = unsafe { self.window.make_current() };
     }

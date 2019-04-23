@@ -1,13 +1,18 @@
-use cgmath::{Vector2};
+use std::rc::Rc;
+
+use cgmath::{Vector4};
 
 use crate::GpuObject;
 use crate::Renderer;
+use crate::GL;
+use crate::GlFunctions;
 
 ///
 /// A canvas represents an area into which can be rendered.
 ///
 pub struct Canvas {
-    size: Vector2<f32>,
+    gl: Rc<GL>,
+    viewport: Vector4<i32>,
     renderer: Option<Box<dyn Renderer>>
 }
 
@@ -15,35 +20,39 @@ impl Canvas {
     ///
     /// Create a canvas instance
     ///
+    /// # Parameters
+    /// - `gl`: GL context
+    ///
     /// # Returns
     /// A new instance of Canvas.
     ///
-    pub fn new() -> Canvas {
+    pub fn new(gl: &Rc<GL>) -> Canvas {
         // return canvas
         Canvas {
-            size: Vector2::new(0.0, 0.0),
+            gl: gl.clone(),
+            viewport: Vector4::new(0, 0, 0, 0),
             renderer: None
         }
     }
 
     ///
-    /// Get size
+    /// Get viewport
     ///
     /// # Returns
-    /// Size of canvas in device coordinates.
+    /// Size of viewport in device coordinates.
     ///
-    pub fn get_size(&self) -> Vector2<f32> {
-        self.size
+    pub fn get_viewport(&self) -> Vector4<i32> {
+        self.viewport
     }
 
     ///
-    /// Set size
+    /// Set viewport
     ///
     /// # Parameters
-    /// - `size`: Size of canvas in device coordinates.
+    /// - `viewport`: Size of viewport in device coordinates.
     ///
-    pub fn set_size(&mut self, size: Vector2<f32>) {
-        self.size = size;
+    pub fn set_viewport(&mut self, viewport: Vector4<i32>) {
+        self.viewport = viewport;
     }
 
     ///
@@ -74,13 +83,8 @@ impl GpuObject for Canvas {
 impl Renderer for Canvas {
     fn render(&mut self) {
         if let Some(ref mut renderer) = self.renderer {
+            self.gl.viewport(self.viewport.x, self.viewport.y, self.viewport.z, self.viewport.w);
             renderer.render();
         }
-    }
-}
-
-impl Default for Canvas {
-    fn default() -> Canvas {
-        Canvas::new()
     }
 }

@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use cgmath::{Vector4};
+
 use crate::Window;
 
 ///
@@ -151,9 +153,8 @@ impl Application {
     pub fn poll_events(&mut self) {
         // get references to data we want to access, because closure borrows self
         let events_loop = &mut self.events_loop;
-        let windows = &self.windows;
+        let windows = &mut self.windows;
         let running = &mut self.running;
-        let first_window = windows.values().next();
 
         // poll events
         events_loop.poll_events(|event| {
@@ -163,26 +164,55 @@ impl Application {
                 // window events
                 glutin::Event::WindowEvent { event, window_id } => {
                     // get window
-                    let window = first_window.unwrap_or_else(|| windows.get(&window_id).unwrap());
+                    let window = windows.get_mut(&window_id).unwrap();
 
                     // get GlWindow
                     let gl_window = window.gl_window();
 
                     // dispatch window event
                     match event {
-                        // window needs to be refreshed (painted)
-                        glutin::WindowEvent::Refresh => {
+                        // window resized
+                        glutin::WindowEvent::Resized(logical_size) => {
+                            // calculate size
+                            let dpi_factor = gl_window.get_hidpi_factor();
+                            let size = logical_size.to_physical(dpi_factor);
+
+                            // update client area
+                            gl_window.resize(size);
+
+                            // update canvas viewport
+                            window.canvas_mut().set_viewport(Vector4::new(0, 0, size.width as i32, size.height as i32));
+                        }
+
+                        // DPI factor changed
+                        glutin::WindowEvent::HiDpiFactorChanged(dpi_factor) => {
+                            if let Some(logical_size) = gl_window.get_inner_size() {
+                                // calculate size
+                                let size = logical_size.to_physical(dpi_factor);
+
+                                // update client area
+                                gl_window.resize(size);
+
+                                // update canvas viewport
+                                window.canvas_mut().set_viewport(Vector4::new(0, 0, size.width as i32, size.height as i32));
+                            }
                         }
 
                         // window closed
                         glutin::WindowEvent::CloseRequested => {
+                            // [TODO] Inform window, do not quit unless windows is set to quit on close
                             *running = false;
                         }
 
-                        // window resized
-                        glutin::WindowEvent::Resized(logical_size) => {
-                            let dpi_factor = gl_window.get_hidpi_factor();
-                            gl_window.resize(logical_size.to_physical(dpi_factor));
+                        // window destroyed
+                        glutin::WindowEvent::Destroyed => {
+                            // [TODO]
+                            *running = false;
+                        }
+
+                        // window needs to be refreshed (painted)
+                        glutin::WindowEvent::Refresh => {
+                            // [TODO]
                         }
 
                         // other event
