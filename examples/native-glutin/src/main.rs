@@ -1,6 +1,8 @@
+use yage::core::{
+    Context
+};
 use yage::glutin::{
     Application,
-    Context,
     Window
 };
 

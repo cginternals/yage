@@ -1,5 +1,5 @@
-pub mod application;
+mod application;
 pub use application::*;
 
-pub mod window;
+mod window;
 pub use window::*;
