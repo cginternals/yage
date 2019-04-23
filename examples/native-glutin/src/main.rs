@@ -1,5 +1,3 @@
-use glutin::GlContext;
-
 use yage::glutin::{
     Application,
     Context,
@@ -18,11 +16,6 @@ fn main() {
 
     // activate context
     app.window(window_id).unwrap().make_current();
-
-    // resolve OpenGL functions
-    // [TODO] automate this
-    let gl_window = app.window(window_id).unwrap().get_gl_window();
-    gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
     // create renderer
     let renderer = ExampleRenderer::new();
