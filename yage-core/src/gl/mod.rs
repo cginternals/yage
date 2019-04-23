@@ -11,6 +11,9 @@ mod gl_impl;
 
 pub use gl_impl::*;
 
+pub mod context;
+pub use context::*;
+
 mod buffer;
 pub use buffer::*;
 

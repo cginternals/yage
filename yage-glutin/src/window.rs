@@ -1,10 +1,10 @@
 use glutin::GlContext;
 use glutin::WindowId;
 
+use yage_core::Context;
 use yage_core::Canvas;
 
 use crate::Application;
-use crate::Context;
 
 ///
 /// Top-level window with OpenGL context.
