@@ -5,7 +5,7 @@ use yage::core::{
     glenum,
     check_error,
     Program, Buffer, VertexArray,
-    Renderer
+    GpuObject, Renderer
 };
 
 ///
@@ -67,15 +67,17 @@ impl ExampleRenderer {
     }
 }
 
-impl Renderer for ExampleRenderer {
+impl GpuObject for ExampleRenderer {
     fn init(&mut self) {
         self.gl.clear_color(0.1, 0.2, 0.3, 1.0);
     }
 
     fn deinit(&mut self) {
     }
+}
 
-    fn render(&self) {
+impl Renderer for ExampleRenderer {
+    fn render(&mut self) {
         self.gl.viewport(0, 0, 300, 200);
 
         self.gl.clear(glenum::BufferBit::Color as u32);

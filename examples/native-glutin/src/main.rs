@@ -1,5 +1,6 @@
 use yage::core::{
-    Context
+    Context,
+    GpuObject
 };
 use yage::glutin::{
     Application,
@@ -33,7 +34,7 @@ fn main() {
 
         // execute renderer
         // [TODO] will be removed
-        app.window_mut(window_id).unwrap().canvas_mut().render();
+        app.window_mut(window_id).unwrap().render();
 
         // swap buffers
         // [TODO] will be removed

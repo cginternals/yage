@@ -166,7 +166,7 @@ impl Application {
                     let window = first_window.unwrap_or_else(|| windows.get(&window_id).unwrap());
 
                     // get GlWindow
-                    let gl_window = window.get_gl_window();
+                    let gl_window = window.gl_window();
 
                     // dispatch window event
                     match event {
