@@ -1,6 +1,8 @@
 use glutin::GlContext;
 use glutin::WindowId;
 
+use yage_core::Canvas;
+
 use crate::Application;
 use crate::Context;
 
@@ -9,6 +11,7 @@ use crate::Context;
 ///
 pub struct Window {
     window: glutin::GlWindow,
+    canvas: Canvas
 }
 
 impl Window {
@@ -40,7 +43,10 @@ impl Window {
                 .unwrap();
 
         // create window
-        Window { window: gl_window }
+        Window {
+            window: gl_window,
+            canvas: Canvas::new()
+        }
     }
 
     ///
@@ -78,6 +84,26 @@ impl Window {
     ///
     pub fn set_title(&self, title: &str) {
         self.window.set_title(title);
+    }
+
+    ///
+    /// Get reference to the window's canvas
+    ///
+    /// # Returns
+    /// Reference to the canvas.
+    ///
+    pub fn canvas(&self) -> &Canvas {
+        &self.canvas
+    }
+
+    ///
+    /// Get mutable reference to the window's canvas
+    ///
+    /// # Returns
+    /// Reference to the canvas.
+    ///
+    pub fn canvas_mut(&mut self) -> &mut Canvas {
+        &mut self.canvas
     }
 }
 

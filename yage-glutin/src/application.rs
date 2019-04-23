@@ -82,6 +82,27 @@ impl Application {
     }
 
     ///
+    /// Borrow mutable reference to a specific window
+    ///
+    /// # Parameters
+    /// - `id`: Window ID
+    ///
+    /// # Returns
+    /// Mutable reference to the window.
+    ///
+    /// # Undefined Behavior
+    /// When the application only has a single window, the return value
+    /// will always be that window, regardless of the given id.
+    ///
+    pub fn window_mut(&mut self, id: glutin::WindowId) -> Option<&mut Window> {
+        if self.windows.len() == 1 {
+            self.windows.values_mut().next()
+        } else {
+            self.windows.get_mut(&id)
+        }
+    }
+
+    ///
     /// Borrow events loop
     ///
     /// # Returns
@@ -149,6 +170,10 @@ impl Application {
 
                     // dispatch window event
                     match event {
+                        // window needs to be refreshed (painted)
+                        glutin::WindowEvent::Refresh => {
+                        }
+
                         // window closed
                         glutin::WindowEvent::CloseRequested => {
                             *running = false;
