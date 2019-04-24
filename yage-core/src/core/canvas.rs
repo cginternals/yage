@@ -15,6 +15,7 @@ pub struct Canvas {
     gl: Rc<GL>,
     viewport: Vector4<i32>,
     renderer: Option<Box<dyn Render>>,
+    new_renderer: Option<Box<dyn Render>>,
     renderer_initialized: bool
 }
 
@@ -34,6 +35,7 @@ impl Canvas {
             gl: gl.clone(),
             viewport: Vector4::new(0, 0, 0, 0),
             renderer: None,
+            new_renderer: None,
             renderer_initialized: false
         }
     }
@@ -65,9 +67,15 @@ impl Canvas {
     /// - `renderer`: Render object that will draw into the canvas.
     ///
     pub fn set_renderer<T: 'static + Render>(&mut self, renderer: T) {
-        // store new renderer
-        self.renderer = Some(Box::new(renderer));
-        self.renderer_initialized = false;
+        // check if there already is a renderer set
+        if self.renderer.is_some() {
+            // store new renderer to replace the old one on the next render call
+            self.new_renderer = Some(Box::new(renderer));
+        } else {
+            // store new renderer right away
+            self.renderer = Some(Box::new(renderer));
+            self.renderer_initialized = false;
+        }
     }
 }
 
@@ -99,6 +107,24 @@ impl GpuObject for Canvas {
 
 impl Render for Canvas {
     fn render(&mut self, context: &Context) {
+        // check if a new renderer waits to replace the old one
+        if self.new_renderer.is_some() {
+            // de-initialize the old renderer
+            if let Some(ref mut renderer) = self.renderer {
+                renderer.deinit(context);
+                self.renderer_initialized = false;
+            }
+
+            // replace renderer
+            match self.new_renderer.take() {
+                None => (),
+                Some(new_renderer) => {
+                    self.renderer = Some(new_renderer);
+                    self.renderer_initialized = false;
+                }
+            }
+        }
+
         // check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
             // check if renderer has been initialized
