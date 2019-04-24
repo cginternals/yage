@@ -5,14 +5,6 @@ use crate::Context;
 ///
 pub trait GpuObject {
     ///
-    /// Check if object has been initialized in OpenGL context
-    ///
-    /// # Returns
-    /// true if object has been initialized, else false
-    ///
-    fn is_initialized(&self) -> bool;
-
-    ///
     /// Initialize in OpenGL context
     ///
     /// # Parameters

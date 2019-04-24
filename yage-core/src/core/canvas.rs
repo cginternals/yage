@@ -14,7 +14,8 @@ use crate::GlFunctions;
 pub struct Canvas {
     gl: Rc<GL>,
     viewport: Vector4<i32>,
-    renderer: Option<Box<dyn Render>>
+    renderer: Option<Box<dyn Render>>,
+    renderer_initialized: bool
 }
 
 impl Canvas {
@@ -32,7 +33,8 @@ impl Canvas {
         Canvas {
             gl: gl.clone(),
             viewport: Vector4::new(0, 0, 0, 0),
-            renderer: None
+            renderer: None,
+            renderer_initialized: false
         }
     }
 
@@ -63,45 +65,53 @@ impl Canvas {
     /// - `renderer`: Render object that will draw into the canvas.
     ///
     pub fn set_renderer<T: 'static + Render>(&mut self, renderer: T) {
+        // store new renderer
         self.renderer = Some(Box::new(renderer));
+        self.renderer_initialized = false;
     }
 }
 
 impl GpuObject for Canvas {
-    fn is_initialized(&self) -> bool {
-        false
-    }
-
     fn init(&mut self, context: &Context) {
+        // [DEBUG]
         println!("initializing canvas");
 
+        // check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
-            println!("initializing renderer");
+            // initialize renderer
             renderer.init(context);
+            self.renderer_initialized = true;
         }
     }
 
     fn deinit(&mut self, context: &Context) {
+        // [DEBUG]
         println!("de-initializing canvas");
 
+        // check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
-            println!("de-initializing renderer");
+            // de-initialize renderer
             renderer.deinit(context);
+            self.renderer_initialized = false;
         }
     }
 }
 
 impl Render for Canvas {
     fn render(&mut self, context: &Context) {
-        println!("render canvas");
-
+        // check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
-            if !renderer.is_initialized() {
-                println!("initializing renderer late");
+            // check if renderer has been initialized
+            if !self.renderer_initialized {
+                // initialize renderer
                 renderer.init(context);
+                self.renderer_initialized = true;
             }
 
+            // set viewport
             self.gl.viewport(self.viewport.x, self.viewport.y, self.viewport.z, self.viewport.w);
+
+            // execute renderer
             renderer.render(context);
         }
     }

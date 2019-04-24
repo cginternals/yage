@@ -35,15 +35,16 @@ impl Renderer {
 }
 
 impl GpuObject for Renderer {
-    fn is_initialized(&self) -> bool {
-        self.initialized
-    }
-
     fn init(&mut self, context: &Context) {
+        // abort if already initialized
         if self.initialized {
             return;
         }
 
+        // [DEBUG]
+        println!("initializing renderer");
+
+        // create OpenGL objects
         let gl = context.gl();
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
@@ -84,6 +85,19 @@ impl GpuObject for Renderer {
     }
 
     fn deinit(&mut self, _context: &Context) {
+        // abort if not initialized
+        if !self.initialized {
+            return;
+        }
+
+        // [DEBUG]
+        println!("de-initializing renderer");
+
+        // release OpenGL objects
+        self.program = None;
+        self.vertex_buffer = None;
+        self.vao = None;
+        self.initialized = false;
     }
 }
 
