@@ -1,3 +1,4 @@
+use crate::Context;
 use crate::GpuObject;
 
 ///
@@ -7,5 +8,8 @@ pub trait Renderer : GpuObject {
     ///
     /// Render frame
     ///
-    fn render(&mut self);
+    /// # Parameters
+    /// - `context`: Current OpenGL context
+    ///
+    fn render(&mut self, context: &Context);
 }

@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use cgmath::{Vector4};
 
+use crate::Context;
 use crate::GpuObject;
 use crate::Renderer;
 use crate::GL;
@@ -67,24 +68,41 @@ impl Canvas {
 }
 
 impl GpuObject for Canvas {
-    fn init(&mut self) {
+    fn is_initialized(&self) -> bool {
+        false
+    }
+
+    fn init(&mut self, context: &Context) {
+        println!("initializing canvas");
+
         if let Some(ref mut renderer) = self.renderer {
-            renderer.init();
+            println!("initializing renderer");
+            renderer.init(context);
         }
     }
 
-    fn deinit(&mut self) {
+    fn deinit(&mut self, context: &Context) {
+        println!("de-initializing canvas");
+
         if let Some(ref mut renderer) = self.renderer {
-            renderer.deinit();
+            println!("de-initializing renderer");
+            renderer.deinit(context);
         }
     }
 }
 
 impl Renderer for Canvas {
-    fn render(&mut self) {
+    fn render(&mut self, context: &Context) {
+        println!("render canvas");
+
         if let Some(ref mut renderer) = self.renderer {
+            if !renderer.is_initialized() {
+                println!("initializing renderer late");
+                renderer.init(context);
+            }
+
             self.gl.viewport(self.viewport.x, self.viewport.y, self.viewport.z, self.viewport.w);
-            renderer.render();
+            renderer.render(context);
         }
     }
 }

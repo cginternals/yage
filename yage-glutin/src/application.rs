@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use cgmath::{Vector4};
-
 use crate::Window;
 
 ///
@@ -164,59 +162,52 @@ impl Application {
                 // window events
                 glutin::Event::WindowEvent { event, window_id } => {
                     // get window
-                    let window = windows.get_mut(&window_id).unwrap();
-
-                    // get GlWindow
-                    let gl_window = window.gl_window();
-
-                    // dispatch window event
-                    match event {
-                        // window resized
-                        glutin::WindowEvent::Resized(logical_size) => {
-                            // calculate size
-                            let dpi_factor = gl_window.get_hidpi_factor();
-                            let size = logical_size.to_physical(dpi_factor);
-
-                            // update client area
-                            gl_window.resize(size);
-
-                            // update canvas viewport
-                            window.canvas_mut().set_viewport(Vector4::new(0, 0, size.width as i32, size.height as i32));
-                        }
-
-                        // DPI factor changed
-                        glutin::WindowEvent::HiDpiFactorChanged(dpi_factor) => {
-                            if let Some(logical_size) = gl_window.get_inner_size() {
-                                // calculate size
+                    if let Some(window) = windows.get_mut(&window_id) {
+                        // dispatch window event
+                        match event {
+                            // window resized
+                            glutin::WindowEvent::Resized(logical_size) => {
+                                // calculate size in device coordinates
+                                let dpi_factor = window.gl_window().get_hidpi_factor();
                                 let size = logical_size.to_physical(dpi_factor);
 
-                                // update client area
-                                gl_window.resize(size);
-
-                                // update canvas viewport
-                                window.canvas_mut().set_viewport(Vector4::new(0, 0, size.width as i32, size.height as i32));
+                                // set new size
+                                window.on_resize(size);
                             }
-                        }
 
-                        // window closed
-                        glutin::WindowEvent::CloseRequested => {
-                            // [TODO] Inform window, do not quit unless windows is set to quit on close
-                            *running = false;
-                        }
+                            // DPI factor changed
+                            glutin::WindowEvent::HiDpiFactorChanged(dpi_factor) => {
+                                if let Some(logical_size) = window.gl_window().get_inner_size() {
+                                    // calculate size in device coordinates
+                                    let size = logical_size.to_physical(dpi_factor);
 
-                        // window destroyed
-                        glutin::WindowEvent::Destroyed => {
-                            // [TODO]
-                            *running = false;
-                        }
+                                    // set new size
+                                    window.on_resize(size);
+                                }
+                            }
 
-                        // window needs to be refreshed (painted)
-                        glutin::WindowEvent::Refresh => {
-                            // [TODO]
-                        }
+                            // window closed
+                            glutin::WindowEvent::CloseRequested => {
+                                // check whether to exit the application
+                                let exit_on_close = window.get_exit_on_close();
 
-                        // other event
-                        _ => (),
+                                // de-initialize and destroy the window
+                                window.on_destroy();
+                                windows.remove(&window_id);
+
+                                // stop application if instructed
+                                *running = !exit_on_close;
+                            }
+
+                            // window needs to be refreshed (painted)
+                            glutin::WindowEvent::Refresh => {
+                                // draw window
+                                window.on_draw();
+                            }
+
+                            // other event
+                            _ => (),
+                        }
                     }
                 }
 

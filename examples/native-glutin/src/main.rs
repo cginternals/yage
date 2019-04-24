@@ -1,7 +1,3 @@
-use yage::core::{
-    Context,
-    GpuObject
-};
 use yage::glutin::{
     Application,
     Window
@@ -15,33 +11,15 @@ fn main() {
     let mut app = Application::new();
 
     // create window
-    let window_id = app.add_window(Window::new(&app));
+    let mut window = Window::new(&app);
 
-    // activate context
-    app.window(window_id).unwrap().make_current();
+    // set renderer
+    let renderer = ExampleRenderer::new();
+    window.canvas_mut().set_renderer(renderer);
 
-    // create renderer
-    let renderer = ExampleRenderer::new(app.window(window_id).unwrap().gl());
-    app.window_mut(window_id).unwrap().canvas_mut().set_renderer(renderer);
-
-    // initialize renderer
-    // [TODO] will be removed
-    app.window_mut(window_id).unwrap().canvas_mut().init();
+    // add window to application
+    let _ = app.add_window(window);
 
     // run main loop
-    while app.is_running() {
-        app.poll_events();
-
-        // execute renderer
-        // [TODO] will be removed
-        app.window_mut(window_id).unwrap().render();
-
-        // swap buffers
-        // [TODO] will be removed
-        app.window(window_id).unwrap().swap();
-    }
-
-    // de-initialize renderer
-    // [TODO] will be removed
-    app.window_mut(window_id).unwrap().canvas_mut().deinit();
+    app.run();
 }
