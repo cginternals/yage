@@ -3,29 +3,29 @@ use yage::core::{
     glenum,
     check_error,
     Program, Buffer, VertexArray,
-    GpuObject, Renderer
+    GpuObject, Render
 };
 
 ///
 /// Example renderer that renders a single triangle.
 ///
-pub struct ExampleRenderer {
+pub struct Renderer {
     initialized: bool,
     program: Option<Program>,
     vertex_buffer: Option<Buffer>,
     vao: Option<VertexArray>
 }
 
-impl ExampleRenderer {
+impl Renderer {
     ///
     /// Create a renderer instance
     ///
     /// # Returns
-    /// A new instance of ExampleRenderer.
+    /// A new instance of Renderer.
     ///
-    pub fn new() -> ExampleRenderer {
+    pub fn new() -> Renderer {
         // return renderer
-        ExampleRenderer {
+        Renderer {
             initialized: false,
             program: None,
             vertex_buffer: None,
@@ -34,7 +34,7 @@ impl ExampleRenderer {
     }
 }
 
-impl GpuObject for ExampleRenderer {
+impl GpuObject for Renderer {
     fn is_initialized(&self) -> bool {
         self.initialized
     }
@@ -87,7 +87,7 @@ impl GpuObject for ExampleRenderer {
     }
 }
 
-impl Renderer for ExampleRenderer {
+impl Render for Renderer {
     fn render(&mut self, context: &Context) {
         context.gl().clear(glenum::BufferBit::Color as u32);
 

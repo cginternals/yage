@@ -10,7 +10,7 @@ use yage_core::GpuObject;
 use yage_core::GL;
 use yage_core::Context;
 use yage_core::Canvas;
-use yage_core::Renderer;
+use yage_core::Render;
 
 use crate::Application;
 

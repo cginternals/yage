@@ -7,5 +7,5 @@ pub use context::*;
 mod gpu_object;
 pub use gpu_object::*;
 
-mod renderer;
-pub use renderer::*;
+mod render;
+pub use render::*;

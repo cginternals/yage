@@ -3,8 +3,8 @@ use yage::glutin::{
     Window
 };
 
-mod example_renderer;
-use example_renderer::ExampleRenderer;
+mod renderer;
+use renderer::Renderer;
 
 fn main() {
     // create application
@@ -14,7 +14,7 @@ fn main() {
     let mut window = Window::new(&app);
 
     // set renderer
-    let renderer = ExampleRenderer::new();
+    let renderer = Renderer::new();
     window.canvas_mut().set_renderer(renderer);
 
     // add window to application

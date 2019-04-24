@@ -4,7 +4,7 @@ use cgmath::{Vector4};
 
 use crate::Context;
 use crate::GpuObject;
-use crate::Renderer;
+use crate::Render;
 use crate::GL;
 use crate::GlFunctions;
 
@@ -14,7 +14,7 @@ use crate::GlFunctions;
 pub struct Canvas {
     gl: Rc<GL>,
     viewport: Vector4<i32>,
-    renderer: Option<Box<dyn Renderer>>
+    renderer: Option<Box<dyn Render>>
 }
 
 impl Canvas {
@@ -60,9 +60,9 @@ impl Canvas {
     /// Set renderer that will draw into the canvas
     ///
     /// # Parameters
-    /// - `renderer`: Renderer that will draw into the canvas.
+    /// - `renderer`: Render object that will draw into the canvas.
     ///
-    pub fn set_renderer<T: 'static + Renderer>(&mut self, renderer: T) {
+    pub fn set_renderer<T: 'static + Render>(&mut self, renderer: T) {
         self.renderer = Some(Box::new(renderer));
     }
 }
@@ -91,7 +91,7 @@ impl GpuObject for Canvas {
     }
 }
 
-impl Renderer for Canvas {
+impl Render for Canvas {
     fn render(&mut self, context: &Context) {
         println!("render canvas");
 

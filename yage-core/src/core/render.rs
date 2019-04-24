@@ -2,9 +2,9 @@ use crate::Context;
 use crate::GpuObject;
 
 ///
-/// A renderer in an object that executes the actual draw or computation code.
+/// Represents a component that executes a rendering or other GPU-based computation code.
 ///
-pub trait Renderer : GpuObject {
+pub trait Render : GpuObject {
     ///
     /// Render frame
     ///
