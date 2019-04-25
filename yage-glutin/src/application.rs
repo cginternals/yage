@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use glutin::ControlFlow;
+
 use crate::Window;
 
 ///
@@ -146,16 +148,23 @@ impl Application {
     }
 
     ///
-    /// Poll events for all windows once.
+    /// Run events loop
     ///
-    pub fn poll_events(&mut self) {
+    /// Executes the events loop for the application.
+    /// This function will block and run as long as the events loop
+    /// is running. To stop the message loop, stop() has to be called
+    /// on the Application object.
+    ///
+    /// # Returns
+    /// Exit code (0 for no error, > 0 for error)
+    ///
+    pub fn run(&mut self) -> i32 {
         // get references to data we want to access, because closure borrows self
-        let events_loop = &mut self.events_loop;
         let windows = &mut self.windows;
         let running = &mut self.running;
 
-        // poll events
-        events_loop.poll_events(|event| {
+        // run main loop
+        self.events_loop.run_forever(|event| {
             // dispatch event
             #[allow(clippy::single_match)]
             match event {
@@ -214,25 +223,14 @@ impl Application {
                 // other event
                 _ => (),
             }
-        });
-    }
 
-    ///
-    /// Run events loop
-    ///
-    /// Executes the events loop for the application.
-    /// This function will block and run as long as the events loop
-    /// is running. To stop the message loop, stop() has to be called
-    /// on the Application object.
-    ///
-    /// # Returns
-    /// Exit code (0 for no error, > 0 for error)
-    ///
-    pub fn run(&mut self) -> i32 {
-        // run events loop until application is exited
-        while self.running {
-            self.poll_events();
-        }
+            // abort main loop?
+            if !*running {
+                ControlFlow::Break
+            } else {
+                ControlFlow::Continue
+            }
+        });
 
         // return exit code
         self.exit_code
