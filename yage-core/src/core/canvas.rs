@@ -141,4 +141,13 @@ impl Render for Canvas {
             renderer.render(context);
         }
     }
+
+    fn needs_redraw(&self) -> bool {
+        // check if a renderer has been set
+        if let Some(ref renderer) = self.renderer {
+            renderer.needs_redraw()
+        } else {
+            false
+        }
+    }
 }

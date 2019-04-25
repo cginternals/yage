@@ -12,4 +12,12 @@ pub trait Render : GpuObject {
     /// - `context`: Current OpenGL context
     ///
     fn render(&mut self, context: &Context);
+
+    ///
+    /// Check if renderer needs a redraw
+    ///
+    /// # Returns
+    /// true if a redraw is requested, else false
+    ///
+    fn needs_redraw(&self) -> bool;
 }

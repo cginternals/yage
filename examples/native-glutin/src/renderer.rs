@@ -13,7 +13,8 @@ pub struct Renderer {
     initialized: bool,
     program: Option<Program>,
     vertex_buffer: Option<Buffer>,
-    vao: Option<VertexArray>
+    vao: Option<VertexArray>,
+    frame_count: i32
 }
 
 impl Renderer {
@@ -29,7 +30,8 @@ impl Renderer {
             initialized: false,
             program: None,
             vertex_buffer: None,
-            vao: None
+            vao: None,
+            frame_count: 0
         }
     }
 }
@@ -103,6 +105,10 @@ impl GpuObject for Renderer {
 
 impl Render for Renderer {
     fn render(&mut self, context: &Context) {
+        // [DEBUG]
+        println!("frame #{}", self.frame_count);
+        self.frame_count = self.frame_count + 1;
+
         context.gl().clear(glenum::BufferBit::Color as u32);
 
         if let Some(ref program) = self.program {
@@ -116,6 +122,10 @@ impl Render for Renderer {
         context.gl().draw_arrays(gl::TRIANGLES, 0, 3);
 
         // check_error!();
+    }
+
+    fn needs_redraw(&self) -> bool {
+        true
     }
 }
 

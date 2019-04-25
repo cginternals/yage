@@ -224,6 +224,12 @@ impl Application {
                 _ => (),
             }
 
+            // update windows
+            for (_, window) in windows.iter_mut() {
+                window.on_update();
+                window.check_redraw();
+            }
+
             // abort main loop?
             if !*running {
                 ControlFlow::Break
