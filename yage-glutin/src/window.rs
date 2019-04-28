@@ -50,7 +50,7 @@ pub struct Window {
 
 impl Window {
     ///
-    /// Create a new window for an application
+    /// Create a new window for an application.
     ///
     /// This creates a new top-level window using the events loop of the
     /// specified application. Afterwards, you should move the window
@@ -106,7 +106,7 @@ impl Window {
     }
 
     ///
-    /// Get window ID
+    /// Get window ID.
     ///
     /// # Returns
     /// The ID of the window.
@@ -116,7 +116,7 @@ impl Window {
     }
 
     ///
-    /// Set window title
+    /// Set window title.
     ///
     /// # Parameters
     /// - `title`: The new window title
@@ -126,7 +126,7 @@ impl Window {
     }
 
     ///
-    /// Check if application shall be quit when the window is closed
+    /// Check if application shall be quit when the window is closed.
     ///
     /// # Returns
     /// true to quit application on close, else false
@@ -136,7 +136,7 @@ impl Window {
     }
 
     ///
-    /// Set if application shall be quit when the window is closed
+    /// Set if application shall be quit when the window is closed.
     ///
     /// # Parameters
     /// - `exit_on_close`: true to quit application on close, else false
@@ -146,7 +146,7 @@ impl Window {
     }
 
     ///
-    /// Get reference to the wrapped OpenGL window
+    /// Get reference to the wrapped OpenGL window.
     ///
     /// # Returns
     /// Reference to the OpenGL window.
@@ -156,7 +156,7 @@ impl Window {
     }
 
     ///
-    /// Get mutable reference to the wrapped OpenGL window
+    /// Get mutable reference to the wrapped OpenGL window.
     ///
     /// # Returns
     /// Mutable reference to the OpenGL window.
@@ -166,7 +166,7 @@ impl Window {
     }
 
     ///
-    /// Get reference to the window's canvas
+    /// Get reference to the window's canvas.
     ///
     /// # Returns
     /// Reference to the canvas.
@@ -176,7 +176,7 @@ impl Window {
     }
 
     ///
-    /// Get mutable reference to the window's canvas
+    /// Get mutable reference to the window's canvas.
     ///
     /// # Returns
     /// Reference to the canvas.
@@ -186,7 +186,7 @@ impl Window {
     }
 
     ///
-    /// Check if a simulation update is needed
+    /// Check if a simulation update is needed.
     ///
     /// # Returns
     /// true if an update is requested, else false
@@ -196,7 +196,7 @@ impl Window {
     }
 
     ///
-    /// Check if window needs to redraw
+    /// Check if window needs to redraw.
     ///
     /// # Returns
     /// true if a redraw is requested, else false
@@ -206,7 +206,7 @@ impl Window {
     }
 
     ///
-    /// Called when the window has been resized
+    /// Called when the window has been resized.
     ///
     /// # Parameters
     /// - `size`: Size in device coordinates.
@@ -220,7 +220,7 @@ impl Window {
     }
 
     ///
-    /// Called when the window is being destroyed
+    /// Called when the window is being destroyed.
     ///
     pub(crate) fn on_destroy(&mut self) {
         // Activate context
@@ -231,7 +231,7 @@ impl Window {
     }
 
     ///
-    /// Called once every mainloop iteration
+    /// Called once every mainloop iteration.
     ///
     pub(crate) fn on_update(&mut self) {
         // Update time delta
@@ -242,7 +242,7 @@ impl Window {
     }
 
     ///
-    /// Called when the window needs to be drawn
+    /// Called when the window needs to be drawn.
     ///
     pub(crate) fn on_draw(&mut self) {
         // Draw canvas

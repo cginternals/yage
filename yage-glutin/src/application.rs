@@ -8,13 +8,14 @@ use crate::Window;
 /// Representation of a glutin-based application.
 ///
 /// This is the main entry point for native applications. The `Application`
-/// manages the top-level windows and the main message loop.
+/// manages the top-level [`Window`] instances and the main message loop.
 ///
 /// The message loop supports both, non-continuous, and continuous rendering.
 /// This is controlled by the signals of the [`Render`] object, which is set
 /// onto a window's [`Canvas`]. By constantly signalling [`needs_update`] and
 /// [`needs_redraw`], continous simulation and rendering can be achieved.
 ///
+/// [`Window`]: struct.Window.html
 /// [`Canvas`]: ../yage_core/struct.Canvas.html
 /// [`Render`]: ../yage_core/trait.Render.html
 /// [`needs_update`]: ../yage_core/trait.Render.html#tymethod.needs_update
@@ -40,7 +41,7 @@ pub struct Application {
 
 impl Application {
     ///
-    /// Create an application instance
+    /// Create an application instance.
     ///
     /// # Returns
     /// A new instance of Application.
@@ -59,7 +60,7 @@ impl Application {
     }
 
     ///
-    /// Add window to the application
+    /// Add window to the application.
     ///
     /// # Parameters
     /// - `window`: Window that is transferred to the application.
@@ -77,7 +78,7 @@ impl Application {
     }
 
     ///
-    /// Get windows that belong to the application
+    /// Get windows that belong to the application.
     ///
     /// # Returns
     /// Map of window IDs -> Window.
@@ -87,7 +88,7 @@ impl Application {
     }
 
     ///
-    /// Borrow reference to a specific window
+    /// Borrow reference to a specific window.
     ///
     /// # Parameters
     /// - `id`: Window ID
@@ -108,7 +109,7 @@ impl Application {
     }
 
     ///
-    /// Borrow mutable reference to a specific window
+    /// Borrow mutable reference to a specific window.
     ///
     /// # Parameters
     /// - `id`: Window ID
@@ -129,7 +130,7 @@ impl Application {
     }
 
     ///
-    /// Borrow events loop
+    /// Borrow events loop.
     ///
     /// # Returns
     /// Reference to the events loop.
@@ -139,7 +140,7 @@ impl Application {
     }
 
     ///
-    /// Check if events loop is still running
+    /// Check if events loop is still running.
     ///
     /// # Returns
     /// State of the events loop.
@@ -149,7 +150,7 @@ impl Application {
     }
 
     ///
-    /// Get exit code
+    /// Get exit code.
     ///
     /// # Returns
     /// Exit code (0 for no error, > 0 for error)
@@ -159,7 +160,7 @@ impl Application {
     }
 
     ///
-    /// Exit application
+    /// Exit application.
     ///
     /// This will stop the events loop and thereby exit the application.
     ///
@@ -172,7 +173,7 @@ impl Application {
     }
 
     ///
-    /// Run events loop
+    /// Run events loop.
     ///
     /// Executes the events loop for the application.
     /// This function will block and run as long as the events loop
