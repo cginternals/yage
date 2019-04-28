@@ -161,6 +161,16 @@ impl Window {
     }
 
     ///
+    /// Check if a simulation update is needed
+    ///
+    /// # Returns
+    /// true if an update is requested, else false
+    ///
+    pub fn needs_update(&self) -> bool {
+        self.canvas.needs_update()
+    }
+
+    ///
     /// Check if window needs to redraw
     ///
     /// # Returns
@@ -196,6 +206,17 @@ impl Window {
     }
 
     ///
+    /// Called once every mainloop iteration
+    ///
+    pub(crate) fn on_update(&mut self) {
+        // Update time delta
+        self.canvas.update_time();
+
+        // Update simulation (regardless of whether it wants to or not - ensures to wakeup the update loop when one event is lost)
+        self.canvas.update(0.0);
+    }
+
+    ///
     /// Called when the window needs to be drawn
     ///
     pub(crate) fn on_draw(&mut self) {
@@ -204,12 +225,6 @@ impl Window {
 
         // Swap buffers
         self.context.swap();
-    }
-
-    ///
-    /// Called once every mainloop iteration
-    ///
-    pub(crate) fn on_update(&mut self) {
     }
 }
 

@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::time::{Instant};
 
 use cgmath::{Vector4};
 
@@ -16,7 +17,9 @@ pub struct Canvas {
     viewport: Vector4<i32>,
     renderer: Option<Box<dyn Render>>,
     new_renderer: Option<Box<dyn Render>>,
-    renderer_initialized: bool
+    renderer_initialized: bool,
+    time: Instant,
+    time_delta: f64
 }
 
 impl Canvas {
@@ -36,7 +39,9 @@ impl Canvas {
             viewport: Vector4::new(0, 0, 0, 0),
             renderer: None,
             new_renderer: None,
-            renderer_initialized: false
+            renderer_initialized: false,
+            time: Instant::now(),
+            time_delta: 0.0
         }
     }
 
@@ -77,6 +82,20 @@ impl Canvas {
             self.renderer_initialized = false;
         }
     }
+
+    pub fn update_time(&mut self) {
+        // update_time() might get called several times before update().
+        // Therefore, the time delta is accumulated until the renderer is
+        // actually updated, and then reset in the method update().
+
+        // Get number of milliseconds since last call
+        let duration = self.time.elapsed().as_millis();
+        self.time = Instant::now();
+
+        // Determine and update time delta
+        let time_delta : f64 = duration as f64 / 1000.0;
+        self.time_delta = self.time_delta + time_delta;
+    }
 }
 
 impl GpuObject for Canvas {
@@ -106,6 +125,35 @@ impl GpuObject for Canvas {
 }
 
 impl Render for Canvas {
+    fn needs_update(&self) -> bool {
+        // Check if a renderer has been set
+        if let Some(ref renderer) = self.renderer {
+            renderer.needs_update()
+        } else {
+            false
+        }
+    }
+
+    fn update(&mut self, _time_delta: f64) {
+        // Check if a renderer has been set
+        if let Some(ref mut renderer) = self.renderer {
+            // Update renderer
+            renderer.update(self.time_delta);
+        }
+
+        // Reset time delta
+        self.time_delta = 0.0;
+    }
+
+    fn needs_redraw(&self) -> bool {
+        // Check if a renderer has been set
+        if let Some(ref renderer) = self.renderer {
+            renderer.needs_redraw()
+        } else {
+            false
+        }
+    }
+
     fn render(&mut self, context: &Context) {
         // Check if a new renderer waits to replace the old one
         if self.new_renderer.is_some() {
@@ -139,15 +187,6 @@ impl Render for Canvas {
 
             // Execute renderer
             renderer.render(context);
-        }
-    }
-
-    fn needs_redraw(&self) -> bool {
-        // Check if a renderer has been set
-        if let Some(ref renderer) = self.renderer {
-            renderer.needs_redraw()
-        } else {
-            false
         }
     }
 }

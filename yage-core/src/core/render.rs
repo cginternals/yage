@@ -6,12 +6,20 @@ use crate::GpuObject;
 ///
 pub trait Render : GpuObject {
     ///
-    /// Render frame
+    /// Check if a simulation update is needed
+    ///
+    /// # Returns
+    /// true if an update is requested, else false
+    ///
+    fn needs_update(&self) -> bool;
+
+    ///
+    /// Update simulation
     ///
     /// # Parameters
-    /// - `context`: Current OpenGL context
+    /// - `time_data`: Time delta (in seconds)
     ///
-    fn render(&mut self, context: &Context);
+    fn update(&mut self, time_delta: f64);
 
     ///
     /// Check if renderer needs a redraw
@@ -20,4 +28,12 @@ pub trait Render : GpuObject {
     /// true if a redraw is requested, else false
     ///
     fn needs_redraw(&self) -> bool;
+
+    ///
+    /// Render frame
+    ///
+    /// # Parameters
+    /// - `context`: Current OpenGL context
+    ///
+    fn render(&mut self, context: &Context);
 }

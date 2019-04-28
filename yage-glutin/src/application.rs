@@ -237,8 +237,7 @@ impl Application {
                     // Update windows
                     for (_, window) in windows.iter_mut() {
                         // Update window if necessary
-                        // [TODO] Change to needs_update()
-                        if window.needs_redraw() {
+                        if window.needs_update() {
                             window.on_update();
                         }
 
@@ -263,7 +262,7 @@ impl Application {
             // a redraw event to the window, but I don't see a way
             // in glutin to do that.
             for (_, window) in windows.iter_mut() {
-                if window.needs_redraw() && !wakeup_scheduled {
+                if (window.needs_update() || window.needs_redraw()) && !wakeup_scheduled {
                     assert!(proxy.wakeup().is_ok());
                     wakeup_scheduled = true;
                 }

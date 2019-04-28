@@ -14,7 +14,9 @@ pub struct Renderer {
     program: Option<Program>,
     vertex_buffer: Option<Buffer>,
     vao: Option<VertexArray>,
-    frame_count: i32
+    frame_count: i32,
+    animation: f64,
+    redraw: bool
 }
 
 impl Renderer {
@@ -30,7 +32,9 @@ impl Renderer {
             program: None,
             vertex_buffer: None,
             vao: None,
-            frame_count: 0
+            frame_count: 0,
+            animation: 0.0,
+            redraw: false
         }
     }
 }
@@ -103,6 +107,20 @@ impl GpuObject for Renderer {
 }
 
 impl Render for Renderer {
+    fn needs_update(&self) -> bool {
+        true
+    }
+
+    fn update(&mut self, time_delta: f64) {
+        println!("Update {}", time_delta);
+        self.animation = self.animation + time_delta;
+        self.redraw = true;
+    }
+
+    fn needs_redraw(&self) -> bool {
+        self.redraw
+    }
+
     fn render(&mut self, context: &Context) {
         // [DEBUG]
         println!("frame #{}", self.frame_count);
@@ -110,8 +128,10 @@ impl Render for Renderer {
 
         context.gl().clear(glenum::BufferBit::Color as u32);
 
-        if let Some(ref program) = self.program {
+        if let Some(ref mut program) = self.program {
             program.use_program();
+            let animation = program.uniform_location("animation");
+            program.set_float(&animation, self.animation as f32);
         }
 
         if let Some(ref vao) = self.vao {
@@ -122,21 +142,36 @@ impl Render for Renderer {
 
         // check_error!();
     }
-
-    fn needs_redraw(&self) -> bool {
-        true
-    }
 }
 
 const VS_SRC: &str = "
 #version 330 core
 precision mediump float;
+uniform float animation;
 layout (location = 0) in vec2 position;
 layout (location = 1) in vec3 color;
 out vec3 v_color;
+vec3 rotate(vec3 color_in, float angle) {
+    mat3 mat;
+
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    mat[0][0] = cosA + (1.0 - cosA) / 3.0;
+    mat[0][1] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
+    mat[0][2] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
+    mat[1][0] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
+    mat[1][1] = cosA + 1./3.*(1.0 - cosA);
+    mat[1][2] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
+    mat[2][0] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
+    mat[2][1] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
+    mat[2][2] = cosA + 1./3. * (1.0 - cosA);
+
+    vec3 color = mat * color_in;
+    return clamp(color, vec3(0.0), vec3(1.0));
+}
 void main() {
     gl_Position = vec4(position, 0.0, 1.0);
-    v_color = color;
+    v_color = rotate(color, animation);
 }";
 
 const FS_SRC: &str = "
