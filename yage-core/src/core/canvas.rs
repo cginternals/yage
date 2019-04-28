@@ -12,25 +12,25 @@ use crate::GlFunctions;
 ///
 /// A canvas represents an area into which can be rendered.
 ///
-/// The canvas is created by the windowing backend, such as [`yage-glutin`]
+/// The `Canvas` is created by the windowing backend, such as [`yage-glutin`]
 /// or [`yage-web`]. It usually belongs to a visible item, e.g., a window
 /// or a DOM element, on which the rendering result will be shown. It can
 /// also belong to an offscreen context. The windowing backend is responsible
-/// for initializing and de-initializing the OpenGL context on the canvas,
+/// for initializing and de-initializing the OpenGL context on the `Canvas`,
 /// setting its size, and calling the update, render, and input functions
 /// at the appropriate time.
 ///
-/// A Canvas owns exactly one [`Render`] object, which is responsible for
-/// rendering into the canvas. It can be set with [`set_renderer`].
-/// The canvas acts as a proxy to the renderer: all methods, which are
+/// A `Canvas` owns exactly one [`Render`] object, which is responsible for
+/// rendering into the `Canvas`. It can be set with [`set_renderer()`].
+/// The `Canvas` acts as a proxy to the renderer: all methods, which are
 /// defined in the [`Render`] and [`GpuObject`] traits, are forwarded
-/// from the canvas to the renderer.
+/// from the `Canvas` to the renderer.
 ///
 /// [`yage-glutin`]: ../yage_glutin/index.html
 /// [`yage-web`]: ../yage_web/index.html
 /// [`Render`]: trait.Render.html
 /// [`GpuObject`]: trait.GpuObject.html
-/// [`set_renderer`]: struct.Canvas.html#method.set_renderer
+/// [`set_renderer()`]: struct.Canvas.html#method.set_renderer
 ///
 pub struct Canvas {
     gl: Rc<GL>,

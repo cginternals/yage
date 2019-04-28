@@ -17,6 +17,31 @@ use crate::Application;
 ///
 /// Top-level window with OpenGL context.
 ///
+/// A `Window` represents a top-level with an OpenGL context. After creating a
+/// `Window`, it must be moved into an [`Application`], which will handle all
+/// events in its main loop.
+///
+/// A `Window` contains a [`Canvas`], which can be accessed via [`canvas()`]
+/// and [`canvas_mut()`]. To control the rendering into the window, set a
+/// [`Render`] onto the [`Canvas`].
+///
+/// [`Application`]: struct.Application.html
+/// [`Render`]: ../yage_core/trait.Render.html
+/// [`Canvas`]: ../yage_core/struct.Canvas.html
+/// [`canvas()`]: struct.Window.html#method.canvas
+/// [`canvas_mut()`]: struct.Window.html#method.canvas_mut
+///
+/// # Examples
+///
+/// ```rust
+/// let mut app = Application::new();
+/// let mut window = Window::new(&app);
+///
+/// window.canvas_mut().set_renderer(MyRenderer::new());
+///
+/// let _ = app.add_window(window);
+/// app.run();
+///
 pub struct Window {
     canvas: Canvas,
     context: WindowContext,

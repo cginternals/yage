@@ -7,6 +7,30 @@ use crate::Window;
 ///
 /// Representation of a glutin-based application.
 ///
+/// This is the main entry point for native applications. The `Application`
+/// manages the top-level windows and the main message loop.
+///
+/// The message loop supports both, non-continuous, and continuous rendering.
+/// This is controlled by the signals of the [`Render`] object, which is set
+/// onto a window's [`Canvas`]. By constantly signalling [`needs_update`] and
+/// [`needs_redraw`], continous simulation and rendering can be achieved.
+///
+/// [`Canvas`]: ../yage_core/struct.Canvas.html
+/// [`Render`]: ../yage_core/trait.Render.html
+/// [`needs_update`]: ../yage_core/trait.Render.html#tymethod.needs_update
+/// [`needs_redraw`]: ../yage_core/trait.Render.html#tymethod.needs_redraw
+///
+/// # Examples
+///
+/// ```rust
+/// let mut app = Application::new();
+/// let mut window = Window::new(&app);
+///
+/// window.canvas_mut().set_renderer(MyRenderer::new());
+///
+/// let _ = app.add_window(window);
+/// app.run();
+///
 pub struct Application {
     events_loop: glutin::EventsLoop,
     windows: HashMap<glutin::WindowId, Window>,
