@@ -38,41 +38,41 @@ impl Window {
     /// A new instance of Window.
     ///
     pub fn new(application: &Application) -> Window {
-        // create window builder
+        // Create window builder
         let window_builder = glutin::WindowBuilder::new()
             .with_title("A fantastic window!")
             .with_dimensions(glutin::dpi::LogicalSize::new(300.0, 200.0));
 
-        // create context builder
+        // Create context builder
         let context_builder = glutin::ContextBuilder::new();
 
-        // create OpenGL window
+        // Create OpenGL window
         let gl_window =
             glutin::GlWindow::new(window_builder, context_builder, application.events_loop())
                 .unwrap();
 
-        // activate context
+        // Activate context
         unsafe {
             let _ = gl_window.make_current();
         }
 
-        // resolve OpenGL functions
+        // Resolve OpenGL functions
         gl::load_with(|ptr| gl_window.context().get_proc_address(ptr) as *const _);
 
-        // create OpenGL function wrapper
+        // Create OpenGL function wrapper
         let gl = Rc::new(GL::new());
 
-        // create context
+        // Create context
         let context = WindowContext {
             window: gl_window,
             gl: gl.clone()
         };
 
-        // create and initialize canvas
+        // Create and initialize canvas
         let mut canvas = Canvas::new(&gl);
         canvas.init(&context);
 
-        // create window
+        // Create window
         Window {
             canvas: Canvas::new(&gl),
             context,
@@ -177,10 +177,10 @@ impl Window {
     /// - `size`: Size in device coordinates.
     ///
     pub(crate) fn on_resize(&mut self, size: PhysicalSize) {
-        // update client area
+        // Update client area
         self.context.window.resize(size);
 
-        // update canvas viewport
+        // Update canvas viewport
         self.canvas.set_viewport(Vector4::new(0, 0, size.width as i32, size.height as i32));
     }
 
@@ -188,10 +188,10 @@ impl Window {
     /// Called when the window is being destroyed
     ///
     pub(crate) fn on_destroy(&mut self) {
-        // activate context
+        // Activate context
         self.context.make_current();
 
-        // de-initialize canvas
+        // De-initialize canvas
         self.canvas.deinit(&self.context);
     }
 
@@ -199,10 +199,10 @@ impl Window {
     /// Called when the window needs to be drawn
     ///
     pub(crate) fn on_draw(&mut self) {
-        // draw canvas
+        // Draw canvas
         self.canvas.render(&self.context);
 
-        // swap buffers
+        // Swap buffers
         self.context.swap();
     }
 

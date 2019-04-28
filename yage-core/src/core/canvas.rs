@@ -30,7 +30,7 @@ impl Canvas {
     /// A new instance of Canvas.
     ///
     pub fn new(gl: &Rc<GL>) -> Canvas {
-        // return canvas
+        // Return canvas
         Canvas {
             gl: gl.clone(),
             viewport: Vector4::new(0, 0, 0, 0),
@@ -67,12 +67,12 @@ impl Canvas {
     /// - `renderer`: Render object that will draw into the canvas.
     ///
     pub fn set_renderer<T: 'static + Render>(&mut self, renderer: T) {
-        // check if there already is a renderer set
+        // Check if there already is a renderer set
         if self.renderer.is_some() {
-            // store new renderer to replace the old one on the next render call
+            // Store new renderer to replace the old one on the next render call
             self.new_renderer = Some(Box::new(renderer));
         } else {
-            // store new renderer right away
+            // Store new renderer right away
             self.renderer = Some(Box::new(renderer));
             self.renderer_initialized = false;
         }
@@ -84,9 +84,9 @@ impl GpuObject for Canvas {
         // [DEBUG]
         println!("initializing canvas");
 
-        // check if a renderer has been set
+        // Check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
-            // initialize renderer
+            // Initialize renderer
             renderer.init(context);
             self.renderer_initialized = true;
         }
@@ -96,9 +96,9 @@ impl GpuObject for Canvas {
         // [DEBUG]
         println!("de-initializing canvas");
 
-        // check if a renderer has been set
+        // Check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
-            // de-initialize renderer
+            // De-initialize renderer
             renderer.deinit(context);
             self.renderer_initialized = false;
         }
@@ -107,15 +107,15 @@ impl GpuObject for Canvas {
 
 impl Render for Canvas {
     fn render(&mut self, context: &Context) {
-        // check if a new renderer waits to replace the old one
+        // Check if a new renderer waits to replace the old one
         if self.new_renderer.is_some() {
-            // de-initialize the old renderer
+            // De-initialize the old renderer
             if let Some(ref mut renderer) = self.renderer {
                 renderer.deinit(context);
                 self.renderer_initialized = false;
             }
 
-            // replace renderer
+            // Replace renderer
             match self.new_renderer.take() {
                 None => (),
                 Some(new_renderer) => {
@@ -125,25 +125,25 @@ impl Render for Canvas {
             }
         }
 
-        // check if a renderer has been set
+        // Check if a renderer has been set
         if let Some(ref mut renderer) = self.renderer {
-            // check if renderer has been initialized
+            // Check if renderer has been initialized
             if !self.renderer_initialized {
-                // initialize renderer
+                // Initialize renderer
                 renderer.init(context);
                 self.renderer_initialized = true;
             }
 
-            // set viewport
+            // Set viewport
             self.gl.viewport(self.viewport.x, self.viewport.y, self.viewport.z, self.viewport.w);
 
-            // execute renderer
+            // Execute renderer
             renderer.render(context);
         }
     }
 
     fn needs_redraw(&self) -> bool {
-        // check if a renderer has been set
+        // Check if a renderer has been set
         if let Some(ref renderer) = self.renderer {
             renderer.needs_redraw()
         } else {

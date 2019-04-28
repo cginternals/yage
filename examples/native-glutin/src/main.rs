@@ -7,19 +7,19 @@ mod renderer;
 use renderer::Renderer;
 
 fn main() {
-    // create application
+    // Create application
     let mut app = Application::new();
 
-    // create window
+    // Create window
     let mut window = Window::new(&app);
 
-    // set renderer
+    // Set renderer
     let renderer = Renderer::new();
     window.canvas_mut().set_renderer(renderer);
 
-    // add window to application
+    // Add window to application
     let _ = app.add_window(window);
 
-    // run main loop
+    // Run main loop
     app.run();
 }

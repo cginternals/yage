@@ -22,10 +22,10 @@ impl Application {
     /// A new instance of Application.
     ///
     pub fn new() -> Application {
-        // create event loop
+        // Create event loop
         let events_loop = glutin::EventsLoop::new();
 
-        // return application
+        // Return application
         Application {
             events_loop,
             windows: HashMap::new(),
@@ -44,11 +44,11 @@ impl Application {
     /// Window ID.
     ///
     pub fn add_window(&mut self, window: Window) -> glutin::WindowId {
-        // move window
+        // Move window
         let id = window.id();
         self.windows.insert(id, window);
 
-        // return window ID
+        // Return window ID
         id
     }
 
@@ -159,82 +159,82 @@ impl Application {
     /// Exit code (0 for no error, > 0 for error)
     ///
     pub fn run(&mut self) -> i32 {
-        // get references to data we want to access, because closure borrows self
+        // Get references to data we want to access, because closure borrows self
         let windows = &mut self.windows;
         let running = &mut self.running;
         let proxy = self.events_loop.create_proxy();
         let mut wakeup_scheduled = false;
 
-        // run main loop
+        // Run main loop
         self.events_loop.run_forever(|event| {
             // [DEBUG]
             // println!("{:?}", event);
 
-            // dispatch event
+            // Dispatch event
             #[allow(clippy::single_match)]
             match event {
-                // window events
+                // Window events
                 glutin::Event::WindowEvent { event, window_id } => {
-                    // get window
+                    // Get window
                     if let Some(window) = windows.get_mut(&window_id) {
-                        // dispatch window event
+                        // Dispatch window event
                         match event {
-                            // window resized
+                            // Window resized
                             glutin::WindowEvent::Resized(logical_size) => {
-                                // calculate size in device coordinates
+                                // Calculate size in device coordinates
                                 let dpi_factor = window.gl_window().get_hidpi_factor();
                                 let size = logical_size.to_physical(dpi_factor);
 
-                                // set new size
+                                // Set new size
                                 window.on_resize(size);
                             }
 
                             // DPI factor changed
                             glutin::WindowEvent::HiDpiFactorChanged(dpi_factor) => {
                                 if let Some(logical_size) = window.gl_window().get_inner_size() {
-                                    // calculate size in device coordinates
+                                    // Calculate size in device coordinates
                                     let size = logical_size.to_physical(dpi_factor);
 
-                                    // set new size
+                                    // Set new size
                                     window.on_resize(size);
                                 }
                             }
 
-                            // window closed
+                            // Window closed
                             glutin::WindowEvent::CloseRequested => {
-                                // check whether to exit the application
+                                // Check whether to exit the application
                                 let exit_on_close = window.get_exit_on_close();
 
-                                // de-initialize and destroy the window
+                                // De-initialize and destroy the window
                                 window.on_destroy();
                                 windows.remove(&window_id);
 
-                                // stop application if instructed
+                                // Stop application if instructed
                                 *running = !exit_on_close;
                             }
 
-                            // window needs to be refreshed (painted)
+                            // Window needs to be refreshed (painted)
                             glutin::WindowEvent::Refresh => {
-                                // draw window
+                                // Draw window
                                 window.on_draw();
                             }
 
-                            // other event
+                            // Other event
                             _ => (),
                         }
                     }
                 }
 
-                // wakeup event
+                // Wakeup event
                 glutin::Event::Awakened => {
                     // This is the update event, in which all windows will be updated
                     // and drawn if necessary. It is scheduled whenever a window has
                     // set its update or redraw flags to true.
 
-                    // reset wakeup
+                    // Reset wakeup
                     wakeup_scheduled = false;
 
-                    // update windows
+                    // Update windows
                     for (_, window) in windows.iter_mut() {
                         // Update window if necessary
                         // [TODO] Change to needs_update()
@@ -249,7 +249,7 @@ impl Application {
                     }
                 }
 
-                // other event
+                // Other event
                 _ => ()
             }
 
@@ -269,7 +269,7 @@ impl Application {
                 }
             }
 
-            // abort main loop?
+            // Abort main loop?
             if !*running {
                 ControlFlow::Break
             } else {
@@ -277,7 +277,7 @@ impl Application {
             }
         });
 
-        // return exit code
+        // Return exit code
         self.exit_code
     }
 }
