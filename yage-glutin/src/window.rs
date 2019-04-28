@@ -161,6 +161,16 @@ impl Window {
     }
 
     ///
+    /// Check if window needs to redraw
+    ///
+    /// # Returns
+    /// true if a redraw is requested, else false
+    ///
+    pub fn needs_redraw(&self) -> bool {
+        self.canvas.needs_redraw()
+    }
+
+    ///
     /// Called when the window has been resized
     ///
     /// # Parameters
@@ -200,19 +210,6 @@ impl Window {
     /// Called once every mainloop iteration
     ///
     pub(crate) fn on_update(&mut self) {
-    }
-
-    ///
-    /// Check if window needs to redraw
-    ///
-    pub(crate) fn check_redraw(&mut self) {
-        // [TODO] At this point, we would check if the canvas needs
-        //        to be redrawn, and then send a redraw-event
-        //        to the window. However, I can't find a way to
-        //        send any events in glutin, only react to them.
-        if self.canvas.needs_redraw() {
-            // [TODO] ???
-        }
     }
 }
 

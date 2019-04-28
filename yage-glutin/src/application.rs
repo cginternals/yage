@@ -162,9 +162,14 @@ impl Application {
         // get references to data we want to access, because closure borrows self
         let windows = &mut self.windows;
         let running = &mut self.running;
+        let proxy = self.events_loop.create_proxy();
+        let mut wakeup_scheduled = false;
 
         // run main loop
         self.events_loop.run_forever(|event| {
+            // [DEBUG]
+            // println!("{:?}", event);
+
             // dispatch event
             #[allow(clippy::single_match)]
             match event {
@@ -220,14 +225,48 @@ impl Application {
                     }
                 }
 
+                // wakeup event
+                glutin::Event::Awakened => {
+                    // This is the update event, in which all windows will be updated
+                    // and drawn if necessary. It is scheduled whenever a window has
+                    // set its update or redraw flags to true.
+
+                    // reset wakeup
+                    wakeup_scheduled = false;
+
+                    // update windows
+                    for (_, window) in windows.iter_mut() {
+                        // Update window if necessary
+                        // [TODO] Change to needs_update()
+                        if window.needs_redraw() {
+                            window.on_update();
+                        }
+
+                        // Redraw window if necessary
+                        if window.needs_redraw() {
+                            window.on_draw();
+                        }
+                    }
+                }
+
                 // other event
-                _ => (),
+                _ => ()
             }
 
-            // update windows
+            // After each event, we check if a window needs to be
+            // updated (animation) or redrawn. If that is the case,
+            // we schedule a wakeup event, which will be processed
+            // after all events still waiting in the event queue.
+            // We also make sure that this event is only added once.
+            //
+            // [TODO] The better way to do this would be to send
+            // a redraw event to the window, but I don't see a way
+            // in glutin to do that.
             for (_, window) in windows.iter_mut() {
-                window.on_update();
-                window.check_redraw();
+                if window.needs_redraw() && !wakeup_scheduled {
+                    assert!(proxy.wakeup().is_ok());
+                    wakeup_scheduled = true;
+                }
             }
 
             // abort main loop?
