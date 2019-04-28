@@ -12,6 +12,26 @@ use crate::GlFunctions;
 ///
 /// A canvas represents an area into which can be rendered.
 ///
+/// The canvas is created by the windowing backend, such as [`yage-glutin`]
+/// or [`yage-web`]. It usually belongs to a visible item, e.g., a window
+/// or a DOM element, on which the rendering result will be shown. It can
+/// also belong to an offscreen context. The windowing backend is responsible
+/// for initializing and de-initializing the OpenGL context on the canvas,
+/// setting its size, and calling the update, render, and input functions
+/// at the appropriate time.
+///
+/// A Canvas owns exactly one [`Render`] object, which is responsible for
+/// rendering into the canvas. It can be set with [`set_renderer`].
+/// The canvas acts as a proxy to the renderer: all methods, which are
+/// defined in the [`Render`] and [`GpuObject`] traits, are forwarded
+/// from the canvas to the renderer.
+///
+/// [`yage-glutin`]: ../yage_glutin/index.html
+/// [`yage-web`]: ../yage_web/index.html
+/// [`Render`]: trait.Render.html
+/// [`GpuObject`]: trait.GpuObject.html
+/// [`set_renderer`]: struct.Canvas.html#method.set_renderer
+///
 pub struct Canvas {
     gl: Rc<GL>,
     viewport: Vector4<i32>,
@@ -24,7 +44,7 @@ pub struct Canvas {
 
 impl Canvas {
     ///
-    /// Create a canvas instance
+    /// Create a canvas instance.
     ///
     /// # Parameters
     /// - `gl`: GL context
@@ -46,7 +66,7 @@ impl Canvas {
     }
 
     ///
-    /// Get viewport
+    /// Get viewport.
     ///
     /// # Returns
     /// Size of viewport in device coordinates.
@@ -56,7 +76,7 @@ impl Canvas {
     }
 
     ///
-    /// Set viewport
+    /// Set viewport.
     ///
     /// # Parameters
     /// - `viewport`: Size of viewport in device coordinates.
@@ -66,7 +86,7 @@ impl Canvas {
     }
 
     ///
-    /// Set renderer that will draw into the canvas
+    /// Set renderer that will draw into the canvas.
     ///
     /// # Parameters
     /// - `renderer`: Render object that will draw into the canvas.
@@ -83,11 +103,17 @@ impl Canvas {
         }
     }
 
+    ///
+    /// Update timing information.
+    ///
+    /// When this function is called, the elapsed time since the last call to
+    /// [`update`] is calculated. Since `update_time` might be called several
+    /// times before `update`, the time delta is accumulated until the canvas
+    /// is actually updated, and then reset in `update`.
+    ///
+    /// [`update`]: trait.Render.html#tymethod.update
+    ///
     pub fn update_time(&mut self) {
-        // update_time() might get called several times before update().
-        // Therefore, the time delta is accumulated until the renderer is
-        // actually updated, and then reset in the method update().
-
         // Get number of milliseconds since last call
         let duration = self.time.elapsed().as_millis();
         self.time = Instant::now();
