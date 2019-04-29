@@ -1,3 +1,7 @@
+use yage::core::{
+    ContinuousRendering
+};
+
 use yage::glutin::{
     Application,
     Window
@@ -14,7 +18,7 @@ fn main() {
     let mut window = Window::new(&app);
 
     // Set renderer
-    let renderer = Renderer::new();
+    let renderer = ContinuousRendering::new(Renderer::new());
     window.canvas_mut().set_renderer(renderer);
 
     // Add window to application

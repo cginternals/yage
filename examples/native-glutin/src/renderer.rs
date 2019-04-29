@@ -108,7 +108,7 @@ impl GpuObject for Renderer {
 
 impl Update for Renderer {
     fn needs_update(&self) -> bool {
-        true
+        false
     }
 
     fn update(&mut self, time_delta: f64) {
