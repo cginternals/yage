@@ -9,3 +9,6 @@ pub use gpu_object::*;
 
 mod render;
 pub use render::*;
+
+mod update;
+pub use update::*;

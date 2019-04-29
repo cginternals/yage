@@ -11,6 +11,7 @@ use yage_core::GL;
 use yage_core::Context;
 use yage_core::Canvas;
 use yage_core::Render;
+use yage_core::Update;
 
 use crate::Application;
 

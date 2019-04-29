@@ -3,7 +3,7 @@ use yage::core::{
     glenum,
     check_error,
     Program, Buffer, VertexArray,
-    GpuObject, Render
+    GpuObject, Render, Update
 };
 
 ///
@@ -106,7 +106,7 @@ impl GpuObject for Renderer {
     }
 }
 
-impl Render for Renderer {
+impl Update for Renderer {
     fn needs_update(&self) -> bool {
         true
     }
@@ -116,7 +116,9 @@ impl Render for Renderer {
         self.animation = self.animation + time_delta;
         self.redraw = true;
     }
+}
 
+impl Render for Renderer {
     fn needs_redraw(&self) -> bool {
         self.redraw
     }

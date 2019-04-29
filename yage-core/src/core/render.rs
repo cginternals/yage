@@ -1,5 +1,6 @@
 use crate::Context;
 use crate::GpuObject;
+use crate::Update;
 
 ///
 /// Represents a component that executes rendering or other GPU-based computation code.
@@ -42,28 +43,12 @@ use crate::GpuObject;
 /// [`Context`]: trait.Context.html
 /// [`GpuObject`]: trait.GpuObject.html
 /// [`Canvas`]: struct.Canvas.html
-/// [`needs_update()`]: trait.Render.html#tymethod.needs_update
-/// [`update()`]: trait.Render.html#tymethod.update
+/// [`needs_update()`]: trait.Update.html#tymethod.needs_update
+/// [`update()`]: trait.Update.html#tymethod.update
 /// [`needs_redraw()`]: trait.Render.html#tymethod.needs_redraw
 /// [`render()`]: trait.Render.html#tymethod.render
 ///
-pub trait Render : GpuObject {
-    ///
-    /// Check if a simulation update is needed
-    ///
-    /// # Returns
-    /// true if an update is requested, else false
-    ///
-    fn needs_update(&self) -> bool;
-
-    ///
-    /// Update simulation
-    ///
-    /// # Parameters
-    /// - `time_data`: Time delta (in seconds)
-    ///
-    fn update(&mut self, time_delta: f64);
-
+pub trait Render : GpuObject + Update {
     ///
     /// Check if renderer needs a redraw
     ///

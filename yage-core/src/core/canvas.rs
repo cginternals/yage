@@ -6,6 +6,7 @@ use cgmath::{Vector4};
 use crate::Context;
 use crate::GpuObject;
 use crate::Render;
+use crate::Update;
 use crate::GL;
 use crate::GlFunctions;
 
@@ -150,7 +151,7 @@ impl GpuObject for Canvas {
     }
 }
 
-impl Render for Canvas {
+impl Update for Canvas {
     fn needs_update(&self) -> bool {
         // Check if a renderer has been set
         if let Some(ref renderer) = self.renderer {
@@ -170,7 +171,9 @@ impl Render for Canvas {
         // Reset time delta
         self.time_delta = 0.0;
     }
+}
 
+impl Render for Canvas {
     fn needs_redraw(&self) -> bool {
         // Check if a renderer has been set
         if let Some(ref renderer) = self.renderer {
