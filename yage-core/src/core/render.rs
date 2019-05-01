@@ -1,3 +1,5 @@
+use cgmath::Vector4;
+
 use crate::Context;
 use crate::GpuObject;
 use crate::Update;
@@ -49,6 +51,14 @@ use crate::Update;
 /// [`render()`]: trait.Render.html#tymethod.render
 ///
 pub trait Render : GpuObject + Update {
+    ///
+    /// Set viewport.
+    ///
+    /// # Parameters
+    /// - `viewport`: Size of viewport in device coordinates.
+    ///
+    fn set_viewport(&mut self, viewport: Vector4<i32>);
+
     ///
     /// Check if renderer needs a redraw
     ///

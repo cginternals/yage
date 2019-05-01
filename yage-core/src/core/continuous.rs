@@ -1,3 +1,5 @@
+use cgmath::Vector4;
+
 use crate::{Context, GpuObject, Render, Update};
 
 ///
@@ -60,6 +62,10 @@ impl<T: Render> Update for ContinuousRendering<T> {
 }
 
 impl<T: Render> Render for ContinuousRendering<T> {
+    fn set_viewport(&mut self, viewport: Vector4<i32>) {
+        self.render.set_viewport(viewport);
+    }
+
     fn needs_redraw(&self) -> bool {
         self.need_redraw
     }

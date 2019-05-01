@@ -1,7 +1,7 @@
 use std::rc::Rc;
-use std::time::{Instant};
+use std::time::Instant;
 
-use cgmath::{Vector4};
+use cgmath::Vector4;
 
 use crate::Context;
 use crate::GpuObject;
@@ -74,16 +74,6 @@ impl Canvas {
     ///
     pub fn get_viewport(&self) -> Vector4<i32> {
         self.viewport
-    }
-
-    ///
-    /// Set viewport.
-    ///
-    /// # Parameters
-    /// - `viewport`: Size of viewport in device coordinates.
-    ///
-    pub fn set_viewport(&mut self, viewport: Vector4<i32>) {
-        self.viewport = viewport;
     }
 
     ///
@@ -174,6 +164,10 @@ impl Update for Canvas {
 }
 
 impl Render for Canvas {
+    fn set_viewport(&mut self, viewport: Vector4<i32>) {
+        self.viewport = viewport;
+    }
+
     fn needs_redraw(&self) -> bool {
         // Check if a renderer has been set
         if let Some(ref renderer) = self.renderer {
