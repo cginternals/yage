@@ -17,7 +17,7 @@ pub struct Renderer {
     program: Option<Program>,
     vertex_buffer: Option<Buffer>,
     texture: Texture,
-    vao: Option<VertexArray>,
+    vao: VertexArray,
     frame_count: i32,
     animation: f64,
     redraw: bool
@@ -36,7 +36,7 @@ impl Renderer {
             program: None,
             vertex_buffer: None,
             texture: Texture::new(gl::TEXTURE_2D),
-            vao: None,
+            vao: VertexArray::new(),
             frame_count: 0,
             animation: 0.0,
             redraw: false
@@ -56,6 +56,7 @@ impl GpuObject for Renderer {
 
         // Initialize OpenGL objects
         self.texture.init(context);
+        self.vao.init(context);
 
         // Create OpenGL objects
         let gl = context.gl();
@@ -72,8 +73,7 @@ impl GpuObject for Renderer {
         vertex_buffer.bind();
         vertex_buffer.set_data(&VERTEX_DATA, glenum::DrawMode::Static as _);
 
-        let vao = VertexArray::new(&gl);
-        vao.bind();
+        self.vao.bind(context);
 
         vertex_buffer.attrib_enable(
             0,
@@ -99,11 +99,10 @@ impl GpuObject for Renderer {
 
         self.program = Some(program);
         self.vertex_buffer = Some(vertex_buffer);
-        self.vao = Some(vao);
         self.initialized = true;
     }
 
-    fn deinit(&mut self, _context: &Context) {
+    fn deinit(&mut self, context: &Context) {
         // Abort if not initialized
         if !self.initialized {
             return;
@@ -112,10 +111,13 @@ impl GpuObject for Renderer {
         // [DEBUG]
         //println!("de-initializing renderer");
 
+        // De-Initialize OpenGL objects
+        self.texture.deinit(context);
+        self.vao.deinit(context);
+
         // Release OpenGL objects
         self.program = None;
         self.vertex_buffer = None;
-        self.vao = None;
         self.initialized = false;
     }
 }
@@ -158,9 +160,7 @@ impl Render for Renderer {
             program.set_int(&texture1, 0);
         }
 
-        if let Some(ref vao) = self.vao {
-            vao.bind();
-        }
+        self.vao.bind(context);
 
         context.gl().draw_arrays(gl::TRIANGLE_STRIP, 0, 4);
         check_error!();

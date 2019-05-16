@@ -1,43 +1,69 @@
-use std::rc::Rc;
+use crate::{
+    Context,
+    GL, GlFunctions,
+    GpuObject
+};
 
-use crate::{GlFunctions, GL};
-
-/// Wrapper around an OpenGL vertex array.
+///
+/// Represents a vertex array on the GPU.
+///
 pub struct VertexArray {
-    gl: Rc<GL>,
-    array_handle: <GL as GlFunctions>::GlVertexArray,
+    handle: Option<<GL as GlFunctions>::GlVertexArray>
 }
 
 impl VertexArray {
-    /// Creates a vertex array.
     ///
-    /// # Parameters
-    /// - `gl`: GL context
-    pub fn new(gl: &Rc<GL>) -> Self {
+    /// Create a vertex array instance.
+    ///
+    /// # Returns
+    /// A new instance of VertexArray.
+    ///
+    pub fn new() -> Self {
         Self {
-            gl: gl.clone(),
-            array_handle: gl.create_vertex_array()
+            handle: None
         }
     }
 
-    /// Getter for the OpenGL/WebGL handle
-    pub fn handle(&self) -> &<GL as GlFunctions>::GlVertexArray {
-        &self.array_handle
+    ///
+    /// Get vertex array handle.
+    ///
+    /// # Returns
+    /// OpenGL handle.
+    ///
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlVertexArray> {
+        self.handle.as_ref()
     }
 
-    /// Binds the vertex array.
-    pub fn bind(&self) {
-        self.gl.bind_vertex_array(Some(&self.array_handle));
+    ///
+    /// Bind vertex array.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
+    pub fn bind(&self, context: &Context) {
+        context.gl().bind_vertex_array(self.handle.as_ref());
     }
 
-    /// Unbinds the vertex array.
-    pub fn unbind(&self) {
-        self.gl.bind_vertex_array(None);
+    ///
+    /// Unbind vertex array.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
+    pub fn unbind(&self, context: &Context) {
+        context.gl().bind_vertex_array(None);
     }
 }
 
-impl Drop for VertexArray {
-    fn drop(&mut self) {
-        self.gl.delete_vertex_array(&self.array_handle);
+impl GpuObject for VertexArray {
+    fn init(&mut self, context: &Context) {
+        self.handle = Some(context.gl().create_vertex_array());
+    }
+
+    fn deinit(&mut self, context: &Context) {
+        if let Some(ref handle) = self.handle {
+            context.gl().delete_vertex_array(handle);
+            self.handle = None;
+        }
     }
 }

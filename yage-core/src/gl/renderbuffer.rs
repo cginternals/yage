@@ -37,7 +37,7 @@ impl Renderbuffer {
     }
 
     ///
-    /// Bind framebuffer.
+    /// Bind renderbuffer.
     ///
     /// # Parameters
     /// - `context`: Active OpenGL context
@@ -47,7 +47,7 @@ impl Renderbuffer {
     }
 
     ///
-    /// Unbind framebuffer.
+    /// Unbind renderbuffer.
     ///
     /// # Parameters
     /// - `context`: Active OpenGL context
