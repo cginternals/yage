@@ -1,6 +1,5 @@
 use crate::{
     Context,
-    GlFunctions,
     Texture
 };
 
@@ -12,10 +11,7 @@ pub struct TextureLoader {
 }
 
 impl TextureLoader {
-    pub fn load(context: &Context, texture: &mut Texture, path: &str) {
-        // Get GL functions
-        let gl = context.gl();
-
+    pub fn load(_context: &Context, texture: &mut Texture, path: &str) {
         // Load image
         let image_file = image::open(path);
         match image_file {
@@ -28,8 +24,7 @@ impl TextureLoader {
                 let data = flipped.raw_pixels();
 
                 // Bind texture
-                gl.active_texture(0);
-                texture.bind();
+                texture.bind_active(0);
 
                 // Upload image data
                 texture.set_image_2d(

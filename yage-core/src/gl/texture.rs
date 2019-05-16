@@ -41,9 +41,20 @@ impl Texture {
     }
 
     ///
-    /// Bind the texture.
+    /// Bind texture.
     ///
     pub fn bind(&self) {
+        self.gl.bind_texture(self.target, self.handle.as_ref());
+    }
+
+    ///
+    /// Bind texture to a specific texture unit
+    ///
+    /// # Parameters
+    /// - `unit`: Texture unit
+    ///
+    pub fn bind_active(&self, unit: u32) {
+        self.gl.active_texture(unit);
         self.gl.bind_texture(self.target, self.handle.as_ref());
     }
 
@@ -73,10 +84,6 @@ impl Texture {
             min,
         );
     }
-
-    /// Sets the texture object's wrapping function for s and t coordinates.
-    ///
-    /// # Parameters:
 
     ///
     /// Set texture wrapping.

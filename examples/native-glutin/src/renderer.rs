@@ -151,12 +151,9 @@ impl Render for Renderer {
 
         context.gl().clear(glenum::BufferBit::Color as u32);
 
-        /*
         if let Some(ref texture) = self.texture {
-            context.gl().active_texture(0);
-            texture.bind();
+            texture.bind_active(0);
         }
-        */
 
         if let Some(ref mut program) = self.program {
             program.use_program();
