@@ -16,7 +16,7 @@ pub struct Renderer {
     initialized: bool,
     program: Option<Program>,
     vertex_buffer: Option<Buffer>,
-    texture: Option<Texture>,
+    texture: Texture,
     vao: Option<VertexArray>,
     frame_count: i32,
     animation: f64,
@@ -35,7 +35,7 @@ impl Renderer {
             initialized: false,
             program: None,
             vertex_buffer: None,
-            texture: None,
+            texture: Texture::new(gl::TEXTURE_2D),
             vao: None,
             frame_count: 0,
             animation: 0.0,
@@ -54,17 +54,16 @@ impl GpuObject for Renderer {
         // [DEBUG]
         //println!("initializing renderer");
 
+        // Initialize OpenGL objects
+        self.texture.init(context);
+
         // Create OpenGL objects
         let gl = context.gl();
 
         check_error!();
 
-        // Create texture
-        let mut texture = Texture::new(&gl, gl::TEXTURE_2D);
-        check_error!();
-
         // Load texture
-        TextureLoader::load(context, &mut texture, "data/duck.jpg");
+        TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
         check_error!();
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
@@ -101,7 +100,6 @@ impl GpuObject for Renderer {
         self.program = Some(program);
         self.vertex_buffer = Some(vertex_buffer);
         self.vao = Some(vao);
-        self.texture = Some(texture);
         self.initialized = true;
     }
 
@@ -118,7 +116,6 @@ impl GpuObject for Renderer {
         self.program = None;
         self.vertex_buffer = None;
         self.vao = None;
-        self.texture = None;
         self.initialized = false;
     }
 }
@@ -151,9 +148,7 @@ impl Render for Renderer {
 
         context.gl().clear(glenum::BufferBit::Color as u32);
 
-        if let Some(ref texture) = self.texture {
-            texture.bind_active(0);
-        }
+        self.texture.bind_active(context, 0);
 
         if let Some(ref mut program) = self.program {
             program.use_program();
@@ -168,8 +163,7 @@ impl Render for Renderer {
         }
 
         context.gl().draw_arrays(gl::TRIANGLE_STRIP, 0, 4);
-
-        // check_error!();
+        check_error!();
     }
 }
 

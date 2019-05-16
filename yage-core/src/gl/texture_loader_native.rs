@@ -11,7 +11,7 @@ pub struct TextureLoader {
 }
 
 impl TextureLoader {
-    pub fn load(_context: &Context, texture: &mut Texture, path: &str) {
+    pub fn load(context: &Context, texture: &mut Texture, path: &str) {
         // Load image
         let image_file = image::open(path);
         match image_file {
@@ -24,10 +24,11 @@ impl TextureLoader {
                 let data = flipped.raw_pixels();
 
                 // Bind texture
-                texture.bind_active(0);
+                texture.bind_active(context, 0);
 
                 // Upload image data
                 texture.set_image_2d(
+                    context,
                     0,
                     gl::RGB as _,
                     flipped.width() as i32,
@@ -39,7 +40,7 @@ impl TextureLoader {
                 );
 
                 // Create mip maps
-                texture.generate_mipmap();
+                texture.generate_mipmap(context);
             }
         }
     }
