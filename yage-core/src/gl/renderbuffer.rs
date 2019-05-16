@@ -1,46 +1,65 @@
-use std::rc::Rc;
-
 use glenum;
 
-use crate::{GlFunctions, GL};
+use crate::{
+    Context,
+    GL, GlFunctions,
+    GpuObject
+};
 
-/// Wrapper around an OpenGL renderbuffer.
-// TODO!!: incomplete
+///
+/// Represents a renderbuffer object on the GPU.
+///
 pub struct Renderbuffer {
-    gl: Rc<GL>,
-    handle: <GL as GlFunctions>::GlRenderbuffer,
+    handle: Option<<GL as GlFunctions>::GlRenderbuffer>,
 }
 
 impl Renderbuffer {
-    /// Creates a renderbuffer.
     ///
-    /// # Parameters
-    /// - `gl`: GL context
-    pub fn new(gl: &Rc<GL>) -> Self {
+    /// Create a renderbuffer instance.
+    ///
+    /// # Returns
+    /// A new instance of Renderbuffer.
+    ///
+    pub fn new() -> Self {
         Self {
-            gl: gl.clone(),
-            handle: gl.create_renderbuffer()
+            handle: None
         }
     }
 
-    /// Getter for the OpenGL/WebGL handle
-    pub fn handle(&self) -> &<GL as GlFunctions>::GlRenderbuffer {
-        &self.handle
+    ///
+    /// Get renderbuffer handle.
+    ///
+    /// # Returns
+    /// OpenGL handle.
+    ///
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlRenderbuffer> {
+        self.handle.as_ref()
     }
 
-    /// Binds the renderbuffer.
-    pub fn bind(&self) {
-        self.gl.bind_renderbuffer(glenum::Buffers::Renderbuffer as _, Some(&self.handle));
+    ///
+    /// Bind framebuffer.
+    ///
+    pub fn bind(&self, context: &Context) {
+        context.gl().bind_renderbuffer(glenum::Buffers::Renderbuffer as _, self.handle.as_ref());
     }
 
-    /// Unbinds the renderbuffer.
-    pub fn unbind(&self) {
-        self.gl.bind_renderbuffer(glenum::Buffers::Renderbuffer as _, None);
+    ///
+    /// Unbind framebuffer.
+    ///
+    pub fn unbind(&self, context: &Context) {
+        context.gl().bind_renderbuffer(glenum::Buffers::Renderbuffer as _, None);
     }
 }
 
-impl Drop for Renderbuffer {
-    fn drop(&mut self) {
-        self.gl.delete_renderbuffer(&self.handle);
+impl GpuObject for Renderbuffer {
+    fn init(&mut self, context: &Context) {
+        self.handle = Some(context.gl().create_renderbuffer());
+    }
+
+    fn deinit(&mut self, context: &Context) {
+        if let Some(ref handle) = self.handle {
+            context.gl().delete_renderbuffer(handle);
+            self.handle = None;
+        }
     }
 }
