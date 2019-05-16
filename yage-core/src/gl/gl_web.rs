@@ -105,6 +105,10 @@ impl super::GlFunctions for GL {
         self.gl.bind_attrib_location(program, index, name);
     }
 
+    fn delete_program(&self, program: &Self::GlProgram) {
+        self.gl.delete_program(program);
+    }
+
     // Buffer Objects
 
     fn create_buffer(&self) -> Self::GlBuffer {

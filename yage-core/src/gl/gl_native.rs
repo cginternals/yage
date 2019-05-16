@@ -153,6 +153,12 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn delete_program(&self, program: &Self::GlProgram) {
+        unsafe {
+            gl::DeleteProgram(*program);
+        }
+    }
+
     // Buffer Objects
 
     fn create_buffer(&self) -> Self::GlBuffer {

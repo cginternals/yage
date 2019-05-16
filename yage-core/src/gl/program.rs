@@ -2,87 +2,340 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::str;
-use std::rc::Rc;
 
-use cgmath::{Matrix4, Vector3, Vector4};
+use cgmath::{
+    Matrix4, Vector3, Vector4
+};
 
-// use log::{warn, trace};
+use crate::{
+    Context,
+    GL, GlFunctions,
+    GpuObject
+};
 
-use crate::{GlFunctions, GL};
-
-/// Wrapper object for OpenGL Programs.
+///
+/// Represents a shader program on the GPU.
+///
 pub struct Program {
-    gl: Rc<GL>,
-    handle: <GL as GlFunctions>::GlProgram,
-    uniform_location_cache: HashMap<&'static str, <GL as GlFunctions>::GlUniformLocation>,
+    handle: Option<<GL as GlFunctions>::GlProgram>,
+    uniform_location_cache: HashMap<&'static str, <GL as GlFunctions>::GlUniformLocation>
 }
 
 impl Program {
-    /// Creates program from vertex and fragment shader paths and preprocessor defines.
-    pub fn from_file(
-        gl: &Rc<GL>,
-        vertex_path: &str,
-        fragment_path: &str,
-        defines: &[String],
-    ) -> Program {
-        // retrieve the vertex/fragment source code from filesystem
-        let mut v_shader_file =
-            File::open(vertex_path).unwrap_or_else(|_| panic!("Failed to open {}", vertex_path));
-        let mut f_shader_file = File::open(fragment_path)
-            .unwrap_or_else(|_| panic!("Failed to open {}", fragment_path));
-        let mut vertex_code = String::new();
-        let mut fragment_code = String::new();
-        v_shader_file
-            .read_to_string(&mut vertex_code)
-            .expect("Failed to read vertex shader");
-        f_shader_file
-            .read_to_string(&mut fragment_code)
-            .expect("Failed to read fragment shader");
-
-        Self::from_source(gl, &vertex_code, &fragment_code, defines)
-    }
-
-    /// Creates program from vertex and fragment shader sources and preprocessor defines.
-    pub fn from_source(
-        gl: &Rc<GL>,
-        vertex_code: &str,
-        fragment_code: &str,
-        defines: &[String],
-    ) -> Program {
-        let vertex_code = Self::add_defines(vertex_code, defines);
-        let fragment_code = Self::add_defines(fragment_code, defines);
-
-        // compile shaders
-        // vertex shader
-        let vertex = gl.create_shader(glenum::ShaderKind::Vertex);
-        gl.shader_source(&vertex, &vertex_code);
-        gl.compile_shader(&vertex);
-        Self::check_compile_errors(gl, &vertex, "VERTEX");
-        // fragment Shader
-        let fragment = gl.create_shader(glenum::ShaderKind::Fragment);
-        gl.shader_source(&fragment, &&fragment_code);
-        gl.compile_shader(&fragment);
-        Self::check_compile_errors(gl, &fragment, "FRAGMENT");
-        // shader Program
-        let handle = gl.create_program();
-        gl.attach_shader(&handle, &vertex);
-        gl.attach_shader(&handle, &fragment);
-        gl.link_program(&handle);
-        Self::check_link_errors(gl, &handle);
-        // delete the shaders as they're linked into our program now and no longer necessary
-        gl.delete_shader(&vertex);
-        gl.delete_shader(&fragment);
-
+    ///
+    /// Create a program instance.
+    ///
+    /// # Returns
+    /// A new instance of Program.
+    ///
+    pub fn new() -> Self {
         Self {
-            handle,
-            gl: gl.clone(),
-            uniform_location_cache: HashMap::new(),
+            handle: None,
+            uniform_location_cache: HashMap::new()
         }
     }
 
-    /// Util to add preprocessor defines.
+    ///
+    /// Load program from vertex and fragment shader files and preprocessor definitions.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `vertex_path`: Path to vertex shader file
+    /// - `fragment_path`: Path to fragment shader file
+    /// - `defines`: Preprocessor definitions
+    ///
+    pub fn load_shaders(
+        &mut self,
+        context: &Context,
+        vertex_path: &str,
+        fragment_path: &str,
+        defines: &[String],
+    ) {
+        // Open shader files
+        let mut vertex_shader_file =
+            File::open(vertex_path).unwrap_or_else(|_| panic!("Failed to open {}", vertex_path));
+        let mut fragment_shader_file =
+            File::open(fragment_path).unwrap_or_else(|_| panic!("Failed to open {}", fragment_path));
+
+        // Create strings
+        let mut vertex_code = String::new();
+        let mut fragment_code = String::new();
+
+        // Read vertex shader
+        vertex_shader_file
+            .read_to_string(&mut vertex_code)
+            .expect("Failed to read vertex shader");
+
+        // Read fragment shader
+        fragment_shader_file
+            .read_to_string(&mut fragment_code)
+            .expect("Failed to read fragment shader");
+
+        // Create program
+        self.set_shaders(context, &vertex_code, &fragment_code, defines)
+    }
+
+    ///
+    /// Set program from vertex and fragment shader code and preprocessor definitions.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `vertex_code`: Vertex shader code
+    /// - `fragment_code`: Fragment shader code
+    /// - `defines`: Preprocessor definitions
+    ///
+    pub fn set_shaders(
+        &mut self,
+        context: &Context,
+        vertex_code: &str,
+        fragment_code: &str,
+        defines: &[String],
+    ) {
+        // Get OpenGL functions
+        let gl = context.gl();
+
+        // Add preprocessor definitions to source code
+        let vertex_code = Self::add_defines(vertex_code, defines);
+        let fragment_code = Self::add_defines(fragment_code, defines);
+
+        // Compile vertex shader
+        let vertex = gl.create_shader(glenum::ShaderKind::Vertex);
+        gl.shader_source(&vertex, &vertex_code);
+        gl.compile_shader(&vertex);
+        Self::check_compile_errors(context, &vertex, "VERTEX");
+
+        // Compile fragment shader
+        let fragment = gl.create_shader(glenum::ShaderKind::Fragment);
+        gl.shader_source(&fragment, &&fragment_code);
+        gl.compile_shader(&fragment);
+        Self::check_compile_errors(context, &fragment, "FRAGMENT");
+
+        // Create shader program
+        if let Some(ref handle) = self.handle {
+            gl.attach_shader(handle, &vertex);
+            gl.attach_shader(handle, &fragment);
+            gl.link_program(handle);
+            Self::check_link_errors(context, handle);
+        }
+
+        // Delete shader objects as they're linked into our program now and no longer necessary
+        gl.delete_shader(&vertex);
+        gl.delete_shader(&fragment);
+    }
+
+    ///
+    /// Get program handle.
+    ///
+    /// # Returns
+    /// OpenGL handle.
+    ///
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlProgram> {
+        self.handle.as_ref()
+    }
+
+    ///
+    /// Bind program.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
+    pub fn use_program(&self, context: &Context) {
+        context.gl().use_program(self.handle.as_ref());
+    }
+
+    ///
+    /// Get uniform location.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `name`: Name of uniform
+    ///
+    /// # Returns
+    /// Uniform location.
+    ///
+    pub fn uniform_location(
+        &mut self,
+        context: &Context,
+        name: &'static str,
+    ) -> <GL as GlFunctions>::GlUniformLocation {
+        // Look up uniform location in cache
+        if let Some(loc) = self.uniform_location_cache.get(name) {
+            #[allow(clippy::clone_on_copy)] // The type is only `Copy` on OpenGL, not WebGL
+            return loc.clone();
+        }
+
+        // Get uniform location
+        // [TODO] Handle case when program is None
+        let loc = context.gl().get_uniform_location(&self.handle.unwrap(), name);
+
+        // [TODO] How to check null/-1 properly depending on WebGL/OpenGL??
+        // if loc == -1 {
+        //     // [TODO] Trace!
+        //     println!("uniform '{}' unknown for shader {:?}", name, self.id);
+        // }
+
+        // Save in cache
+        #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL
+        self.uniform_location_cache.insert(name, loc.clone());
+
+        // Return uniform location
+        loc
+    }
+
+    ///
+    /// Set uniform value (boolean).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
+    pub fn set_bool(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        value: bool,
+    ) {
+        context.gl().uniform_1i(location, value as i32);
+    }
+
+    ///
+    /// Set uniform value (integer).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
+    pub fn set_int(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        value: i32,
+    ) {
+        context.gl().uniform_1i(location, value);
+    }
+
+    ///
+    /// Set uniform value (float).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
+    pub fn set_float(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        value: f32
+    ) {
+        context.gl().uniform_1f(location, value);
+    }
+
+    ///
+    /// Set uniform value (tuple).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `x`: First value
+    /// - `y`: Second value
+    ///
+    pub fn set_vec2(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        x: f32,
+        y: f32,
+    ) {
+        context.gl().uniform_2f(location, x, y);
+    }
+
+    ///
+    /// Set uniform value (triple).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `x`: First value
+    /// - `y`: Second value
+    /// - `z`: Third value
+    ///
+    pub fn set_vec3(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        x: f32,
+        y: f32,
+        z: f32,
+    ) {
+        context.gl().uniform_3f(location, x, y, z);
+    }
+
+    ///
+    /// Set uniform value (Vector3).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
+    pub fn set_vector3(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        value: &Vector3<f32>,
+    ) {
+        context.gl().uniform_3fv(location, value.as_ref());
+    }
+
+    ///
+    /// Set uniform value (Vector4).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
+    pub fn set_vector4(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        value: &Vector4<f32>,
+    ) {
+        context.gl().uniform_4fv(location, value.as_ref());
+    }
+
+    ///
+    /// Set uniform value (Matrix4).
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
+    pub fn set_mat4(
+        &self,
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        mat: &Matrix4<f32>,
+    ) {
+        context.gl().uniform_matrix_4fv(location, mat.as_ref());
+    }
+
+    ///
+    /// Add preprocessor definitions to source code.
+    ///
+    /// # Parameters
+    /// - `source`: Original source code
+    /// - `defines`: Preprocessor definitions
+    ///
+    /// # Returns
+    /// New source code.
+    ///
     fn add_defines(source: &str, defines: &[String]) -> String {
-        // insert preprocessor defines after #version if exists
+        // Insert preprocessor defines after #version if exists
         // (#version must occur before any other statement in the program)
         let defines = defines
             .iter()
@@ -98,101 +351,83 @@ impl Program {
         lines.join("\n")
     }
 
-    /// Getter for the OpenGL/WebGL handle
-    pub fn handle(&self) -> &<GL as GlFunctions>::GlProgram {
-        &self.handle
-    }
-
-    /// activate the shader
-    pub fn use_program(&self) {
-        self.gl.use_program(Some(&self.handle))
-    }
-
-    // uniform setting functions
-
-    pub fn set_bool(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: bool) {
-        self.gl.uniform_1i(location, value as i32);
-    }
-    pub fn set_int(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: i32) {
-        self.gl.uniform_1i(location, value);
-    }
-    pub fn set_float(&self, location: &<GL as GlFunctions>::GlUniformLocation, value: f32) {
-        self.gl.uniform_1f(location, value);
-    }
-    pub fn set_vector3(
-        &self,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: &Vector3<f32>,
+    ///
+    /// Check for shader compilation errors.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `shader`: OpenGL Shader
+    /// - `type_`: Shader type
+    ///
+    fn check_compile_errors(
+        context: &Context,
+        shader: &<GL as GlFunctions>::GlShader,
+        type_: &str,
     ) {
-        self.gl.uniform_3fv(location, value.as_ref());
-    }
-    pub fn set_vector4(
-        &self,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: &Vector4<f32>,
-    ) {
-        self.gl.uniform_4fv(location, value.as_ref());
-    }
-    pub fn set_vec2(&self, location: &<GL as GlFunctions>::GlUniformLocation, x: f32, y: f32) {
-        self.gl.uniform_2f(location, x, y);
-    }
-    pub fn set_vec3(
-        &self,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        x: f32,
-        y: f32,
-        z: f32,
-    ) {
-        self.gl.uniform_3f(location, x, y, z);
-    }
-    pub fn set_mat4(&self, location: &<GL as GlFunctions>::GlUniformLocation, mat: &Matrix4<f32>) {
-        self.gl.uniform_matrix_4fv(location, mat.as_ref());
-    }
+        // Get compile status
+        let success = context.gl().get_shader_parameter(
+            shader,
+            glenum::ShaderParameter::CompileStatus as _
+        );
 
-    /// get uniform location with caching
-    pub fn uniform_location(
-        &mut self,
-        name: &'static str,
-    ) -> <GL as GlFunctions>::GlUniformLocation {
-        if let Some(loc) = self.uniform_location_cache.get(name) {
-            #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL
-            return loc.clone();
-        }
-
-        let loc = self.gl.get_uniform_location(&self.handle, name);
-        // TODO!!: how to check null/-1 properly depending on WebGL/OpenGL??
-        // if loc == -1 {
-        //     // TODO!: trace!
-        //     println!("uniform '{}' unknown for shader {:?}", name, self.id);
-        // }
-        #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL
-        self.uniform_location_cache.insert(name, loc.clone());
-        loc
-    }
-
-    /// utility function for checking shader compilation errors.
-    fn check_compile_errors(gl: &GL, shader: &<GL as GlFunctions>::GlShader, type_: &str) {
-        let success = gl.get_shader_parameter(shader, glenum::ShaderParameter::CompileStatus as _);
+        // Determine error status
         let log_type = if success == 1 { "WARNING" } else { "ERROR" };
-        let info_log = gl.get_shader_info_log(shader);
+
+        // Get log message
+        let info_log = context.gl().get_shader_info_log(shader);
         if info_log.is_empty() {
             return;
         }
+
+        // Raise error
+        // [TODO] Warn
         panic!(
             "{}::SHADER_COMPILATION_{} of type: {}\n{}",
             log_type, log_type, type_, info_log
         );
     }
 
-    /// utility function for checking program linking errors.
-    fn check_link_errors(gl: &GL, program: &<GL as GlFunctions>::GlProgram) {
-        let success = gl.get_program_parameter(program, glenum::ShaderParameter::LinkStatus as _);
+    ///
+    /// Check for program linking errors.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `program`: Shader program
+    ///
+    fn check_link_errors(
+        context: &Context,
+        program: &<GL as GlFunctions>::GlProgram,
+    ) {
+        // Get linker status
+        let success = context.gl().get_program_parameter(
+            program,
+            glenum::ShaderParameter::LinkStatus as _
+        );
+
+        // Determine error status
         let log_type = if success == 1 { "WARNING" } else { "ERROR" };
-        let info_log = gl.get_program_info_log(program);
+
+        // Get log message
+        let info_log = context.gl().get_program_info_log(program);
         if info_log.is_empty() {
             return;
         }
-        // TODO!: warn!
+
+        // Raise error
+        // [TODO] Warn
         println!("{}::PROGRAM_LINKING_{} \n{}", log_type, log_type, info_log);
+    }
+}
+
+impl GpuObject for Program {
+    fn init(&mut self, context: &Context) {
+        self.handle = Some(context.gl().create_program());
+    }
+
+    fn deinit(&mut self, context: &Context) {
+        if let Some(ref handle) = self.handle {
+            context.gl().delete_program(handle);
+            self.handle = None;
+        }
     }
 }

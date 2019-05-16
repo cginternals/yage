@@ -14,7 +14,7 @@ use yage::core::{
 ///
 pub struct Renderer {
     initialized: bool,
-    program: Option<Program>,
+    program: Program,
     vertex_buffer: Buffer,
     texture: Texture,
     vao: VertexArray,
@@ -33,7 +33,7 @@ impl Renderer {
     pub fn new() -> Renderer {
         Renderer {
             initialized: false,
-            program: None,
+            program: Program::new(),
             vertex_buffer: Buffer::new(glenum::BufferKind::Array as _),
             texture: Texture::new(gl::TEXTURE_2D),
             vao: VertexArray::new(),
@@ -55,6 +55,7 @@ impl GpuObject for Renderer {
         //println!("initializing renderer");
 
         // Initialize OpenGL objects
+        self.program.init(context);
         self.texture.init(context);
         self.vao.init(context);
         self.vertex_buffer.init(context);
@@ -68,7 +69,7 @@ impl GpuObject for Renderer {
         TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
         check_error!();
 
-        let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
+        self.program.set_shaders(context, VS_SRC, FS_SRC, &[]);
 
         self.vertex_buffer.bind(context);
         self.vertex_buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
@@ -99,7 +100,6 @@ impl GpuObject for Renderer {
 
         gl.clear_color(0.1, 0.2, 0.3, 1.0);
 
-        self.program = Some(program);
         self.initialized = true;
     }
 
@@ -113,12 +113,10 @@ impl GpuObject for Renderer {
         //println!("de-initializing renderer");
 
         // De-Initialize OpenGL objects
+        self.program.deinit(context);
         self.texture.deinit(context);
         self.vao.deinit(context);
         self.vertex_buffer.deinit(context);
-
-        // Release OpenGL objects
-        self.program = None;
         self.initialized = false;
     }
 }
@@ -153,13 +151,11 @@ impl Render for Renderer {
 
         self.texture.bind_active(context, 0);
 
-        if let Some(ref mut program) = self.program {
-            program.use_program();
-            let animation = program.uniform_location("animation");
-            program.set_float(&animation, self.animation as f32);
-            let texture1 = program.uniform_location("texture1");
-            program.set_int(&texture1, 0);
-        }
+        self.program.use_program(context);
+        let animation = self.program.uniform_location(context, "animation");
+        self.program.set_float(context, &animation, self.animation as f32);
+        let texture1 = self.program.uniform_location(context, "texture1");
+        self.program.set_int(context, &texture1, 0);
 
         self.vao.bind(context);
 

@@ -42,6 +42,7 @@ pub trait GlFunctions {
     fn use_program(&self, program: Option<&Self::GlProgram>);
     fn get_attrib_location(&self, program: &Self::GlProgram, name: &str) -> i32;
     fn bind_attrib_location(&self, program: &Self::GlProgram, index: u32, name: &str);
+    fn delete_program(&self, program: &Self::GlProgram);
 
     // Buffer Objects
 

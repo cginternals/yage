@@ -17,7 +17,7 @@ impl Buffer {
     /// Create a buffer instance.
     ///
     /// # Parameters
-    /// - `gl`: GL context
+    /// - `target`: Must be a valid glenum for `glBindBuffer`
     ///
     /// # Returns
     /// A new instance of Buffer.
