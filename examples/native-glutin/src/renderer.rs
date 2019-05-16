@@ -1,14 +1,12 @@
 use cgmath::Vector4;
 
-extern crate image;
-
 use yage::core::{
     Context, GlFunctions,
     glenum,
     check_error,
     Program, Buffer, VertexArray,
     GpuObject, Render, Update,
-    Texture
+    Texture, TextureLoader
 };
 
 ///
@@ -65,38 +63,9 @@ impl GpuObject for Renderer {
         let mut texture = Texture::new(&gl, gl::TEXTURE_2D);
         check_error!();
 
-        // Load image
-        let image_file = image::open("data/duck.jpg");
-        match image_file {
-            Err(err) => panic!("Could not load image: {}", err),
-            Ok(img) => {
-                let data = img.raw_pixels();
-
-                texture.init(context);
-                check_error!();
-
-                gl.active_texture(0);
-                check_error!();
-
-                texture.bind();
-                check_error!();
-
-                texture.set_image_2d(
-                    0,
-                    gl::RGB as _,
-                    1024,
-                    768,
-                    0,
-                    gl::RGB,
-                    gl::UNSIGNED_BYTE,
-                    Some(&data)
-                );
-                check_error!();
-
-                texture.generate_mipmap();
-                check_error!();
-            }
-        }
+        // Load texture
+        TextureLoader::load(context, &mut texture, "data/duck.jpg");
+        check_error!();
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
 

@@ -11,6 +11,16 @@ mod gl_impl;
 
 pub use gl_impl::*;
 
+#[cfg(not(target_arch = "wasm32"))]
+#[path = "texture_loader_native.rs"]
+mod texture_loader;
+
+#[cfg(target_arch = "wasm32")]
+#[path = "texture_loader_web.rs"]
+mod texture_loader;
+
+pub use texture_loader::*;
+
 mod buffer;
 pub use buffer::*;
 
