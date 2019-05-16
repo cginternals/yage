@@ -1,49 +1,66 @@
 use std::rc::Rc;
 
-use crate::{GlFunctions, GL};
+use crate::{Context, GL, GlFunctions, GpuObject};
 
-/// Wrapper around an OpenGL texture.
+///
+/// Represents a texture on the GPU.
+///
 pub struct Texture {
     gl: Rc<GL>,
-    /// Target for use in `glBindTexture`
     target: u32,
-    handle: <GL as GlFunctions>::GlTexture,
+    handle: Option<<GL as GlFunctions>::GlTexture>,
 }
 
 impl Texture {
-    /// Creates an texture.
+    ///
+    /// Create a texture instance.
     ///
     /// # Parameters
     /// - `gl`: GL context
-    /// - `target`: must be a valid glenum for `glBindTexture`
+    /// - `target`: Texture target (OpenGL enum, e.g., GL_TEXTURE_2D)
+    ///
+    /// # Returns
+    /// A new instance of Texture.
+    ///
     pub fn new(gl: &Rc<GL>, target: u32) -> Self {
         Self {
             gl: gl.clone(),
             target,
-            handle: gl.create_texture(),
+            handle: None,
         }
     }
 
-    /// Getter for the OpenGL/WebGL handle
-    pub fn handle(&self) -> &<GL as GlFunctions>::GlTexture {
-        &self.handle
+    ///
+    /// Get texture handle.
+    ///
+    /// # Returns
+    /// OpenGL texture handle.
+    ///
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlTexture> {
+        self.handle.as_ref()
     }
 
-    /// Binds the texture.
+    ///
+    /// Bind the texture.
+    ///
     pub fn bind(&self) {
-        self.gl.bind_texture(self.target, Some(&self.handle));
+        self.gl.bind_texture(self.target, self.handle.as_ref());
     }
 
-    /// Unbinds the texture.
+    ///
+    /// Unbind the texture.
+    ///
     pub fn unbind(&self) {
         self.gl.bind_texture(self.target, None);
     }
 
-    /// Sets the texture object's magnification and minification filter.
+    ///
+    /// Set texture magnification and minification filters.
     ///
     /// # Parameters:
     /// - `mag`: Value for the TEXTURE_MAG_FILTER parameter
     /// - `min`: Value for the TEXTURE_MIN_FILTER parameter
+    ///
     pub fn filter(&self, mag: i32, min: i32) {
         self.gl.tex_parameteri(
             self.target,
@@ -57,12 +74,19 @@ impl Texture {
         );
     }
 
-    // TODO!!: Option<wrap_r> or seperate 3D texture object?
     /// Sets the texture object's wrapping function for s and t coordinates.
+    ///
+    /// # Parameters:
+
+    ///
+    /// Set texture wrapping.
     ///
     /// # Parameters:
     /// - `wrap_s`: Value for the TEXTURE_WRAP_S parameter
     /// - `wrap_t`: Value for the TEXTURE_WRAP_T parameter
+    ///
+    /// [TODO] Option<wrap_r> or seperate 3D texture object?
+    ///
     pub fn wrap(&self, wrap_s: i32, wrap_t: i32) {
         self.gl.tex_parameteri(
             self.target,
@@ -76,19 +100,21 @@ impl Texture {
         );
     }
 
-    /// Pass image data to the texture object.
+    ///
+    /// Set 2D image data.
     ///
     /// # Parameters:
     /// - `level`: level-of-detail number
-    /// - `internal_format`:
-    /// - `width`:
-    /// - `height`:
-    /// - `border`:
-    /// - `format`:
-    /// - `ty`: type
+    /// - `internal_format`: Internal data format
+    /// - `width`: Texture width (in pixels)
+    /// - `height`: Texture height (in pixels)
+    /// - `border`: Must be 0
+    /// - `format`: Data format
+    /// - `data_type`: Data type
     /// - `pixels`: pixel data
+    ///
     #[allow(clippy::too_many_arguments)]
-    pub fn image_2d(
+    pub fn set_image_2d(
         &self,
         level: i32,
         internal_format: i32,
@@ -96,7 +122,7 @@ impl Texture {
         height: i32,
         border: i32,
         format: u32,
-        ty: u32,
+        data_type: u32,
         pixels: Option<&[u8]>,
     ) {
         self.gl.tex_image_2d(
@@ -107,18 +133,28 @@ impl Texture {
             height,
             border,
             format,
-            ty,
+            data_type,
             pixels,
         );
     }
 
+    ///
+    /// Generate mipmap data.
+    ///
     pub fn generate_mipmap(&self) {
         self.gl.generate_mipmap(self.target);
     }
 }
 
-impl Drop for Texture {
-    fn drop(&mut self) {
-        self.gl.delete_texture(&self.handle);
+impl GpuObject for Texture {
+    fn init(&mut self, _context: &Context) {
+        self.handle = Some(self.gl.create_texture());
+    }
+
+    fn deinit(&mut self, _context: &Context) {
+        if let Some(ref handle) = self.handle {
+            self.gl.delete_texture(handle);
+            self.handle = None;
+        }
     }
 }

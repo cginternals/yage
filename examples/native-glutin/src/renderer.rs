@@ -1,11 +1,14 @@
 use cgmath::Vector4;
 
+extern crate image;
+
 use yage::core::{
     Context, GlFunctions,
     glenum,
     check_error,
     Program, Buffer, VertexArray,
-    GpuObject, Render, Update
+    GpuObject, Render, Update,
+    Texture
 };
 
 ///
@@ -15,6 +18,7 @@ pub struct Renderer {
     initialized: bool,
     program: Option<Program>,
     vertex_buffer: Option<Buffer>,
+    texture: Option<Texture>,
     vao: Option<VertexArray>,
     frame_count: i32,
     animation: f64,
@@ -33,6 +37,7 @@ impl Renderer {
             initialized: false,
             program: None,
             vertex_buffer: None,
+            texture: None,
             vao: None,
             frame_count: 0,
             animation: 0.0,
@@ -49,10 +54,49 @@ impl GpuObject for Renderer {
         }
 
         // [DEBUG]
-        println!("initializing renderer");
+        //println!("initializing renderer");
 
         // Create OpenGL objects
         let gl = context.gl();
+
+        check_error!();
+
+        // Create texture
+        let mut texture = Texture::new(&gl, gl::TEXTURE_2D);
+        check_error!();
+
+        // Load image
+        let image_file = image::open("data/duck.jpg");
+        match image_file {
+            Err(err) => panic!("Could not load image: {}", err),
+            Ok(img) => {
+                let data = img.raw_pixels();
+
+                texture.init(context);
+                check_error!();
+
+                gl.active_texture(0);
+                check_error!();
+
+                texture.bind();
+                check_error!();
+
+                texture.set_image_2d(
+                    0,
+                    gl::RGB as _,
+                    1024,
+                    768,
+                    0,
+                    gl::RGB,
+                    gl::UNSIGNED_BYTE,
+                    Some(&data)
+                );
+                check_error!();
+
+                texture.generate_mipmap();
+                check_error!();
+            }
+        }
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
 
@@ -68,17 +112,17 @@ impl GpuObject for Renderer {
             2,
             gl::FLOAT,
             false,
-            5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+            4 * std::mem::size_of::<f32>() as gl::types::GLsizei,
             0
         );
 
         vertex_buffer.attrib_enable(
             1,
-            3,
+            2,
             gl::FLOAT,
             false,
-            5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-            2 * std::mem::size_of::<f32>() as i32
+            4 * std::mem::size_of::<f32>() as gl::types::GLsizei,
+            2 * std::mem::size_of::<f32>() as gl::types::GLsizei
         );
 
         check_error!();
@@ -88,6 +132,7 @@ impl GpuObject for Renderer {
         self.program = Some(program);
         self.vertex_buffer = Some(vertex_buffer);
         self.vao = Some(vao);
+        self.texture = Some(texture);
         self.initialized = true;
     }
 
@@ -98,12 +143,13 @@ impl GpuObject for Renderer {
         }
 
         // [DEBUG]
-        println!("de-initializing renderer");
+        //println!("de-initializing renderer");
 
         // Release OpenGL objects
         self.program = None;
         self.vertex_buffer = None;
         self.vao = None;
+        self.texture = None;
         self.initialized = false;
     }
 }
@@ -114,7 +160,7 @@ impl Update for Renderer {
     }
 
     fn update(&mut self, time_delta: f64) {
-        println!("Update {}", time_delta);
+        //println!("Update {}", time_delta);
         self.animation = self.animation + time_delta;
         self.redraw = true;
     }
@@ -131,22 +177,31 @@ impl Render for Renderer {
 
     fn render(&mut self, context: &Context) {
         // [DEBUG]
-        println!("frame #{}", self.frame_count);
+        //println!("frame #{}", self.frame_count);
         self.frame_count = self.frame_count + 1;
 
         context.gl().clear(glenum::BufferBit::Color as u32);
+
+        /*
+        if let Some(ref texture) = self.texture {
+            context.gl().active_texture(0);
+            texture.bind();
+        }
+        */
 
         if let Some(ref mut program) = self.program {
             program.use_program();
             let animation = program.uniform_location("animation");
             program.set_float(&animation, self.animation as f32);
+            let texture1 = program.uniform_location("texture1");
+            program.set_int(&texture1, 0);
         }
 
         if let Some(ref vao) = self.vao {
             vao.bind();
         }
 
-        context.gl().draw_arrays(gl::TRIANGLES, 0, 3);
+        context.gl().draw_arrays(gl::TRIANGLE_STRIP, 0, 4);
 
         // check_error!();
     }
@@ -157,43 +212,28 @@ const VS_SRC: &str = "
 precision mediump float;
 uniform float animation;
 layout (location = 0) in vec2 position;
-layout (location = 1) in vec3 color;
-out vec3 v_color;
-vec3 rotate(vec3 color_in, float angle) {
-    mat3 mat;
-
-    float cosA = cos(angle);
-    float sinA = sin(angle);
-    mat[0][0] = cosA + (1.0 - cosA) / 3.0;
-    mat[0][1] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
-    mat[0][2] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
-    mat[1][0] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
-    mat[1][1] = cosA + 1./3.*(1.0 - cosA);
-    mat[1][2] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
-    mat[2][0] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
-    mat[2][1] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
-    mat[2][2] = cosA + 1./3. * (1.0 - cosA);
-
-    vec3 color = mat * color_in;
-    return clamp(color, vec3(0.0), vec3(1.0));
-}
+layout (location = 1) in vec2 texcoord;
+out vec2 v_texcoord;
 void main() {
     gl_Position = vec4(position, 0.0, 1.0);
-    v_color = rotate(color, animation);
+    v_texcoord = texcoord;
 }";
 
 const FS_SRC: &str = "
 #version 330 core
 precision mediump float;
-in vec3 v_color;
+uniform sampler2D texture1;
+in vec2 v_texcoord;
 out vec4 FragColor;
 void main() {
-    FragColor = vec4(v_color, 1.0);
+    // FragColor = vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
+    FragColor = vec4(texture(texture1, v_texcoord).rgb, 1.0);
 }";
 
 #[rustfmt::skip]
-static VERTEX_DATA: [f32; 15] = [
-    -0.5, -0.5,  1.0,  0.0,  0.0,
-     0.0,  0.5,  0.0,  1.0,  0.0,
-     0.5, -0.5,  0.0,  0.0,  1.0,
+static VERTEX_DATA: [f32; 16] = [
+    -0.5,  0.5,  0.0,  1.0,
+    -0.5, -0.5,  0.0,  0.0,
+     0.5,  0.5,  1.0,  1.0,
+     0.5, -0.5,  1.0,  0.0,
 ];
