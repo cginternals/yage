@@ -39,12 +39,18 @@ impl Renderbuffer {
     ///
     /// Bind framebuffer.
     ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
     pub fn bind(&self, context: &Context) {
         context.gl().bind_renderbuffer(glenum::Buffers::Renderbuffer as _, self.handle.as_ref());
     }
 
     ///
     /// Unbind framebuffer.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
     ///
     pub fn unbind(&self, context: &Context) {
         context.gl().bind_renderbuffer(glenum::Buffers::Renderbuffer as _, None);

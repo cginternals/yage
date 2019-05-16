@@ -42,6 +42,9 @@ impl Texture {
     ///
     /// Bind texture.
     ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
     pub fn bind(&self, context: &Context) {
         context.gl().bind_texture(self.target, self.handle.as_ref());
     }
@@ -50,6 +53,7 @@ impl Texture {
     /// Bind texture to a specific texture unit
     ///
     /// # Parameters
+    /// - `context`: Active OpenGL context
     /// - `unit`: Texture unit
     ///
     pub fn bind_active(&self, context: &Context, unit: u32) {
@@ -60,6 +64,9 @@ impl Texture {
     ///
     /// Unbind the texture.
     ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
     pub fn unbind(&self, context: &Context) {
         context.gl().bind_texture(self.target, None);
     }
@@ -68,6 +75,7 @@ impl Texture {
     /// Set texture magnification and minification filters.
     ///
     /// # Parameters:
+    /// - `context`: Active OpenGL context
     /// - `mag`: Value for the TEXTURE_MAG_FILTER parameter
     /// - `min`: Value for the TEXTURE_MIN_FILTER parameter
     ///
@@ -88,6 +96,7 @@ impl Texture {
     /// Set texture wrapping.
     ///
     /// # Parameters:
+    /// - `context`: Active OpenGL context
     /// - `wrap_s`: Value for the TEXTURE_WRAP_S parameter
     /// - `wrap_t`: Value for the TEXTURE_WRAP_T parameter
     ///
@@ -110,6 +119,7 @@ impl Texture {
     /// Set 2D image data.
     ///
     /// # Parameters:
+    /// - `context`: Active OpenGL context
     /// - `level`: level-of-detail number
     /// - `internal_format`: Internal data format
     /// - `width`: Texture width (in pixels)
@@ -147,6 +157,9 @@ impl Texture {
 
     ///
     /// Generate mipmap data.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
     ///
     pub fn generate_mipmap(&self, context: &Context) {
         context.gl().generate_mipmap(self.target);

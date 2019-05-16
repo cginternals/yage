@@ -39,12 +39,18 @@ impl Framebuffer {
     ///
     /// Bind framebuffer.
     ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
     pub fn bind(&self, context: &Context) {
         context.gl().bind_framebuffer(self.target, self.handle.as_ref());
     }
 
     ///
     /// Unbind framebuffer.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
     ///
     pub fn unbind(&self, context: &Context) {
         context.gl().bind_framebuffer(self.target, None);
