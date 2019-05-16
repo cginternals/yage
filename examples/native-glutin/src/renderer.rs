@@ -15,7 +15,7 @@ use yage::core::{
 pub struct Renderer {
     initialized: bool,
     program: Option<Program>,
-    vertex_buffer: Option<Buffer>,
+    vertex_buffer: Buffer,
     texture: Texture,
     vao: VertexArray,
     frame_count: i32,
@@ -34,7 +34,7 @@ impl Renderer {
         Renderer {
             initialized: false,
             program: None,
-            vertex_buffer: None,
+            vertex_buffer: Buffer::new(glenum::BufferKind::Array as _),
             texture: Texture::new(gl::TEXTURE_2D),
             vao: VertexArray::new(),
             frame_count: 0,
@@ -57,6 +57,7 @@ impl GpuObject for Renderer {
         // Initialize OpenGL objects
         self.texture.init(context);
         self.vao.init(context);
+        self.vertex_buffer.init(context);
 
         // Create OpenGL objects
         let gl = context.gl();
@@ -69,13 +70,13 @@ impl GpuObject for Renderer {
 
         let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
 
-        let vertex_buffer = Buffer::new(&gl, glenum::BufferKind::Array as _);
-        vertex_buffer.bind();
-        vertex_buffer.set_data(&VERTEX_DATA, glenum::DrawMode::Static as _);
+        self.vertex_buffer.bind(context);
+        self.vertex_buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
 
         self.vao.bind(context);
 
-        vertex_buffer.attrib_enable(
+        self.vertex_buffer.attrib_enable(
+            context,
             0,
             2,
             gl::FLOAT,
@@ -84,7 +85,8 @@ impl GpuObject for Renderer {
             0
         );
 
-        vertex_buffer.attrib_enable(
+        self.vertex_buffer.attrib_enable(
+            context,
             1,
             2,
             gl::FLOAT,
@@ -98,7 +100,6 @@ impl GpuObject for Renderer {
         gl.clear_color(0.1, 0.2, 0.3, 1.0);
 
         self.program = Some(program);
-        self.vertex_buffer = Some(vertex_buffer);
         self.initialized = true;
     }
 
@@ -114,10 +115,10 @@ impl GpuObject for Renderer {
         // De-Initialize OpenGL objects
         self.texture.deinit(context);
         self.vao.deinit(context);
+        self.vertex_buffer.deinit(context);
 
         // Release OpenGL objects
         self.program = None;
-        self.vertex_buffer = None;
         self.initialized = false;
     }
 }

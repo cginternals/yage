@@ -1,79 +1,109 @@
-use std::rc::Rc;
+use crate::{
+    Context,
+    GL, GlFunctions,
+    GpuObject
+};
 
-use crate::{GlFunctions, GL};
-
-/// Wrapper around an OpenGL array or element array buffer.
+///
+/// Represents a generic buffer on the GPU.
+///
 pub struct Buffer {
-    gl: Rc<GL>,
-    /// Target for use in `glBindBuffer`
     target: u32,
-    handle: <GL as GlFunctions>::GlBuffer,
+    handle: Option<<GL as GlFunctions>::GlBuffer>,
 }
 
 impl Buffer {
-    /// Creates an empty buffer.
+    ///
+    /// Create a buffer instance.
     ///
     /// # Parameters
     /// - `gl`: GL context
-    /// - `target`: must be a valid glenum for `glBindBuffer`
-    pub fn new(gl: &Rc<GL>, target: u32) -> Self {
+    ///
+    /// # Returns
+    /// A new instance of Buffer.
+    ///
+    pub fn new(target: u32) -> Self {
         Self {
-            gl: gl.clone(),
             target,
-            handle: gl.create_buffer(),
+            handle: None
         }
     }
 
-    /// Getter for the OpenGL/WebGL handle
-    pub fn handle(&self) -> &<GL as GlFunctions>::GlBuffer {
-        &self.handle
+    ///
+    /// Get buffer handle.
+    ///
+    /// # Returns
+    /// OpenGL handle.
+    ///
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlBuffer> {
+        self.handle.as_ref()
     }
 
-    /// Creates the buffer object's data store.
+    ///
+    /// Bind buffer.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
+    pub fn bind(&self, context: &Context) {
+        context.gl().bind_buffer(self.target, self.handle.as_ref());
+    }
+
+    ///
+    /// Unbind buffer.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
+    pub fn unbind(&self, context: &Context) {
+        context.gl().bind_buffer(self.target, None);
+    }
+
+    ///
+    /// Set buffer data.
     ///
     /// Expects the buffer to be bound.
     ///
     /// # Parameters
+    /// - `context`: Active OpenGL context
     /// - `data`: buffer data
     /// - `usage`: must be a valid glenum for `glBufferData`
-    pub fn set_data<T>(&self, data: &[T], usage: u32) {
-        self.gl.buffer_data(self.target, data, usage);
+    ///
+    pub fn set_data<T>(&self, context: &Context, data: &[T], usage: u32) {
+        context.gl().buffer_data(self.target, data, usage);
     }
 
-    /// Updates a subset of a buffer object's data store.
+    ///
+    /// Update a subset of a buffer's data store.
     ///
     /// Expects the buffer to be bound.
     ///
     /// # Parameters
+    /// - `context`: Active OpenGL context
     /// - `offset`: offset into the buffer object's data store in bytes
     /// - `data`: buffer data
-    pub fn set_sub_data<T>(&self, offset: isize, data: &[T]) {
-        self.gl.buffer_sub_data(self.target, offset, data);
+    ///
+    pub fn set_sub_data<T>(&self, context: &Context, offset: isize, data: &[T]) {
+        context.gl().buffer_sub_data(self.target, offset, data);
     }
 
-    /// Binds the buffer.
-    pub fn bind(&self) {
-        self.gl.bind_buffer(self.target, Some(&self.handle));
-    }
-
-    /// Unbinds the buffer.
-    pub fn unbind(&self) {
-        self.gl.bind_buffer(self.target, None);
-    }
-
-    /// Specifies the memory layout of the buffer for a binding point.
+    ///
+    /// Define the memory layout of the buffer for a binding point.
     ///
     /// Expects the buffer to be bound.
     ///
     /// # Parameters
+    /// - `context`: Active OpenGL context
     /// - `index` - Index of the vertex attribute that is to be setup and enabled.
     /// - `size` - Number of components per vertex attribute.
     /// - `type` - Data type of each component in the array.
     /// - `normalized` - Whether integer data values should be normalized when being casted to a float.
     /// - `stride` - Offset in bytes between the beginning of consecutive vertex attributes.
     /// - `offset` - Offset in bytes of the first component in the vertex attribute array.
+    ///
     pub fn attrib_enable(
         &self,
+        context: &Context,
         index: u32,
         size: i32,
         data_type: u32,
@@ -81,20 +111,31 @@ impl Buffer {
         stride: i32,
         offset: i32,
     ) {
-        self.gl
-            .vertex_attrib_pointer(index, size, data_type, normalized, stride, offset);
-        self.gl.enable_vertex_attrib_array(index);
+        context.gl().vertex_attrib_pointer(index, size, data_type, normalized, stride, offset);
+        context.gl().enable_vertex_attrib_array(index);
     }
 
-    /// Disables a buffer binding point.
+    ///
+    /// Disable a buffer binding point.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
     /// - `index` - Index of the vertex attribute that is to be disabled.
-    pub fn attrib_disable(&self, index: u32) {
-        self.gl.disable_vertex_attrib_array(index);
+    ///
+    pub fn attrib_disable(&self, context: &Context, index: u32) {
+        context.gl().disable_vertex_attrib_array(index);
     }
 }
 
-impl Drop for Buffer {
-    fn drop(&mut self) {
-        self.gl.delete_buffer(&self.handle);
+impl GpuObject for Buffer {
+    fn init(&mut self, context: &Context) {
+        self.handle = Some(context.gl().create_buffer());
+    }
+
+    fn deinit(&mut self, context: &Context) {
+        if let Some(ref handle) = self.handle {
+            context.gl().delete_buffer(handle);
+            self.handle = None;
+        }
     }
 }
