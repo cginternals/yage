@@ -1,47 +1,65 @@
-use std::rc::Rc;
+use crate::{
+    Context,
+    GL, GlFunctions,
+    GpuObject
+};
 
-use crate::{GlFunctions, GL};
-
-/// Wrapper around an OpenGL frame buffer.
-// TODO!!: incomplete
+///
+/// Represents a framebuffer object on the GPU.
+///
 pub struct Framebuffer {
-    gl: Rc<GL>,
-    /// Target for use in `glBindFrameBuffer`
     pub target: u32,
-    handle: <GL as GlFunctions>::GlFramebuffer,
+    handle: Option<<GL as GlFunctions>::GlFramebuffer>
 }
 
 impl Framebuffer {
-    /// Creates a framebuffer.
     ///
-    /// # Parameters
-    /// - `gl`: GL context
-    pub fn new(gl: &Rc<GL>) -> Self {
+    /// Create a framebuffer instance.
+    ///
+    /// # Returns
+    /// A new instance of Framebuffer.
+    ///
+    pub fn new() -> Self {
         Self {
-            gl: gl.clone(),
             target: glenum::Buffers::Framebuffer as _,
-            handle: gl.create_framebuffer()
+            handle: None
         }
     }
 
-    /// Getter for the OpenGL/WebGL handle
-    pub fn handle(&self) -> &<GL as GlFunctions>::GlFramebuffer {
-        &self.handle
+    ///
+    /// Get framebuffer handle.
+    ///
+    /// # Returns
+    /// OpenGL handle.
+    ///
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlFramebuffer> {
+        self.handle.as_ref()
     }
 
-    /// Binds the framebuffer.
-    pub fn bind(&self) {
-        self.gl.bind_framebuffer(self.target, Some(&self.handle));
+    ///
+    /// Bind framebuffer.
+    ///
+    pub fn bind(&self, context: &Context) {
+        context.gl().bind_framebuffer(self.target, self.handle.as_ref());
     }
 
-    /// Unbinds the framebuffer.
-    pub fn unbind(&self) {
-        self.gl.bind_framebuffer(self.target, None);
+    ///
+    /// Unbind framebuffer.
+    ///
+    pub fn unbind(&self, context: &Context) {
+        context.gl().bind_framebuffer(self.target, None);
     }
 }
 
-impl Drop for Framebuffer {
-    fn drop(&mut self) {
-        self.gl.delete_framebuffer(&self.handle);
+impl GpuObject for Framebuffer {
+    fn init(&mut self, context: &Context) {
+        self.handle = Some(context.gl().create_framebuffer());
+    }
+
+    fn deinit(&mut self, context: &Context) {
+        if let Some(ref handle) = self.handle {
+            context.gl().delete_framebuffer(handle);
+            self.handle = None;
+        }
     }
 }

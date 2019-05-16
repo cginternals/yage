@@ -33,7 +33,7 @@ impl Texture {
     /// Get texture handle.
     ///
     /// # Returns
-    /// OpenGL texture handle.
+    /// OpenGL handle.
     ///
     pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlTexture> {
         self.handle.as_ref()
