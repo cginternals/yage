@@ -1,7 +1,11 @@
 pub use glenum;
+pub use cgmath;
 
-mod gl;
-pub use crate::gl::*;
+#[cfg(not(target_arch = "wasm32"))]
+pub use gl;
+
+mod opengl;
+pub use crate::opengl::*;
 
 mod core;
 pub use crate::core::*;

@@ -32,4 +32,3 @@ simplelog = "0.5.3"
 [target.wasm32-unknown-unknown.dependencies]
 js-sys = "0.3.17"
 wasm-bindgen = "0.2.40"
-

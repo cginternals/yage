@@ -6,6 +6,4 @@ edition = "2018"
 
 [dependencies]
 glutin = "0.19.0"
-gl = "0.12.0"
-cgmath = "0.17.0"
 yage-core = { path = "../yage-core" }

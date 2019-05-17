@@ -1,8 +1,6 @@
-use cgmath::Vector4;
-
 use yage_core::{
     Context, GlFunctions,
-    glenum,
+    glenum, cgmath,
     check_error,
     Program, Shader, Buffer, VertexArray,
     GpuObject, Render, Update,
@@ -145,7 +143,7 @@ impl Update for Renderer {
 }
 
 impl Render for Renderer {
-    fn set_viewport(&mut self, _viewport: Vector4<i32>) {
+    fn set_viewport(&mut self, _viewport: cgmath::Vector4<i32>) {
         // We don't care as the viewport is correctly set by the canvas
     }
 

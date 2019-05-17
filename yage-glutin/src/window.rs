@@ -1,11 +1,11 @@
 use std::rc::Rc;
 
-use cgmath::Vector4;
-
 use glutin::GlContext;
 use glutin::WindowId;
 use glutin::dpi::PhysicalSize;
 
+use yage_core::gl;
+use yage_core::cgmath;
 use yage_core::GpuObject;
 use yage_core::GL;
 use yage_core::Context;
@@ -217,7 +217,7 @@ impl Window {
         self.context.window.resize(size);
 
         // Update canvas viewport
-        self.canvas.set_viewport(Vector4::new(0, 0, size.width as i32, size.height as i32));
+        self.canvas.set_viewport(cgmath::Vector4::new(0, 0, size.width as i32, size.height as i32));
     }
 
     ///
