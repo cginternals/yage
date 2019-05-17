@@ -269,12 +269,20 @@ impl super::GlFunctions for GL {
         program: &Self::GlProgram,
         name: &str,
     ) -> Self::GlUniformLocation {
-        unsafe { gl::GetUniformLocation(*program, name.as_ptr() as *const i8) as i32 }
+        unsafe {
+            gl::GetUniformLocation(*program, name.as_ptr() as *const i8) as i32
+        }
     }
 
     fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32) {
         unsafe {
             gl::Uniform1i(*location, x);
+        }
+    }
+
+    fn uniform_1ui(&self, location: &Self::GlUniformLocation, x: u32) {
+        unsafe {
+            gl::Uniform1ui(*location, x);
         }
     }
 
@@ -284,15 +292,15 @@ impl super::GlFunctions for GL {
         }
     }
 
-    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]) {
+    fn uniform_2i(&self, location: &Self::GlUniformLocation, x: i32, y: i32) {
         unsafe {
-            gl::Uniform3fv(*location, 1, x.as_ptr());
+            gl::Uniform2i(*location, x, y);
         }
     }
 
-    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]) {
+    fn uniform_2ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32) {
         unsafe {
-            gl::Uniform4fv(*location, 1, x.as_ptr());
+            gl::Uniform2ui(*location, x, y);
         }
     }
 
@@ -302,9 +310,51 @@ impl super::GlFunctions for GL {
         }
     }
 
+    fn uniform_3i(&self, location: &Self::GlUniformLocation, x: i32, y: i32, z: i32) {
+        unsafe {
+            gl::Uniform3i(*location, x, y, z);
+        }
+    }
+
+    fn uniform_3ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32, z: u32) {
+        unsafe {
+            gl::Uniform3ui(*location, x, y, z);
+        }
+    }
+
     fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32) {
         unsafe {
             gl::Uniform3f(*location, x, y, z);
+        }
+    }
+
+    fn uniform_4i(&self, location: &Self::GlUniformLocation, x: i32, y: i32, z: i32, w: i32) {
+        unsafe {
+            gl::Uniform4i(*location, x, y, z, w);
+        }
+    }
+
+    fn uniform_4ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32, z: u32, w: u32) {
+        unsafe {
+            gl::Uniform4ui(*location, x, y, z, w);
+        }
+    }
+
+    fn uniform_4f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32, w: f32) {
+        unsafe {
+            gl::Uniform4f(*location, x, y, z, w);
+        }
+    }
+
+    fn uniform_matrix_2fv(&self, location: &Self::GlUniformLocation, mat: &[[f32; 2]; 2]) {
+        unsafe {
+            gl::UniformMatrix2fv(*location, 1, gl::FALSE, mat.as_ptr() as _);
+        }
+    }
+
+    fn uniform_matrix_3fv(&self, location: &Self::GlUniformLocation, mat: &[[f32; 3]; 3]) {
+        unsafe {
+            gl::UniformMatrix3fv(*location, 1, gl::FALSE, mat.as_ptr() as _);
         }
     }
 

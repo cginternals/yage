@@ -52,7 +52,7 @@ impl GpuObject for Renderer {
         }
 
         // [DEBUG]
-        //println!("initializing renderer");
+        println!("initializing renderer");
 
         // Initialize OpenGL objects
         self.program.init(context);
@@ -110,7 +110,7 @@ impl GpuObject for Renderer {
         }
 
         // [DEBUG]
-        //println!("de-initializing renderer");
+        println!("de-initializing renderer");
 
         // De-Initialize OpenGL objects
         self.program.deinit(context);
@@ -127,8 +127,11 @@ impl Update for Renderer {
     }
 
     fn update(&mut self, time_delta: f64) {
-        //println!("Update {}", time_delta);
         self.animation = self.animation + time_delta;
+        //println!("Update {}", self.animation);
+        if self.animation > 1.0 {
+            self.animation -= 1.0;
+        }
         self.redraw = true;
     }
 }
@@ -152,10 +155,12 @@ impl Render for Renderer {
         self.texture.bind_active(context, 0);
 
         self.program.use_program(context);
-        let animation = self.program.uniform_location(context, "animation");
-        self.program.set_float(context, &animation, self.animation as f32);
-        let texture1 = self.program.uniform_location(context, "texture1");
-        self.program.set_int(context, &texture1, 0);
+        check_error!();
+
+        self.program.set_uniform(context, "tex", 0);
+        self.program.set_uniform(context, "color", (0.4, 0.8, 0.4));
+        self.program.set_uniform(context, "animation", self.animation as f32);
+        check_error!();
 
         self.vao.bind(context);
 
@@ -167,7 +172,6 @@ impl Render for Renderer {
 const VS_SRC: &str = "
 #version 330 core
 precision mediump float;
-uniform float animation;
 layout (location = 0) in vec2 position;
 layout (location = 1) in vec2 texcoord;
 out vec2 v_texcoord;
@@ -179,12 +183,14 @@ void main() {
 const FS_SRC: &str = "
 #version 330 core
 precision mediump float;
-uniform sampler2D texture1;
+uniform sampler2D tex;
+uniform vec3 color = vec3(1.0, 1.0, 1.0);
+uniform float animation = 1.0;
 in vec2 v_texcoord;
 out vec4 FragColor;
 void main() {
     // FragColor = vec4(v_texcoord.x, v_texcoord.y, 0.0, 1.0);
-    FragColor = vec4(texture(texture1, v_texcoord).rgb, 1.0);
+    FragColor = vec4(texture(tex, v_texcoord).rgb * color * vec3(animation), 1.0);
 }";
 
 #[rustfmt::skip]

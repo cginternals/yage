@@ -3,14 +3,11 @@ use std::fs::File;
 use std::io::Read;
 use std::str;
 
-use cgmath::{
-    Matrix4, Vector3, Vector4
-};
-
 use crate::{
     Context,
     GL, GlFunctions,
-    GpuObject
+    GpuObject,
+    Uniform
 };
 
 ///
@@ -18,7 +15,7 @@ use crate::{
 ///
 pub struct Program {
     handle: Option<<GL as GlFunctions>::GlProgram>,
-    uniform_location_cache: HashMap<&'static str, <GL as GlFunctions>::GlUniformLocation>
+    uniform_location_cache: HashMap<String, <GL as GlFunctions>::GlUniformLocation>
 }
 
 impl Program {
@@ -156,17 +153,19 @@ impl Program {
     pub fn uniform_location(
         &mut self,
         context: &Context,
-        name: &'static str,
+        name: &str,
     ) -> <GL as GlFunctions>::GlUniformLocation {
         // Look up uniform location in cache
         if let Some(loc) = self.uniform_location_cache.get(name) {
-            #[allow(clippy::clone_on_copy)] // The type is only `Copy` on OpenGL, not WebGL
-            return loc.clone();
+            if *loc > -1 {
+                #[allow(clippy::clone_on_copy)] // The type is only `Copy` on OpenGL, not WebGL
+                return loc.clone();
+            }
         }
 
         // Get uniform location
         // [TODO] Handle case when program is None
-        let loc = context.gl().get_uniform_location(&self.handle.unwrap(), name);
+        let loc = context.gl().get_uniform_location(&self.handle.unwrap(), &name.to_string());
 
         // [TODO] How to check null/-1 properly depending on WebGL/OpenGL??
         // if loc == -1 {
@@ -176,152 +175,27 @@ impl Program {
 
         // Save in cache
         #[allow(clippy::clone_on_copy)] // the type is only `Copy` on OpenGL, not WebGL
-        self.uniform_location_cache.insert(name, loc.clone());
+        self.uniform_location_cache.insert(name.to_string(), loc.clone());
 
         // Return uniform location
         loc
     }
 
     ///
-    /// Set uniform value (boolean).
+    /// Set uniform value.
     ///
     /// # Parameters
     /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
+    /// - `name`: Name of uniform
     /// - `value`: Uniform value
     ///
-    pub fn set_bool(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: bool,
-    ) {
-        context.gl().uniform_1i(location, value as i32);
-    }
+    pub fn set_uniform<T: Uniform<T>>(&mut self, context: &Context, name: &str, value: T)
+    {
+        // Get uniform location
+        let loc = self.uniform_location(context, name);
 
-    ///
-    /// Set uniform value (integer).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `value`: Uniform value
-    ///
-    pub fn set_int(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: i32,
-    ) {
-        context.gl().uniform_1i(location, value);
-    }
-
-    ///
-    /// Set uniform value (float).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `value`: Uniform value
-    ///
-    pub fn set_float(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: f32
-    ) {
-        context.gl().uniform_1f(location, value);
-    }
-
-    ///
-    /// Set uniform value (tuple).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `x`: First value
-    /// - `y`: Second value
-    ///
-    pub fn set_vec2(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        x: f32,
-        y: f32,
-    ) {
-        context.gl().uniform_2f(location, x, y);
-    }
-
-    ///
-    /// Set uniform value (triple).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `x`: First value
-    /// - `y`: Second value
-    /// - `z`: Third value
-    ///
-    pub fn set_vec3(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        x: f32,
-        y: f32,
-        z: f32,
-    ) {
-        context.gl().uniform_3f(location, x, y, z);
-    }
-
-    ///
-    /// Set uniform value (Vector3).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `value`: Uniform value
-    ///
-    pub fn set_vector3(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: &Vector3<f32>,
-    ) {
-        context.gl().uniform_3fv(location, value.as_ref());
-    }
-
-    ///
-    /// Set uniform value (Vector4).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `value`: Uniform value
-    ///
-    pub fn set_vector4(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        value: &Vector4<f32>,
-    ) {
-        context.gl().uniform_4fv(location, value.as_ref());
-    }
-
-    ///
-    /// Set uniform value (Matrix4).
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `location`: Uniform location
-    /// - `value`: Uniform value
-    ///
-    pub fn set_mat4(
-        &self,
-        context: &Context,
-        location: &<GL as GlFunctions>::GlUniformLocation,
-        mat: &Matrix4<f32>,
-    ) {
-        context.gl().uniform_matrix_4fv(location, mat.as_ref());
+        // Set uniform value
+        T::set_uniform(context, &loc, value);
     }
 
     ///

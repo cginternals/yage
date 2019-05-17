@@ -202,24 +202,60 @@ impl super::GlFunctions for GL {
         self.gl.uniform1i(Some(location), x);
     }
 
+    fn uniform_1ui(&self, location: &Self::GlUniformLocation, x: u32) {
+        self.gl.uniform1ui(Some(location), x);
+    }
+
     fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32) {
         self.gl.uniform1f(Some(location), x);
     }
 
-    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]) {
-        self.gl.uniform3fv_with_f32_array(Some(location), x);
+    fn uniform_2i(&self, location: &Self::GlUniformLocation, x: i32, y: i32) {
+        self.gl.uniform2i(Some(location), x, y);
     }
 
-    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]) {
-        self.gl.uniform4fv_with_f32_array(Some(location), x);
+    fn uniform_2ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32) {
+        self.gl.uniform2ui(Some(location), x, y);
     }
 
     fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32) {
         self.gl.uniform2f(Some(location), x, y);
     }
 
+    fn uniform_3i(&self, location: &Self::GlUniformLocation, x: i32, y: i32, z: i32) {
+        self.gl.uniform3i(Some(location), x, y, z);
+    }
+
+    fn uniform_3ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32, z: u32) {
+        self.gl.uniform3ui(Some(location), x, y, z);
+    }
+
     fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32) {
         self.gl.uniform3f(Some(location), x, y, z);
+    }
+
+    fn uniform_4i(&self, location: &Self::GlUniformLocation, x: i32, y: i32, z: i32, w: i32) {
+        self.gl.uniform4i(Some(location), x, y, z, w);
+    }
+
+    fn uniform_4ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32, z: u32, w: u32) {
+        self.gl.uniform4ui(Some(location), x, y, z, w);
+    }
+
+    fn uniform_4f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32, w: f32) {
+        self.gl.uniform4f(Some(location), x, y, z, w);
+    }
+
+    fn uniform_matrix_2fv(&self, _location: &Self::GlUniformLocation, _mat: &[[f32; 2]; 2]) {
+        // TODO!!: how to convert properly?
+        // self.gl.uniform_matrix4fv_with_f32_array(Some(location), false, std::mem::transmute(mat));
+        unimplemented!();
+    }
+
+    fn uniform_matrix_3fv(&self, _location: &Self::GlUniformLocation, _mat: &[[f32; 3]; 3]) {
+        // TODO!!: how to convert properly?
+        // self.gl.uniform_matrix4fv_with_f32_array(Some(location), false, std::mem::transmute(mat));
+        unimplemented!();
     }
 
     fn uniform_matrix_4fv(&self, _location: &Self::GlUniformLocation, _mat: &[[f32; 4]; 4]) {

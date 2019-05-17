@@ -80,11 +80,23 @@ pub trait GlFunctions {
         name: &str,
     ) -> Self::GlUniformLocation;
     fn uniform_1i(&self, location: &Self::GlUniformLocation, x: i32);
+    fn uniform_1ui(&self, location: &Self::GlUniformLocation, x: u32);
     fn uniform_1f(&self, location: &Self::GlUniformLocation, x: f32);
-    fn uniform_3fv(&self, location: &Self::GlUniformLocation, x: &[f32; 3]);
-    fn uniform_4fv(&self, location: &Self::GlUniformLocation, x: &[f32; 4]);
+
+    fn uniform_2i(&self, location: &Self::GlUniformLocation, x: i32, y: i32);
+    fn uniform_2ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32);
     fn uniform_2f(&self, location: &Self::GlUniformLocation, x: f32, y: f32);
+
+    fn uniform_3i(&self, location: &Self::GlUniformLocation, x: i32, y: i32, z: i32);
+    fn uniform_3ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32, z: u32);
     fn uniform_3f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32);
+
+    fn uniform_4i(&self, location: &Self::GlUniformLocation, x: i32, y: i32, z: i32, w: i32);
+    fn uniform_4ui(&self, location: &Self::GlUniformLocation, x: u32, y: u32, z: u32, w: u32);
+    fn uniform_4f(&self, location: &Self::GlUniformLocation, x: f32, y: f32, z: f32, w: f32);
+
+    fn uniform_matrix_2fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 2]; 2]);
+    fn uniform_matrix_3fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 3]; 3]);
     fn uniform_matrix_4fv(&self, location: &Self::GlUniformLocation, value: &[[f32; 4]; 4]);
 
     // Writing to the Draw Buffer

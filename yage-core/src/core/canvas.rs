@@ -106,11 +106,11 @@ impl Canvas {
     ///
     pub fn update_time(&mut self) {
         // Get number of milliseconds since last call
-        let duration = self.time.elapsed().as_millis();
+        let nanos = self.time.elapsed().as_nanos();
         self.time = Instant::now();
 
         // Determine and update time delta
-        let time_delta : f64 = duration as f64 / 1000.0;
+        let time_delta = nanos as f64 / 1000000000.0;
         self.time_delta = self.time_delta + time_delta;
     }
 }
