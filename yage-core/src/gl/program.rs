@@ -20,7 +20,7 @@ pub struct Program {
 
 impl Program {
     ///
-    /// Create a program instance.
+    /// Create a shader program.
     ///
     /// # Returns
     /// A new instance of Program.

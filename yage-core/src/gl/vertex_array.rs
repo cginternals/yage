@@ -13,7 +13,7 @@ pub struct VertexArray {
 
 impl VertexArray {
     ///
-    /// Create a vertex array instance.
+    /// Create a vertex array.
     ///
     /// # Returns
     /// A new instance of VertexArray.

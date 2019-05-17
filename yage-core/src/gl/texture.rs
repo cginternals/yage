@@ -14,7 +14,7 @@ pub struct Texture {
 
 impl Texture {
     ///
-    /// Create a texture instance.
+    /// Create a texture.
     ///
     /// # Parameters
     /// - `target`: Texture target (OpenGL enum, e.g., GL_TEXTURE_2D)

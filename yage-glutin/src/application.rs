@@ -41,7 +41,7 @@ pub struct Application {
 
 impl Application {
     ///
-    /// Create an application instance.
+    /// Create an application.
     ///
     /// # Returns
     /// A new instance of Application.

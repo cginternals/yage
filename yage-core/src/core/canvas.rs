@@ -45,7 +45,7 @@ pub struct Canvas {
 
 impl Canvas {
     ///
-    /// Create a canvas instance.
+    /// Create a canvas.
     ///
     /// # Parameters
     /// - `gl`: GL context

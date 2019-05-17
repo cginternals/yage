@@ -16,7 +16,7 @@ pub struct ContinuousRendering<T: Render> {
 
 impl<T: Render> ContinuousRendering<T> {
     ///
-    /// Create renderer.
+    /// Create continuous rendering adapter.
     ///
     /// # Parameters
     /// - `render`: Render object

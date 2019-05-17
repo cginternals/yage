@@ -17,7 +17,7 @@ pub struct Shader {
 
 impl Shader {
     ///
-    /// Create a shader instance.
+    /// Create a shader.
     ///
     /// # Parameters
     /// - `shader_type`: Type of shader

@@ -14,7 +14,7 @@ pub struct Framebuffer {
 
 impl Framebuffer {
     ///
-    /// Create a framebuffer instance.
+    /// Create a framebuffer.
     ///
     /// # Returns
     /// A new instance of Framebuffer.

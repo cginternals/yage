@@ -25,7 +25,7 @@ pub struct Renderer {
 
 impl Renderer {
     ///
-    /// Create a renderer instance
+    /// Create a renderer.
     ///
     /// # Returns
     /// A new instance of Renderer.

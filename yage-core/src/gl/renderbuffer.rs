@@ -15,7 +15,7 @@ pub struct Renderbuffer {
 
 impl Renderbuffer {
     ///
-    /// Create a renderbuffer instance.
+    /// Create a renderbuffer.
     ///
     /// # Returns
     /// A new instance of Renderbuffer.

@@ -14,7 +14,7 @@ pub struct Buffer {
 
 impl Buffer {
     ///
-    /// Create a buffer instance.
+    /// Create a buffer.
     ///
     /// # Parameters
     /// - `target`: Must be a valid glenum for `glBindBuffer`
