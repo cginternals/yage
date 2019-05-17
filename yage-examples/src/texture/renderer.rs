@@ -1,6 +1,6 @@
 use cgmath::Vector4;
 
-use yage::core::{
+use yage_core::{
     Context, GlFunctions,
     glenum,
     check_error,

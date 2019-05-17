@@ -7,8 +7,7 @@ use yage::glutin::{
     Window
 };
 
-mod renderer;
-use renderer::Renderer;
+use yage::examples::texture::Renderer;
 
 fn main() {
     // Create application
