@@ -1,4 +1,4 @@
-use std::f64::consts::PI;
+use std::f32::consts::PI;
 
 use yage_core::{
     Context, GlFunctions,
@@ -6,8 +6,11 @@ use yage_core::{
     check_error,
     Program, Shader, Buffer, VertexArray,
     GpuObject, Render, Update,
-    Texture, TextureLoader
+    Texture, TextureLoader,
+    Animation, Animate
 };
+
+use crate::triangle::ColorRotation;
 
 ///
 /// Example renderer that renders a single triangle.
@@ -19,7 +22,8 @@ pub struct Renderer {
     texture: Texture,
     vao: VertexArray,
     frame_count: i32,
-    animation: f64,
+    animation: Animation<f32>,
+    color_rotation: ColorRotation,
     redraw: bool
 }
 
@@ -31,6 +35,13 @@ impl Renderer {
     /// A new instance of Renderer.
     ///
     pub fn new() -> Renderer {
+        // Create animation
+        let mut animation = Animation::new(0.0, 2.0 * PI);
+        animation.set_duration(4.0);
+        animation.set_looped(true);
+        animation.start();
+
+        // Return renderer
         Renderer {
             initialized: false,
             program: Program::new(),
@@ -38,7 +49,8 @@ impl Renderer {
             texture: Texture::new(gl::TEXTURE_2D),
             vao: VertexArray::new(),
             frame_count: 0,
-            animation: 0.0,
+            animation,
+            color_rotation: ColorRotation::new(),
             redraw: false
         }
     }
@@ -131,14 +143,12 @@ impl GpuObject for Renderer {
 
 impl Update for Renderer {
     fn needs_update(&self) -> bool {
-        false
+        self.animation.needs_update()
     }
 
     fn update(&mut self, time_delta: f64) {
-        self.animation = self.animation + time_delta;
-        if self.animation > (2.0 * PI) {
-            self.animation -= 2.0 * PI;
-        }
+        self.animation.update(time_delta);
+        self.color_rotation.set_angle(self.animation.get_value());
         self.redraw = true;
     }
 }
@@ -164,9 +174,7 @@ impl Render for Renderer {
         self.program.use_program(context);
         check_error!();
 
-        self.program.set_uniform(context, "tex", 0);
-        self.program.set_uniform(context, "color", (0.4, 0.8, 0.4));
-        self.program.set_uniform(context, "animation", self.animation as f32);
+        self.program.set_uniform(context, "color_matrix", &self.color_rotation.get_matrix());
         check_error!();
 
         self.vao.bind(context);
@@ -179,31 +187,13 @@ impl Render for Renderer {
 const VS_SRC: &str = "
 #version 330 core
 precision mediump float;
-uniform float animation;
+uniform mat3 color_matrix;
 layout (location = 0) in vec2 position;
 layout (location = 1) in vec3 color;
 out vec3 v_color;
-vec3 rotate(vec3 color_in, float angle) {
-    mat3 mat;
-
-    float cosA = cos(angle);
-    float sinA = sin(angle);
-    mat[0][0] = cosA + (1.0 - cosA) / 3.0;
-    mat[0][1] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
-    mat[0][2] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
-    mat[1][0] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
-    mat[1][1] = cosA + 1./3.*(1.0 - cosA);
-    mat[1][2] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
-    mat[2][0] = 1./3. * (1.0 - cosA) - sqrt(1./3.) * sinA;
-    mat[2][1] = 1./3. * (1.0 - cosA) + sqrt(1./3.) * sinA;
-    mat[2][2] = cosA + 1./3. * (1.0 - cosA);
-
-    vec3 color = mat * color_in;
-    return clamp(color, vec3(0.0), vec3(1.0));
-}
 void main() {
     gl_Position = vec4(position, 0.0, 1.0);
-    v_color = rotate(color, animation);
+    v_color = clamp(color_matrix * color, vec3(0.0), vec3(1.0));
 }";
 
 const FS_SRC: &str = "

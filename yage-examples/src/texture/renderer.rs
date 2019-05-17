@@ -4,7 +4,8 @@ use yage_core::{
     check_error,
     Program, Shader, Buffer, VertexArray,
     GpuObject, Render, Update,
-    Texture, TextureLoader
+    Texture, TextureLoader,
+    Animation, Animate
 };
 
 ///
@@ -17,7 +18,7 @@ pub struct Renderer {
     texture: Texture,
     vao: VertexArray,
     frame_count: i32,
-    animation: f64,
+    animation: Animation<f32>,
     redraw: bool
 }
 
@@ -29,6 +30,14 @@ impl Renderer {
     /// A new instance of Renderer.
     ///
     pub fn new() -> Renderer {
+        // Create animation
+        let mut animation = Animation::new(0.0, 1.0);
+        animation.set_duration(2.0);
+        animation.set_bouncing(true);
+        animation.set_looped(true);
+        animation.start();
+
+        // Return renderer
         Renderer {
             initialized: false,
             program: Program::new(),
@@ -36,7 +45,7 @@ impl Renderer {
             texture: Texture::new(gl::TEXTURE_2D),
             vao: VertexArray::new(),
             frame_count: 0,
-            animation: 0.0,
+            animation,
             redraw: false
         }
     }
@@ -129,15 +138,11 @@ impl GpuObject for Renderer {
 
 impl Update for Renderer {
     fn needs_update(&self) -> bool {
-        false
+        self.animation.needs_update()
     }
 
     fn update(&mut self, time_delta: f64) {
-        self.animation = self.animation + time_delta;
-        //println!("Update {}", self.animation);
-        if self.animation > 1.0 {
-            self.animation -= 1.0;
-        }
+        self.animation.update(time_delta);
         self.redraw = true;
     }
 }
@@ -165,7 +170,7 @@ impl Render for Renderer {
 
         self.program.set_uniform(context, "tex", 0);
         self.program.set_uniform(context, "color", (0.4, 0.8, 0.4));
-        self.program.set_uniform(context, "animation", self.animation as f32);
+        self.program.set_uniform(context, "animation", self.animation.get_value());
         check_error!();
 
         self.vao.bind(context);

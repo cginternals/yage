@@ -15,3 +15,15 @@ pub use render::*;
 
 mod update;
 pub use update::*;
+
+mod animate;
+pub use animate::*;
+
+mod interpolate;
+pub use interpolate::*;
+
+mod animator;
+pub use animator::*;
+
+mod animation;
+pub use animation::*;

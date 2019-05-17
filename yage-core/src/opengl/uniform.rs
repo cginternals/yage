@@ -12,6 +12,14 @@ use crate::{
 /// Represents a type that can be set as a uniform on a shader program.
 ///
 pub trait Uniform<T> {
+    ///
+    /// Set uniform value
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `location`: Uniform location
+    /// - `value`: Uniform value
+    ///
     fn set_uniform(
         context: &Context,
         location: &<GL as GlFunctions>::GlUniformLocation,
