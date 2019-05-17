@@ -4,7 +4,7 @@ use yage::core::{
     Context, GlFunctions,
     glenum,
     check_error,
-    Program, Buffer, VertexArray,
+    Program, Shader, Buffer, VertexArray,
     GpuObject, Render, Update,
     Texture, TextureLoader
 };
@@ -69,7 +69,15 @@ impl GpuObject for Renderer {
         TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
         check_error!();
 
-        self.program.set_shaders(context, VS_SRC, FS_SRC, &[]);
+        // Load shader programs
+        let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
+        vertex_shader.set_code(context, VS_SRC, &[]);
+
+        let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
+        fragment_shader.set_code(context, FS_SRC, &[]);
+
+        self.program.attach(vertex_shader);
+        self.program.attach(fragment_shader);
 
         self.vertex_buffer.bind(context);
         self.vertex_buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);

@@ -30,6 +30,9 @@ pub use vertex_array::*;
 mod program;
 pub use program::*;
 
+mod shader;
+pub use shader::*;
+
 mod uniform;
 pub use uniform::*;
 
