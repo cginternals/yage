@@ -29,16 +29,49 @@ impl<T: Interpolate<T> + Copy> Animation<T> {
     /// # Parameters
     /// - `first`: First value
     /// - `second`: Second value
+    /// - `duration`: Duration (in seconds)
+    /// - `looped`: true if the animation is looped, else false
+    /// - `bouncing`: true if the animation is bouncing, else false
+    /// - `start`: true to start the animation right away, else false
     ///
     /// # Returns
     /// A new instance of Animation.
     ///
-    pub fn new(first: T, second: T) -> Self {
+    pub fn new(first: T, second: T, duration: f64, looped: bool, bouncing: bool, start: bool) -> Self {
+        let mut animator = Animator::new();
+        animator.set_duration(duration);
+        animator.set_looped(looped);
+        animator.set_bouncing(bouncing);
+        if start { animator.start(); }
+
         Self {
             first,
             second,
             value: first,
-            animator: Animator::new()
+            animator
+        }
+    }
+
+    ///
+    /// Create animation from one value to another.
+    ///
+    /// # Parameters
+    /// - `first`: First value
+    /// - `second`: Second value
+    /// - `duration`: Duration (in seconds)
+    ///
+    /// # Returns
+    /// A new instance of Animation.
+    ///
+    pub fn from_to(first: T, second: T, duration: f64) -> Self {
+        let mut animator = Animator::new();
+        animator.set_duration(duration);
+
+        Self {
+            first,
+            second,
+            value: first,
+            animator
         }
     }
 

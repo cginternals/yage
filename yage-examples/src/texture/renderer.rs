@@ -5,7 +5,7 @@ use yage_core::{
     Program, Shader, Buffer, VertexArray,
     GpuObject, Render, Update,
     Texture, TextureLoader,
-    Animation, Animate
+    Animation
 };
 
 ///
@@ -30,14 +30,6 @@ impl Renderer {
     /// A new instance of Renderer.
     ///
     pub fn new() -> Renderer {
-        // Create animation
-        let mut animation = Animation::new(0.0, 1.0);
-        animation.set_duration(2.0);
-        animation.set_bouncing(true);
-        animation.set_looped(true);
-        animation.start();
-
-        // Return renderer
         Renderer {
             initialized: false,
             program: Program::new(),
@@ -45,7 +37,7 @@ impl Renderer {
             texture: Texture::new(gl::TEXTURE_2D),
             vao: VertexArray::new(),
             frame_count: 0,
-            animation,
+            animation: Animation::new(0.0, 1.0, 2.0, true, true, true),
             redraw: false
         }
     }

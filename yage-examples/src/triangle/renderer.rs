@@ -7,7 +7,7 @@ use yage_core::{
     Program, Shader, Buffer, VertexArray,
     GpuObject, Render, Update,
     Texture, TextureLoader,
-    Animation, Animate
+    Animation
 };
 
 use crate::triangle::ColorRotation;
@@ -35,13 +35,6 @@ impl Renderer {
     /// A new instance of Renderer.
     ///
     pub fn new() -> Renderer {
-        // Create animation
-        let mut animation = Animation::new(0.0, 2.0 * PI);
-        animation.set_duration(4.0);
-        animation.set_looped(true);
-        animation.start();
-
-        // Return renderer
         Renderer {
             initialized: false,
             program: Program::new(),
@@ -49,7 +42,7 @@ impl Renderer {
             texture: Texture::new(gl::TEXTURE_2D),
             vao: VertexArray::new(),
             frame_count: 0,
-            animation,
+            animation: Animation::new(0.0, 2.0 * PI, 4.0, true, false, true),
             color_rotation: ColorRotation::new(),
             redraw: false
         }
