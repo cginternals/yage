@@ -1,5 +1,5 @@
 use cgmath::Matrix3;
-use cgmath::prelude::One;
+use cgmath::prelude::SquareMatrix;
 
 ///
 /// Utility that implements an RGB color rotation.
@@ -19,7 +19,7 @@ impl ColorRotation {
     pub fn new() -> Self {
         ColorRotation {
             angle: 0.0,
-            matrix: Matrix3::one()
+            matrix: Matrix3::identity()
         }
     }
 
