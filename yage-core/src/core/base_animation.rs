@@ -3,10 +3,10 @@ use crate::{Animate, Update};
 ///
 /// Base component for animations.
 ///
-/// An animator counts from 0.0 to 1.0 in a given amount of time.
+/// A base animation counts from 0.0 to 1.0 in a given amount of time.
 /// The duration specifies the number of seconds between 0.0 and 1.0.
-/// If bouncing, the animator counts back to 0.0 after reaching 1.0.
-/// If looped, the animator starts again at the beginning after the
+/// If bouncing, the animation counts back to 0.0 after reaching 1.0.
+/// If looped, the animation starts again at the beginning after the
 /// animation would have otherwise finished.
 ///
 /// For creating specific animations with different data types
@@ -14,30 +14,53 @@ use crate::{Animate, Update};
 ///
 /// [`Animation`]: struct.Animation.html
 ///
-pub struct Animator {
-    value: f64, // Current value ([0..1])
+pub struct BaseAnimation {
     duration: f64, // Number of seconds between 0.0 and 1.0
     looped: bool, // Is the animation looped?
     bouncing: bool, // Will the animation go back and forth?
     running: bool, // Current status
-    back: bool // Is the animation on its way back? (in case of bouncing)
+    back: bool, // Is the animation on its way back? (in case of bouncing)
+    value: f64 // Current value ([0..1])
 }
 
-impl Animator {
+impl BaseAnimation {
     ///
-    /// Create animator.
+    /// Create animation.
     ///
     /// # Returns
-    /// A new instance of Animator.
+    /// A new instance of BaseAnimation.
     ///
     pub fn new() -> Self {
         Self {
-            value: 0.0,
             duration: 1.0,
             looped: false,
             bouncing: false,
             running: false,
-            back: false
+            back: false,
+            value: 0.0
+        }
+    }
+
+    ///
+    /// Create animation with options.
+    ///
+    /// # Parameters
+    /// - `duration`: Duration (in seconds)
+    /// - `looped`: true if the animation is looped, else false
+    /// - `bouncing`: true if the animation is bouncing, else false
+    /// - `start`: true to start the animation right away, else false
+    ///
+    /// # Returns
+    /// A new instance of BaseAnimation.
+    ///
+    pub fn with_options(duration: f64, looped: bool, bouncing: bool, start: bool) -> Self {
+        Self {
+            duration: duration,
+            looped,
+            bouncing,
+            running: start,
+            back: false,
+            value: 0.0
         }
     }
 
@@ -52,7 +75,7 @@ impl Animator {
     }
 }
 
-impl Animate for Animator {
+impl Animate for BaseAnimation {
     fn get_duration(&self) -> f64 {
         self.duration
     }
@@ -105,7 +128,7 @@ impl Animate for Animator {
     }
 }
 
-impl Update for Animator {
+impl Update for BaseAnimation {
     fn needs_update(&self) -> bool {
         self.running
     }

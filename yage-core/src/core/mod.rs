@@ -22,8 +22,8 @@ pub use animate::*;
 mod interpolate;
 pub use interpolate::*;
 
-mod animator;
-pub use animator::*;
+mod base_animation;
+pub use base_animation::*;
 
 mod animation;
 pub use animation::*;

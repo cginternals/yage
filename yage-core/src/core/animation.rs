@@ -1,5 +1,5 @@
 use crate::{
-    Animate, Animator, Update, Interpolate
+    Animate, BaseAnimation, Update, Interpolate
 };
 
 ///
@@ -19,7 +19,7 @@ pub struct Animation<T> {
     first: T,
     second: T,
     value: T,
-    animator: Animator
+    animation: BaseAnimation
 }
 
 impl<T: Interpolate<T> + Copy> Animation<T> {
@@ -38,17 +38,11 @@ impl<T: Interpolate<T> + Copy> Animation<T> {
     /// A new instance of Animation.
     ///
     pub fn new(first: T, second: T, duration: f64, looped: bool, bouncing: bool, start: bool) -> Self {
-        let mut animator = Animator::new();
-        animator.set_duration(duration);
-        animator.set_looped(looped);
-        animator.set_bouncing(bouncing);
-        if start { animator.start(); }
-
         Self {
             first,
             second,
             value: first,
-            animator
+            animation: BaseAnimation::with_options(duration, looped, bouncing, start)
         }
     }
 
@@ -64,14 +58,11 @@ impl<T: Interpolate<T> + Copy> Animation<T> {
     /// A new instance of Animation.
     ///
     pub fn from_to(first: T, second: T, duration: f64) -> Self {
-        let mut animator = Animator::new();
-        animator.set_duration(duration);
-
         Self {
             first,
             second,
             value: first,
-            animator
+            animation: BaseAnimation::with_options(duration, false, false, false)
         }
     }
 
@@ -108,57 +99,57 @@ impl<T: Interpolate<T> + Copy> Animation<T> {
 
 impl<T: Interpolate<T> + Copy> Animate for Animation<T> {
     fn get_duration(&self) -> f64 {
-        self.animator.get_duration()
+        self.animation.get_duration()
     }
 
     fn set_duration(&mut self, duration: f64) {
-        self.animator.set_duration(duration);
+        self.animation.set_duration(duration);
     }
 
     fn is_looped(&self) -> bool {
-        self.animator.is_looped()
+        self.animation.is_looped()
     }
 
     fn set_looped(&mut self, looped: bool) {
-        self.animator.set_looped(looped);
+        self.animation.set_looped(looped);
     }
 
     fn is_bouncing(&self) -> bool {
-        self.animator.is_bouncing()
+        self.animation.is_bouncing()
     }
 
     fn set_bouncing(&mut self, bouncing: bool) {
-        self.animator.set_bouncing(bouncing);
+        self.animation.set_bouncing(bouncing);
     }
 
     fn is_running(&self) -> bool {
-        self.animator.is_running()
+        self.animation.is_running()
     }
 
     fn has_finished(&self) -> bool {
-        self.animator.has_finished()
+        self.animation.has_finished()
     }
 
     fn start(&mut self) {
-        self.animator.start();
+        self.animation.start();
     }
 
     fn stop(&mut self) {
-        self.animator.stop();
+        self.animation.stop();
     }
 
     fn reset(&mut self) {
-        self.animator.reset();
+        self.animation.reset();
     }
 }
 
 impl<T: Interpolate<T> + Copy> Update for Animation<T> {
     fn needs_update(&self) -> bool {
-        self.animator.needs_update()
+        self.animation.needs_update()
     }
 
     fn update(&mut self, time_delta: f64) {
-        self.animator.update(time_delta);
-        self.value = <T>::interpolate(self.first, self.second, self.animator.get_value() as f32);
+        self.animation.update(time_delta);
+        self.value = <T>::interpolate(self.first, self.second, self.animation.get_value() as f32);
     }
 }
