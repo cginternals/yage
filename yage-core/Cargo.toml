@@ -5,6 +5,7 @@ authors = ["Benjamin Wasty <benjamin.wasty@cginternals.com>", "Stefan Buschmann 
 edition = "2018"
 
 [dependencies]
+toolshed = "0.8.0"
 glenum = "0.1.1"
 log = "0.4.6"
 cgmath = "0.17.0"
