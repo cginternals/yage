@@ -1,5 +1,5 @@
 [package]
-name = "native-glutin"
+name = "viewer"
 version = "0.0.1"
 authors = ["Benjamin Wasty <benjamin.wasty@cginternals.com>", "Stefan Buschmann <stefan.buschmann@cginternals.com>"]
 edition = "2018"
