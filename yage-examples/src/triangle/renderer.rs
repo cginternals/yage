@@ -4,9 +4,9 @@ use yage_core::{
     Context, GlFunctions,
     glenum, cgmath,
     check_error,
-    Program, Shader, Buffer, VertexArray,
-    GpuObject, Render, Update,
-    Texture, TextureLoader,
+    Program, Shader, Buffer,
+    GpuObject, Render, Update, Drawable,
+    Geometry, VertexAttribute, Primitive,
     Animation
 };
 
@@ -17,13 +17,11 @@ use crate::triangle::ColorRotation;
 ///
 pub struct Renderer {
     initialized: bool,
+    geometry: Geometry,
     program: Program,
-    vertex_buffer: Buffer,
-    texture: Texture,
-    vao: VertexArray,
-    frame_count: i32,
     animation: Animation<f32>,
     color_rotation: ColorRotation,
+    frame_count: i32,
     redraw: bool
 }
 
@@ -37,13 +35,11 @@ impl Renderer {
     pub fn new() -> Renderer {
         Renderer {
             initialized: false,
+            geometry: Geometry::new(),
             program: Program::new(),
-            vertex_buffer: Buffer::new(glenum::BufferKind::Array as _),
-            texture: Texture::new(gl::TEXTURE_2D),
-            vao: VertexArray::new(),
-            frame_count: 0,
             animation: Animation::new(0.0, 2.0 * PI, 4.0, true, false, true),
             color_rotation: ColorRotation::new(),
+            frame_count: 0,
             redraw: false
         }
     }
@@ -59,65 +55,74 @@ impl GpuObject for Renderer {
         // [DEBUG]
         println!("initializing renderer");
 
-        // Initialize OpenGL objects
+        // Create geometry
+        self.geometry = Geometry::new();
+        {
+            // Create vertex buffer
+            let mut buffer = Buffer::new(glenum::BufferKind::Array as _);
+            buffer.init(context);
+            buffer.bind(context);
+            buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
+
+            // Add vertex buffer
+            let buffer_index = self.geometry.add_buffer(buffer);
+
+            // Create vertex attribute for 'position'
+            let va_position = VertexAttribute::new(
+                buffer_index,
+                0,
+                0,
+                5 * std::mem::size_of::<f32>(),
+                gl::FLOAT,
+                2,
+                false
+            );
+
+            // Create vertex attribute for 'color'
+            let va_color = VertexAttribute::new(
+                buffer_index,
+                0,
+                2 * std::mem::size_of::<f32>(),
+                5 * std::mem::size_of::<f32>(),
+                gl::FLOAT,
+                3,
+                false
+            );
+
+            // Add vertex attributes
+            let position_index = self.geometry.add_vertex_attribute(va_position);
+            let color_index = self.geometry.add_vertex_attribute(va_color);
+
+            // Create primitive
+            let mut primitive = Primitive::new();
+            primitive.set_attribute_binding(0, position_index);
+            primitive.set_attribute_binding(1, color_index);
+            primitive.set_index_buffer(None);
+            primitive.set_render_mode(gl::TRIANGLES);
+            primitive.set_count(3);
+
+            // Add primitive
+            self.geometry.add_primitive(primitive);
+        }
+
+        // Create shader program
+        self.program = Program::new();
         self.program.init(context);
-        self.texture.init(context);
-        self.vao.init(context);
-        self.vertex_buffer.init(context);
+        {
+            // Load vertex shader
+            let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
+            vertex_shader.set_code(context, VS_SRC, &[]);
 
-        // Create OpenGL objects
-        let gl = context.gl();
+            // Load fragment shader
+            let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
+            fragment_shader.set_code(context, FS_SRC, &[]);
 
-        check_error!();
+            // Attach shaders
+            self.program.attach(vertex_shader);
+            self.program.attach(fragment_shader);
+        }
 
-        // Load texture
-        TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
-        check_error!();
-
-        // Load shader programs
-        let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
-        vertex_shader.set_code(context, VS_SRC, &[]);
-
-        let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
-        fragment_shader.set_code(context, FS_SRC, &[]);
-
-        self.program.attach(vertex_shader);
-        self.program.attach(fragment_shader);
-
-        self.vertex_buffer.bind(context);
-        self.vertex_buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
-
-        self.vao.bind(context);
-
-        self.vao.set_attribute(
-            context,
-            0,
-            &self.vertex_buffer,
-            2,
-            gl::FLOAT,
-            false,
-            5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-            0
-        );
-
-        self.vao.set_attribute(
-            context,
-            1,
-            &self.vertex_buffer,
-            3,
-            gl::FLOAT,
-            false,
-            5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-            2 * std::mem::size_of::<f32>() as gl::types::GLsizei
-        );
-
-        self.vao.enable_attribute(context, 0);
-        self.vao.enable_attribute(context, 1);
-
-        check_error!();
-
-        gl.clear_color(0.1, 0.2, 0.3, 1.0);
-
+        // Done
         self.initialized = true;
     }
 
@@ -131,10 +136,8 @@ impl GpuObject for Renderer {
         println!("de-initializing renderer");
 
         // De-Initialize OpenGL objects
+        self.geometry.deinit(context);
         self.program.deinit(context);
-        self.texture.deinit(context);
-        self.vao.deinit(context);
-        self.vertex_buffer.deinit(context);
         self.initialized = false;
     }
 }
@@ -165,19 +168,18 @@ impl Render for Renderer {
         //println!("frame #{}", self.frame_count);
         self.frame_count = self.frame_count + 1;
 
+        // Clear background
+        context.gl().clear_color(0.1, 0.2, 0.3, 1.0);
         context.gl().clear(glenum::BufferBit::Color as u32);
-
-        self.texture.bind_active(context, 0);
-
-        self.program.use_program(context);
         check_error!();
 
+        // Bind program and set uniforms
+        self.program.use_program(context);
         self.program.set_uniform(context, "color_matrix", &self.color_rotation.get_matrix());
         check_error!();
 
-        self.vao.bind(context);
-
-        context.gl().draw_arrays(gl::TRIANGLES, 0, 3);
+        // Draw geometry
+        self.geometry.draw(context);
         check_error!();
     }
 }

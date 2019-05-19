@@ -2,10 +2,10 @@ use yage_core::{
     Context, GlFunctions,
     glenum, cgmath,
     check_error,
-    Program, Shader, Buffer, VertexArray,
-    GpuObject, Render, Update,
+    Program, Shader, Buffer,
+    GpuObject, Render, Update, Drawable, Animation,
     Texture, TextureLoader,
-    Animation
+    Geometry, VertexAttribute, Primitive,
 };
 
 ///
@@ -13,12 +13,11 @@ use yage_core::{
 ///
 pub struct Renderer {
     initialized: bool,
+    geometry: Geometry,
     program: Program,
-    vertex_buffer: Buffer,
     texture: Texture,
-    vao: VertexArray,
-    frame_count: i32,
     animation: Animation<f32>,
+    frame_count: i32,
     redraw: bool
 }
 
@@ -32,12 +31,11 @@ impl Renderer {
     pub fn new() -> Renderer {
         Renderer {
             initialized: false,
+            geometry: Geometry::new(),
             program: Program::new(),
-            vertex_buffer: Buffer::new(glenum::BufferKind::Array as _),
             texture: Texture::new(gl::TEXTURE_2D),
-            vao: VertexArray::new(),
-            frame_count: 0,
             animation: Animation::new(0.0, 1.0, 2.0, true, true, true),
+            frame_count: 0,
             redraw: false
         }
     }
@@ -53,65 +51,83 @@ impl GpuObject for Renderer {
         // [DEBUG]
         println!("initializing renderer");
 
-        // Initialize OpenGL objects
+        // Create geometry
+        self.geometry = Geometry::new();
+        {
+            // Create vertex buffer
+            let mut buffer = Buffer::new(glenum::BufferKind::Array as _);
+            buffer.init(context);
+            buffer.bind(context);
+            buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
+
+            // Add vertex buffer
+            let buffer_index = self.geometry.add_buffer(buffer);
+
+            // Create vertex attribute for 'position'
+            let va_position = VertexAttribute::new(
+                buffer_index,
+                0,
+                0,
+                4 * std::mem::size_of::<f32>(),
+                gl::FLOAT,
+                2,
+                false
+            );
+
+            // Create vertex attribute for 'texcoord'
+            let va_texcoord = VertexAttribute::new(
+                buffer_index,
+                0,
+                2 * std::mem::size_of::<f32>(),
+                4 * std::mem::size_of::<f32>(),
+                gl::FLOAT,
+                2,
+                false
+            );
+
+            // Add vertex attributes
+            let position_index = self.geometry.add_vertex_attribute(va_position);
+            let texcoord_index = self.geometry.add_vertex_attribute(va_texcoord);
+
+            // Create primitive
+            let mut primitive = Primitive::new();
+            primitive.set_attribute_binding(0, position_index);
+            primitive.set_attribute_binding(1, texcoord_index);
+            primitive.set_index_buffer(None);
+            primitive.set_render_mode(gl::TRIANGLE_STRIP);
+            primitive.set_count(4);
+
+            // Add primitive
+            self.geometry.add_primitive(primitive);
+        }
+
+        // Create shader program
+        self.program = Program::new();
         self.program.init(context);
+        {
+            // Load vertex shader
+            let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
+            vertex_shader.set_code(context, VS_SRC, &[]);
+
+            // Load fragment shader
+            let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
+            fragment_shader.set_code(context, FS_SRC, &[]);
+
+            // Attach shaders
+            self.program.attach(vertex_shader);
+            self.program.attach(fragment_shader);
+        }
+
+        // Create texture
+        self.texture = Texture::new(gl::TEXTURE_2D);
         self.texture.init(context);
-        self.vao.init(context);
-        self.vertex_buffer.init(context);
+        {
+            // Load texture
+            TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
+            check_error!();
+        }
 
-        // Create OpenGL objects
-        let gl = context.gl();
-
-        check_error!();
-
-        // Load texture
-        TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
-        check_error!();
-
-        // Load shader programs
-        let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
-        vertex_shader.set_code(context, VS_SRC, &[]);
-
-        let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
-        fragment_shader.set_code(context, FS_SRC, &[]);
-
-        self.program.attach(vertex_shader);
-        self.program.attach(fragment_shader);
-
-        self.vertex_buffer.bind(context);
-        self.vertex_buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
-
-        self.vao.bind(context);
-
-        self.vao.set_attribute(
-            context,
-            0,
-            &self.vertex_buffer,
-            2,
-            gl::FLOAT,
-            false,
-            4 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-            0
-        );
-
-        self.vao.set_attribute(
-            context,
-            1,
-            &self.vertex_buffer,
-            2,
-            gl::FLOAT,
-            false,
-            4 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-            2 * std::mem::size_of::<f32>() as gl::types::GLsizei
-        );
-
-        self.vao.enable_attribute(context, 0);
-        self.vao.enable_attribute(context, 1);
-
-        check_error!();
-
-        gl.clear_color(0.1, 0.2, 0.3, 1.0);
-
+        // Done
         self.initialized = true;
     }
 
@@ -125,10 +141,9 @@ impl GpuObject for Renderer {
         println!("de-initializing renderer");
 
         // De-Initialize OpenGL objects
+        self.geometry.deinit(context);
         self.program.deinit(context);
         self.texture.deinit(context);
-        self.vao.deinit(context);
-        self.vertex_buffer.deinit(context);
         self.initialized = false;
     }
 }
@@ -158,21 +173,24 @@ impl Render for Renderer {
         //println!("frame #{}", self.frame_count);
         self.frame_count = self.frame_count + 1;
 
+        // Clear background
+        context.gl().clear_color(0.1, 0.2, 0.3, 1.0);
         context.gl().clear(glenum::BufferBit::Color as u32);
-
-        self.texture.bind_active(context, 0);
-
-        self.program.use_program(context);
         check_error!();
 
+        // Bind texture
+        self.texture.bind_active(context, 0);
+        check_error!();
+
+        // Bind program and set uniforms
+        self.program.use_program(context);
         self.program.set_uniform(context, "tex", 0);
         self.program.set_uniform(context, "color", (0.4, 0.8, 0.4));
         self.program.set_uniform(context, "animation", self.animation.get_value());
         check_error!();
 
-        self.vao.bind(context);
-
-        context.gl().draw_arrays(gl::TRIANGLE_STRIP, 0, 4);
+        // Draw geometry
+        self.geometry.draw(context);
         check_error!();
     }
 }

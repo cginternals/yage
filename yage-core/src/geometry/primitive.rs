@@ -1,5 +1,12 @@
 use std::collections::HashMap;
 
+use crate::{
+    Context, GlFunctions,
+    GpuObject,
+    VertexArray, Buffer,
+    ResourceManager, VertexAttribute,
+};
+
 ///
 /// Represents a renderable geometric primitive.
 ///
@@ -10,7 +17,7 @@ pub struct Primitive {
     material: usize, // Material ID
     render_mode: u32, // Render mode (e.g., GL_TRIANGLES)
     count: usize, // Number of elements
-    // [TODO] VAO
+    vao: Option<VertexArray> // Vertex array object
 }
 
 impl Primitive {
@@ -28,6 +35,7 @@ impl Primitive {
             material: 0,
             render_mode: 0,
             count: 0,
+            vao: None,
         }
     }
 
@@ -85,5 +93,72 @@ impl Primitive {
 
     pub fn set_count(&mut self, count: usize) {
         self.count = count;
+    }
+
+    pub fn init_vao(&mut self,
+        context: &Context,
+        vertex_attributes: &ResourceManager<VertexAttribute>,
+        buffers: &ResourceManager<Buffer>,
+    ) {
+        // Check if VAO needs to be initialized
+        if self.vao.is_some() {
+            return;
+        }
+
+        // Create new VAO
+        self.vao = Some(VertexArray::new());
+
+        // Get VAO
+        if let Some(ref mut vao) = self.vao {
+            // Initialize VAO
+            vao.init(context);
+
+            // Bind VAO
+            vao.bind(context);
+
+            // Bind vertex attributes
+            for (bind_index, index) in self.attributes.iter() {
+                // Get vertex attribute
+                if let Some(ref vertex_attribute) = vertex_attributes.get(*index) {
+                    // Get buffer
+                    if let Some(ref buffer) = buffers.get(vertex_attribute.buffer()) {
+                        // Create vertex attribute binding
+                        vao.set_attribute(
+                            context,
+                            *bind_index as u32,
+                            buffer,
+                            vertex_attribute.components() as i32,
+                            vertex_attribute.data_type(),
+                            vertex_attribute.normalize(),
+                            vertex_attribute.stride() as i32,
+                            vertex_attribute.relative_offset() as i32
+                        );
+
+                        // Enable vertex attribute
+                        vao.enable_attribute(context, *bind_index as u32);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn deinit_vao(&mut self, context: &Context) {
+        // Get VAO
+        if let Some(ref mut vao) = self.vao {
+            // De-initialize VAO
+            vao.deinit(context);
+
+            // Destroy VAO
+            self.vao = None;
+        }
+    }
+
+    pub fn draw(&mut self, context: &Context) {
+        // Get VAO
+        if let Some(ref vao) = self.vao {
+            // Draw VAO
+            vao.bind(context);
+            context.gl().draw_arrays(self.render_mode, 0, self.count as i32);
+        }
     }
 }

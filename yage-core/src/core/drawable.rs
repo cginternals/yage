@@ -10,5 +10,5 @@ pub trait Drawable {
     /// # Parameters
     /// - `context`: Current OpenGL context
     ///
-    fn draw(&self, context: &Context);
+    fn draw(&mut self, context: &Context);
 }

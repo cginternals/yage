@@ -19,6 +19,26 @@ impl<T> ResourceManager<T> {
     }
 
     ///
+    /// Get objects
+    ///
+    /// # Returns
+    /// List of objects
+    ///
+    pub fn objects(&self) -> &Vec<T> {
+        &self.objects
+    }
+
+    ///
+    /// Get objects
+    ///
+    /// # Returns
+    /// List of objects
+    ///
+    pub fn objects_mut(&mut self) -> &mut Vec<T> {
+        &mut self.objects
+    }
+
+    ///
     /// Get number of objects
     ///
     /// # Returns

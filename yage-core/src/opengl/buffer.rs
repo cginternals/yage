@@ -90,7 +90,9 @@ impl Buffer {
 
 impl GpuObject for Buffer {
     fn init(&mut self, context: &Context) {
-        self.handle = Some(context.gl().create_buffer());
+        if self.handle.is_none() {
+            self.handle = Some(context.gl().create_buffer());
+        }
     }
 
     fn deinit(&mut self, context: &Context) {

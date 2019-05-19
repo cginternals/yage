@@ -109,7 +109,9 @@ impl VertexArray {
 
 impl GpuObject for VertexArray {
     fn init(&mut self, context: &Context) {
-        self.handle = Some(context.gl().create_vertex_array());
+        if self.handle.is_none() {
+            self.handle = Some(context.gl().create_vertex_array());
+        }
     }
 
     fn deinit(&mut self, context: &Context) {

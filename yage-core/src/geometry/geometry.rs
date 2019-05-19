@@ -75,7 +75,20 @@ impl Geometry {
 }
 
 impl GpuObject for Geometry {
-    fn init(&mut self, _context: &Context) {
+    fn init(&mut self, context: &Context) {
+        // Initialize buffers
+        for buffer in self.buffers.objects_mut() {
+            buffer.init(context);
+        }
+
+        // Initialize primitives
+        for primitive in &mut self.primitives {
+            primitive.init_vao(
+                context,
+                &self.attributes,
+                &self.buffers
+            );
+        }
     }
 
     fn deinit(&mut self, _context: &Context) {
@@ -83,6 +96,13 @@ impl GpuObject for Geometry {
 }
 
 impl Drawable for Geometry {
-    fn draw(&self, _context: &Context) {
+    fn draw(&mut self, context: &Context) {
+        // Lazy initialization
+        self.init(context);
+
+        // Draw primitives
+        for primitive in &mut self.primitives {
+            primitive.draw(context);
+        }
     }
 }
