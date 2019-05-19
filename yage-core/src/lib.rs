@@ -12,3 +12,6 @@ pub use crate::opengl::*;
 
 mod geometry;
 pub use crate::geometry::*;
+
+mod rendering;
+pub use crate::rendering::*;

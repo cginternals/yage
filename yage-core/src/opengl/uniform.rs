@@ -1,11 +1,11 @@
 use cgmath::{
     Vector2, Vector3, Vector4,
-    Matrix2, Matrix3, Matrix4
+    Matrix2, Matrix3, Matrix4,
 };
 
 use crate::{
-    Context,
-    GL, GlFunctions,
+    Context, GL, GlFunctions,
+    Transform,
 };
 
 ///
@@ -398,5 +398,16 @@ impl Uniform<&Matrix4<f32>> for &Matrix4<f32> {
         value: &Matrix4<f32>,
     ) {
         context.gl().uniform_matrix_4fv(location, value.as_ref());
+    }
+}
+
+// Implementation for Transform
+impl Uniform<&Transform> for &Transform {
+    fn set_uniform(
+        context: &Context,
+        location: &<GL as GlFunctions>::GlUniformLocation,
+        value: &Transform,
+    ) {
+        context.gl().uniform_matrix_4fv(location, value.transform().as_ref());
     }
 }
