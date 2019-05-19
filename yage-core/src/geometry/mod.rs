@@ -1,6 +1,3 @@
-mod resource_manager;
-pub use resource_manager::*;
-
 mod geometry;
 pub use geometry::*;
 

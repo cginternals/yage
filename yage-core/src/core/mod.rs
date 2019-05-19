@@ -36,3 +36,6 @@ pub use camera::*;
 
 mod drawable;
 pub use drawable::*;
+
+mod resource_manager;
+pub use resource_manager::*;
