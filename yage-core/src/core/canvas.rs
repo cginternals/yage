@@ -165,7 +165,13 @@ impl Update for Canvas {
 
 impl Render for Canvas {
     fn set_viewport(&mut self, viewport: Vector4<i32>) {
+        // Save viewport
         self.viewport = viewport;
+
+        // Inform renderer
+        if let Some(ref mut renderer) = self.renderer {
+            renderer.set_viewport(viewport)
+        }
     }
 
     fn needs_redraw(&self) -> bool {

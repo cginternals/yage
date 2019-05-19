@@ -2,7 +2,7 @@ use crate::{
     check_error,
     Context, GlFunctions,
     Program, Shader,
-    MeshRenderer, GpuObject, Drawable, Transform,
+    MeshRenderer, GpuObject, Drawable, Transform, Camera,
 };
 
 ///
@@ -69,10 +69,28 @@ impl GpuObject for BasicMeshRenderer {
 }
 
 impl MeshRenderer for BasicMeshRenderer {
-    fn draw(&mut self, context: &Context, mesh: &mut Drawable, model_matrix: &Transform) {
+    fn draw(&mut self,
+        context: &Context,
+        camera: &Camera,
+        mesh: &mut Drawable,
+        transform: &Transform
+    ) {
+        // Calculate matrices
+        let view_matrix = camera.view_matrix();
+        let projection_matrix = camera.projection_matrix();
+        let view_projection_matrix = camera.view_projection_matrix();
+        let model_matrix = transform.transform();
+        let model_view_matrix = view_matrix * model_matrix;
+        let model_view_projection_matrix = view_projection_matrix * model_matrix;
+
         // Bind program and set uniforms
         self.program.use_program(context);
-        self.program.set_uniform(context, "modelViewMatrix", model_matrix);
+        self.program.set_uniform(context, "viewMatrix", &view_matrix);
+        self.program.set_uniform(context, "projectionMatrix", &projection_matrix);
+        self.program.set_uniform(context, "viewProjectionMatrix", &view_projection_matrix);
+        self.program.set_uniform(context, "modelMatrix", &model_matrix);
+        self.program.set_uniform(context, "modelViewMatrix", &model_view_matrix);
+        self.program.set_uniform(context, "modelViewProjectionMatrix", &model_view_projection_matrix);
         check_error!();
 
         // Set rendering states
@@ -88,12 +106,12 @@ impl MeshRenderer for BasicMeshRenderer {
 const VS_SRC: &str = "
 #version 330 core
 precision mediump float;
-uniform mat4 modelViewMatrix;
+uniform mat4 modelViewProjectionMatrix;
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 texcoord;
 out vec2 v_texcoord;
 void main() {
-    gl_Position = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
     v_texcoord = texcoord;
 }";
 

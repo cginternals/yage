@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use yage_core::{
     glenum, cgmath, check_error,
     Context, GlFunctions,
-    Cube, Transform,
+    Cube, Transform, Camera,
     Texture, TextureLoader,
     BasicMeshRenderer,
     GpuObject, Render, Update, Animation, MeshRenderer,
@@ -14,10 +14,11 @@ use yage_core::{
 ///
 pub struct Renderer {
     initialized: bool,
+    camera: Camera,
     mesh_renderer: BasicMeshRenderer,
     cube: Cube,
     texture: Texture,
-    model_matrix: Transform,
+    transform: Transform,
     animation: Animation<f32>,
     frame_count: i32,
     redraw: bool
@@ -31,12 +32,28 @@ impl Renderer {
     /// A new instance of Renderer.
     ///
     pub fn new() -> Renderer {
+        // Initialize camera
+        let mut camera = Camera::new();
+        camera.look_at(
+            cgmath::Vector3::new(0.0, 3.0, 3.0),
+            cgmath::Vector3::new(0.0, 0.0, 0.0),
+            cgmath::Vector3::new(0.0, 1.0, 0.0)
+        );
+        camera.perspective_fov_aspect(
+            PI / 4.0,
+            4.0 / 3.0,
+            0.1,
+            64.0
+        );
+
+        // Create renderer
         Renderer {
             initialized: false,
+            camera,
             mesh_renderer: BasicMeshRenderer::new(),
             cube: Cube::new(),
             texture: Texture::new(gl::TEXTURE_2D),
-            model_matrix: Transform::new(),
+            transform: Transform::new(),
             animation: Animation::new(0.0, 2.0 * PI, 4.0, true, false, true),
             frame_count: 0,
             redraw: false
@@ -102,11 +119,11 @@ impl Update for Renderer {
 
         // Update rotation
         let rotation = cgmath::Quaternion::from(cgmath::Euler {
-            x: cgmath::Rad(-0.4),
+            x: cgmath::Rad(0.0),
             y: cgmath::Rad(value),
             z: cgmath::Rad(0.0),
         });
-        self.model_matrix.set_rotation(rotation);
+        self.transform.set_rotation(rotation);
 
         // Redraw
         self.redraw = true;
@@ -114,8 +131,15 @@ impl Update for Renderer {
 }
 
 impl Render for Renderer {
-    fn set_viewport(&mut self, _viewport: cgmath::Vector4<i32>) {
-        // We don't care as the viewport is correctly set by the canvas
+    fn set_viewport(&mut self, viewport: cgmath::Vector4<i32>) {
+        // Update camera projection
+        self.camera.perspective_fov(
+            PI / 4.0,
+            viewport.z as f32,
+            viewport.w as f32,
+            0.1,
+            64.0
+        );
     }
 
     fn needs_redraw(&self) -> bool {
@@ -137,6 +161,6 @@ impl Render for Renderer {
         check_error!();
 
         // Draw geometry
-        self.mesh_renderer.draw(context, &mut self.cube, &self.model_matrix);
+        self.mesh_renderer.draw(context, &self.camera, &mut self.cube, &self.transform);
     }
 }

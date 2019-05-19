@@ -1,6 +1,6 @@
 use crate::{
     Context,
-    MeshRenderer, GpuObject, Drawable, Transform,
+    MeshRenderer, GpuObject, Drawable, Transform, Camera,
 };
 
 ///
@@ -23,7 +23,12 @@ impl PbrMeshRenderer {
 }
 
 impl MeshRenderer for PbrMeshRenderer {
-    fn draw(&mut self, _context: &Context, _mesh: &mut Drawable, _model_matrix: &Transform) {
+    fn draw(&mut self,
+        _context: &Context,
+        _camera: &Camera,
+        _mesh: &mut Drawable,
+        _transform: &Transform
+    ) {
     }
 }
 
