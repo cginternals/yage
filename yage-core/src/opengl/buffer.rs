@@ -86,45 +86,6 @@ impl Buffer {
     pub fn set_sub_data<T>(&self, context: &Context, offset: isize, data: &[T]) {
         context.gl().buffer_sub_data(self.target, offset, data);
     }
-
-    ///
-    /// Define the memory layout of the buffer for a binding point.
-    ///
-    /// Expects the buffer to be bound.
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `index` - Index of the vertex attribute that is to be setup and enabled.
-    /// - `size` - Number of components per vertex attribute.
-    /// - `type` - Data type of each component in the array.
-    /// - `normalized` - Whether integer data values should be normalized when being casted to a float.
-    /// - `stride` - Offset in bytes between the beginning of consecutive vertex attributes.
-    /// - `offset` - Offset in bytes of the first component in the vertex attribute array.
-    ///
-    pub fn attrib_enable(
-        &self,
-        context: &Context,
-        index: u32,
-        size: i32,
-        data_type: u32,
-        normalized: bool,
-        stride: i32,
-        offset: i32,
-    ) {
-        context.gl().vertex_attrib_pointer(index, size, data_type, normalized, stride, offset);
-        context.gl().enable_vertex_attrib_array(index);
-    }
-
-    ///
-    /// Disable a buffer binding point.
-    ///
-    /// # Parameters
-    /// - `context`: Active OpenGL context
-    /// - `index` - Index of the vertex attribute that is to be disabled.
-    ///
-    pub fn attrib_disable(&self, context: &Context, index: u32) {
-        context.gl().disable_vertex_attrib_array(index);
-    }
 }
 
 impl GpuObject for Buffer {

@@ -89,9 +89,10 @@ impl GpuObject for Renderer {
 
         self.vao.bind(context);
 
-        self.vertex_buffer.attrib_enable(
+        self.vao.set_attribute(
             context,
             0,
+            &self.vertex_buffer,
             2,
             gl::FLOAT,
             false,
@@ -99,15 +100,19 @@ impl GpuObject for Renderer {
             0
         );
 
-        self.vertex_buffer.attrib_enable(
+        self.vao.set_attribute(
             context,
             1,
+            &self.vertex_buffer,
             3,
             gl::FLOAT,
             false,
             5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
             2 * std::mem::size_of::<f32>() as gl::types::GLsizei
         );
+
+        self.vao.enable_attribute(context, 0);
+        self.vao.enable_attribute(context, 1);
 
         check_error!();
 
