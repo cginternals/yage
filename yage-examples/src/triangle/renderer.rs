@@ -94,12 +94,14 @@ impl GpuObject for Renderer {
             let color_index = self.geometry.add_vertex_attribute(va_color);
 
             // Create primitive
-            let mut primitive = Primitive::new();
-            primitive.set_attribute_binding(0, position_index);
-            primitive.set_attribute_binding(1, color_index);
-            primitive.set_index_buffer(None);
-            primitive.set_render_mode(gl::TRIANGLES);
-            primitive.set_count(3);
+            let primitive = Primitive::new(
+                0,
+                gl::TRIANGLES,
+                3,
+                None,
+                0,
+                &[ (0, position_index), (1, color_index) ]
+            );
 
             // Add primitive
             self.geometry.add_primitive(primitive);

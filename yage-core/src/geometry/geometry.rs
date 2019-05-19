@@ -12,10 +12,10 @@ use crate::{
 /// and materials.
 ///
 pub struct Geometry {
-    buffers: ResourceManager<Buffer>,
-    attributes: ResourceManager<VertexAttribute>,
-    materials: ResourceManager<Material>,
-    primitives: Vec<Primitive>,
+    buffers: ResourceManager<Buffer>, // Vertex buffers
+    attributes: ResourceManager<VertexAttribute>, // Vertex attributes
+    materials: ResourceManager<Material>, // Materials
+    primitives: Vec<Primitive>, // Geometric primitives
 }
 
 impl Geometry {
@@ -33,42 +33,112 @@ impl Geometry {
             primitives: Vec::new(),
         }
     }
+
+    ///
+    /// Get buffers.
+    ///
+    /// # Returns
+    /// Reference to resource manager for buffers.
+    ///
     pub fn buffers(&self) -> &ResourceManager<Buffer> {
         &self.buffers
     }
 
+    ///
+    /// Get buffers.
+    ///
+    /// # Returns
+    /// Mutable reference to resource manager for buffers.
+    ///
     pub fn buffers_mut(&mut self) -> &mut ResourceManager<Buffer> {
         &mut self.buffers
     }
 
+    ///
+    /// Add buffer.
+    ///
+    /// # Parameters
+    /// - `buffer`: Vertex buffer
+    ///
+    /// # Returns
+    /// Index of vertex buffer.
+    ///
     pub fn add_buffer(&mut self, buffer: Buffer) -> usize {
         self.buffers.add(buffer)
     }
 
+    ///
+    /// Get vertex attributes.
+    ///
+    /// # Returns
+    /// Reference to resource manager for vertex attributes.
+    ///
     pub fn vertex_attributes(&self) -> &ResourceManager<VertexAttribute> {
         &self.attributes
     }
 
+    ///
+    /// Get vertex attributes.
+    ///
+    /// # Returns
+    /// Mutable reference to resource manager for vertex attributes.
+    ///
     pub fn vertex_attributes_mut(&mut self) -> &mut ResourceManager<VertexAttribute> {
         &mut self.attributes
     }
 
+    ///
+    /// Add vertex attribute.
+    ///
+    /// # Parameters
+    /// - `attribute`: Vertex attribute
+    ///
+    /// # Returns
+    /// Index of vertex attribute.
+    ///
     pub fn add_vertex_attribute(&mut self, attribute: VertexAttribute) -> usize {
         self.attributes.add(attribute)
     }
 
+    ///
+    /// Get materials.
+    ///
+    /// # Returns
+    /// Reference to resource manager for materials.
+    ///
     pub fn materials(&self) -> &ResourceManager<Material> {
         &self.materials
     }
 
+    ///
+    /// Get materials.
+    ///
+    /// # Returns
+    /// Mutable reference to resource manager for materials.
+    ///
     pub fn materials_mut(&mut self) -> &mut ResourceManager<Material> {
         &mut self.materials
     }
 
+    ///
+    /// Add material.
+    ///
+    /// # Parameters
+    /// - `material`: Material
+    ///
+    /// # Returns
+    /// Index of material.
+    ///
     pub fn add_material(&mut self, material: Material) -> usize {
         self.materials.add(material)
     }
 
+    ///
+    /// Add primitive to geometry.
+    ///
+    /// # Parameters
+    /// - `primitive`: Geometry primitive
+    ///
     pub fn add_primitive(&mut self, primitive: Primitive) {
         self.primitives.push(primitive);
     }
@@ -91,7 +161,16 @@ impl GpuObject for Geometry {
         }
     }
 
-    fn deinit(&mut self, _context: &Context) {
+    fn deinit(&mut self, context: &Context) {
+        // De-initialize buffers
+        for buffer in self.buffers.objects_mut() {
+            buffer.deinit(context);
+        }
+
+        // De-initialize primitives
+        for primitive in &mut self.primitives {
+            primitive.deinit_vao(context);
+        }
     }
 }
 

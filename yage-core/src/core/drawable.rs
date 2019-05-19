@@ -8,7 +8,7 @@ pub trait Drawable {
     /// Draw/execute the rendering code.
     ///
     /// # Parameters
-    /// - `context`: Current OpenGL context
+    /// - `context`: Active OpenGL context
     ///
     fn draw(&mut self, context: &Context);
 }

@@ -1,5 +1,5 @@
 ///
-/// Description of a vertex attribute
+/// Description of a vertex attribute.
 ///
 #[derive(Copy, Clone)]
 pub struct VertexAttribute {

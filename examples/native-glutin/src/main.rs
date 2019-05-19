@@ -7,8 +7,8 @@ use yage::glutin::{
     Window
 };
 
-use yage::examples::triangle::Renderer;
-//use yage::examples::texture::Renderer;
+//use yage::examples::triangle::Renderer;
+use yage::examples::texture::Renderer;
 
 fn main() {
     // Create application

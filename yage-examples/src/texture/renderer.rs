@@ -90,12 +90,14 @@ impl GpuObject for Renderer {
             let texcoord_index = self.geometry.add_vertex_attribute(va_texcoord);
 
             // Create primitive
-            let mut primitive = Primitive::new();
-            primitive.set_attribute_binding(0, position_index);
-            primitive.set_attribute_binding(1, texcoord_index);
-            primitive.set_index_buffer(None);
-            primitive.set_render_mode(gl::TRIANGLE_STRIP);
-            primitive.set_count(4);
+            let primitive = Primitive::new(
+                0,
+                gl::TRIANGLE_STRIP,
+                4,
+                None,
+                0,
+                &[ (0, position_index), (1, texcoord_index) ]
+            );
 
             // Add primitive
             self.geometry.add_primitive(primitive);

@@ -11,12 +11,12 @@ use crate::{
 /// Represents a renderable geometric primitive.
 ///
 pub struct Primitive {
-    attributes: HashMap<usize, usize>, // Attribute bindings
-    index_buffer: Option<usize>, // Index buffer ID, or None
-    index_buffer_type: u32, // Data type (e.g., GL_UNSIGNED_INT)
     material: usize, // Material ID
     render_mode: u32, // Render mode (e.g., GL_TRIANGLES)
     count: usize, // Number of elements
+    index_buffer: Option<usize>, // Index buffer ID, or None
+    index_buffer_type: u32, // Data type (e.g., GL_UNSIGNED_INT)
+    attributes: HashMap<usize, usize>, // Attribute bindings
     vao: Option<VertexArray> // Vertex array object
 }
 
@@ -24,25 +24,105 @@ impl Primitive {
     ///
     /// Create primitive.
     ///
+    /// # Parameters
+    /// - `material`: Material ID
+    /// - `render_mode`: Render mode (e.g., GL_TRIANGLES)
+    /// - `count`: Number of elements
+    /// - `index_buffer`: Index buffer ID, or None
+    /// - `index_buffer_type`: Data type (e.g., GL_UNSIGNED_INT)
+    /// - `attributes`: Attribute bindings
+    ///
     /// # Returns
     /// A new instance of Primitive.
     ///
-    pub fn new() -> Self {
+    pub fn new(
+        material: usize,
+        render_mode: u32,
+        count: usize,
+        index_buffer: Option<usize>,
+        index_buffer_type: u32,
+        attributes: &[(usize, usize)],
+    ) -> Self {
         Self {
-            attributes: HashMap::new(),
-            index_buffer: None,
-            index_buffer_type: 0,
-            material: 0,
-            render_mode: 0,
-            count: 0,
+            material,
+            render_mode,
+            count,
+            index_buffer,
+            index_buffer_type,
+            attributes: attributes.iter().cloned().collect(),
             vao: None,
         }
     }
 
+    ///
+    /// Get material.
+    ///
+    /// # Returns
+    /// Material ID.
+    ///
+    pub fn material(&self) -> usize {
+        self.material
+    }
+
+    ///
+    /// Get render mode.
+    ///
+    /// # Returns
+    /// Render mode (e.g., GL_TRIANGLES).
+    ///
+    pub fn render_mode(&self) -> u32 {
+        self.render_mode
+    }
+
+    ///
+    /// Get number of elements to draw.
+    ///
+    /// # Returns
+    /// Number of elements.
+    ///
+    pub fn count(&self) -> usize {
+        self.count
+    }
+
+    ///
+    /// Get index buffer.
+    ///
+    /// # Returns
+    /// Index buffer ID, or None.
+    ///
+    pub fn index_buffer(&self) -> Option<usize> {
+        self.index_buffer
+    }
+
+    ///
+    /// Get index buffer type.
+    ///
+    /// # Returns
+    /// Data type (e.g., GL_UNSIGNED_INT).
+    ///
+    pub fn index_buffer_type(&self) -> u32 {
+        self.index_buffer_type
+    }
+
+    ///
+    /// Get attribute bindings.
+    ///
+    /// # Returns
+    /// Attribute bindings.
+    ///
     pub fn attribute_bindings(&self) -> &HashMap<usize, usize> {
         &self.attributes
     }
 
+    ///
+    /// Get vertex attribute for binding index.
+    ///
+    /// # Parameters
+    /// - `index`: Binding index
+    ///
+    /// # Returns
+    /// Index of vertex attribute, or None.
+    ///
     pub fn get_attribute_binding(&self, index: usize) -> Option<usize> {
         if let Some(attribute_index) = self.attributes.get(&index) {
             Some(*attribute_index)
@@ -51,50 +131,25 @@ impl Primitive {
         }
     }
 
+    ///
+    /// Set vertex attribute for binding index.
+    ///
+    /// # Parameters
+    /// - `index`: Binding index
+    /// - `attribute_index`: Index of vertex attribute
+    ///
     pub fn set_attribute_binding(&mut self, index: usize, attribute_index: usize) {
         self.attributes.insert(index, attribute_index);
     }
 
-    pub fn index_buffer(&self) -> Option<usize> {
-        self.index_buffer
-    }
-
-    pub fn set_index_buffer(&mut self, index: Option<usize>) {
-        self.index_buffer = index;
-    }
-
-    pub fn index_buffer_type(&self) -> u32 {
-        self.index_buffer_type
-    }
-
-    pub fn set_index_buffer_type(&mut self, data_type: u32) {
-        self.index_buffer_type = data_type;
-    }
-
-    pub fn material(&self) -> usize {
-        self.material
-    }
-
-    pub fn set_material(&mut self, material: usize) {
-        self.material = material;
-    }
-
-    pub fn render_mode(&self) -> u32 {
-        self.render_mode
-    }
-
-    pub fn set_render_mode(&mut self, render_mode: u32) {
-        self.render_mode = render_mode;
-    }
-
-    pub fn count(&self) -> usize {
-        self.count
-    }
-
-    pub fn set_count(&mut self, count: usize) {
-        self.count = count;
-    }
-
+    ///
+    /// Initialize VAO for primitive.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    /// - `vertex_attributes`: Resource manager for vertex attributes
+    /// - `buffers`: Resource manager for buffers
+    ///
     pub fn init_vao(&mut self,
         context: &Context,
         vertex_attributes: &ResourceManager<VertexAttribute>,
@@ -142,6 +197,12 @@ impl Primitive {
         }
     }
 
+    ///
+    /// De-initialize VAO for primitive.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
     pub fn deinit_vao(&mut self, context: &Context) {
         // Get VAO
         if let Some(ref mut vao) = self.vao {
@@ -153,11 +214,19 @@ impl Primitive {
         }
     }
 
+    ///
+    /// Draw geometry.
+    ///
+    /// # Parameters
+    /// - `context`: Active OpenGL context
+    ///
     pub fn draw(&mut self, context: &Context) {
         // Get VAO
         if let Some(ref vao) = self.vao {
             // Draw VAO
             vao.bind(context);
+
+            // [TODO] Dispatch draw_arrays/draw_elements based on index-buffer
             context.gl().draw_arrays(self.render_mode, 0, self.count as i32);
         }
     }

@@ -43,7 +43,7 @@ pub trait GpuObject {
     /// Initialize in OpenGL context
     ///
     /// # Parameters
-    /// - `context`: OpenGL context in which the GPU object in initialized
+    /// - `context`: Active OpenGL context
     ///
     fn init(&mut self, context: &Context);
 
@@ -51,7 +51,7 @@ pub trait GpuObject {
     /// De-Initialize in OpenGL context
     ///
     /// # Parameters
-    /// - `context`: OpenGL context from which the GPU object in de-initialized
+    /// - `context`: Active OpenGL context
     ///
     fn deinit(&mut self, context: &Context);
 }
