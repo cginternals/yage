@@ -7,10 +7,8 @@ use yage_core::{
     Program, Shader, Buffer,
     GpuObject, Render, Update, Drawable,
     Geometry, VertexAttribute, Primitive,
-    Animation
+    Animation, ColorRotation
 };
-
-use crate::triangle::ColorRotation;
 
 ///
 /// Example renderer that renders a single triangle.
