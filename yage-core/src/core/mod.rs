@@ -33,3 +33,6 @@ pub use transform::*;
 
 mod camera;
 pub use camera::*;
+
+mod drawable;
+pub use drawable::*;

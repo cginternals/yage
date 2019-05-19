@@ -4,8 +4,11 @@ pub use cgmath;
 #[cfg(not(target_arch = "wasm32"))]
 pub use gl;
 
+mod core;
+pub use crate::core::*;
+
 mod opengl;
 pub use crate::opengl::*;
 
-mod core;
-pub use crate::core::*;
+mod geometry;
+pub use crate::geometry::*;
