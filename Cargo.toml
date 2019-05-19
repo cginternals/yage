@@ -24,7 +24,7 @@ default = ["gltf"]
 
 [workspace]
 members = ["yage-core", "yage-glutin", "yage-web", "yage-gltf", "yage-examples"]
-exclude = ["examples/native-glutin", "examples/rust-webpack", "examples/native-azul"]
+exclude = ["examples/viewer-native", "examples/rust-webpack"]
 
 [dependencies]
 cfg-if = "0.1.7"

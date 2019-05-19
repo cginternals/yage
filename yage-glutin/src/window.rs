@@ -66,7 +66,7 @@ impl Window {
     pub fn new(application: &Application) -> Window {
         // Create window builder
         let window_builder = glutin::WindowBuilder::new()
-            .with_title("A fantastic window!")
+            .with_title("Yage")
             .with_dimensions(glutin::dpi::LogicalSize::new(300.0, 200.0));
 
         // Create context builder
