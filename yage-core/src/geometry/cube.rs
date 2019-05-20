@@ -25,6 +25,26 @@ impl Cube {
             initialized: false
         }
     }
+
+    ///
+    /// Get geometry.
+    ///
+    /// # Returns
+    /// Reference to geometry.
+    ///
+    pub fn geometry(&self) -> &Geometry {
+        &self.geometry
+    }
+
+    ///
+    /// Get geometry.
+    ///
+    /// # Returns
+    /// Mutable reference to geometry.
+    ///
+    pub fn geometry_mut(&mut self) -> &mut Geometry {
+        &mut self.geometry
+    }
 }
 
 impl GpuObject for Cube {

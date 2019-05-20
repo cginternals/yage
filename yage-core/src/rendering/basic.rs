@@ -1,8 +1,8 @@
 use crate::{
     check_error,
     Context, GlFunctions,
-    Program, Shader,
-    MeshRenderer, GpuObject, Drawable, Transform, Camera,
+    Program, Shader, Geometry, Transform, Camera,
+    MeshRenderer, GpuObject, Drawable,
 };
 
 ///
@@ -72,7 +72,7 @@ impl MeshRenderer for BasicMeshRenderer {
     fn draw(&mut self,
         context: &Context,
         camera: &Camera,
-        mesh: &mut Drawable,
+        geometry: &mut Geometry,
         transform: &Transform
     ) {
         // Calculate matrices
@@ -98,7 +98,7 @@ impl MeshRenderer for BasicMeshRenderer {
         context.gl().disable(gl::CULL_FACE);
 
         // Draw geometry
-        mesh.draw(context);
+        geometry.draw(context);
         check_error!();
     }
 }

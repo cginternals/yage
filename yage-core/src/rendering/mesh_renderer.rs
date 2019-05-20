@@ -1,6 +1,7 @@
 use crate::{
     Context,
-    GpuObject, Drawable, Transform, Camera,
+    Geometry,
+    GpuObject, Transform, Camera,
 };
 
 ///
@@ -13,13 +14,13 @@ pub trait MeshRenderer : GpuObject {
     /// # Parameters
     /// - `context`: Active OpenGL context
     /// - `camera`: Active camera
-    /// - `mesh`: Drawable that renders the mesh
+    /// - `geometry`: Geometry that is drawn
     /// - `transform`: Transformation for the mesh
     ///
     fn draw(&mut self,
         context: &Context,
         camera: &Camera,
-        mesh: &mut Drawable,
+        geometry: &mut Geometry,
         transform: &Transform
     );
 }

@@ -161,6 +161,6 @@ impl Render for Renderer {
         check_error!();
 
         // Draw geometry
-        self.mesh_renderer.draw(context, &self.camera, &mut self.cube, &self.transform);
+        self.mesh_renderer.draw(context, &self.camera, self.cube.geometry_mut(), &self.transform);
     }
 }
