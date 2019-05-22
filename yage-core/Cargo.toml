@@ -5,9 +5,11 @@ authors = ["Benjamin Wasty <benjamin.wasty@cginternals.com>", "Stefan Buschmann 
 edition = "2018"
 
 [dependencies]
+toolshed = "0.8.0"
 glenum = "0.1.1"
 log = "0.4.6"
 cgmath = "0.17.0"
+image = "0.21.1"
 
 [target.wasm32-unknown-unknown.dependencies.web-sys]
 version = "0.3.17"
@@ -31,4 +33,3 @@ simplelog = "0.5.3"
 [target.wasm32-unknown-unknown.dependencies]
 js-sys = "0.3.17"
 wasm-bindgen = "0.2.40"
-

@@ -1,9 +1,36 @@
 use std::collections::HashMap;
 
+use glutin::ControlFlow;
+
 use crate::Window;
 
 ///
 /// Representation of a glutin-based application.
+///
+/// This is the main entry point for native applications. The `Application`
+/// manages the top-level [`Window`] instances and the main message loop.
+///
+/// The message loop supports both, non-continuous, and continuous rendering.
+/// This is controlled by the signals of the [`Render`] object, which is set
+/// onto a window's [`Canvas`]. By constantly signalling [`needs_update`] and
+/// [`needs_redraw`], continous simulation and rendering can be achieved.
+///
+/// [`Window`]: struct.Window.html
+/// [`Canvas`]: ../yage_core/struct.Canvas.html
+/// [`Render`]: ../yage_core/trait.Render.html
+/// [`needs_update`]: ../yage_core/trait.Render.html#tymethod.needs_update
+/// [`needs_redraw`]: ../yage_core/trait.Render.html#tymethod.needs_redraw
+///
+/// # Examples
+///
+/// ```rust
+/// let mut app = Application::new();
+/// let mut window = Window::new(&app);
+///
+/// window.canvas_mut().set_renderer(MyRenderer::new());
+///
+/// let _ = app.add_window(window);
+/// app.run();
 ///
 pub struct Application {
     events_loop: glutin::EventsLoop,
@@ -14,16 +41,16 @@ pub struct Application {
 
 impl Application {
     ///
-    /// Create an application instance
+    /// Create an application.
     ///
     /// # Returns
     /// A new instance of Application.
     ///
     pub fn new() -> Application {
-        // create event loop
+        // Create event loop
         let events_loop = glutin::EventsLoop::new();
 
-        // return application
+        // Return application
         Application {
             events_loop,
             windows: HashMap::new(),
@@ -33,7 +60,7 @@ impl Application {
     }
 
     ///
-    /// Add window to the application
+    /// Add window to the application.
     ///
     /// # Parameters
     /// - `window`: Window that is transferred to the application.
@@ -42,16 +69,16 @@ impl Application {
     /// Window ID.
     ///
     pub fn add_window(&mut self, window: Window) -> glutin::WindowId {
-        // move window
+        // Move window
         let id = window.id();
         self.windows.insert(id, window);
 
-        // return window ID
+        // Return window ID
         id
     }
 
     ///
-    /// Get windows that belong to the application
+    /// Get windows that belong to the application.
     ///
     /// # Returns
     /// Map of window IDs -> Window.
@@ -61,7 +88,7 @@ impl Application {
     }
 
     ///
-    /// Borrow reference to a specific window
+    /// Borrow reference to a specific window.
     ///
     /// # Parameters
     /// - `id`: Window ID
@@ -82,7 +109,28 @@ impl Application {
     }
 
     ///
-    /// Borrow events loop
+    /// Borrow mutable reference to a specific window.
+    ///
+    /// # Parameters
+    /// - `id`: Window ID
+    ///
+    /// # Returns
+    /// Mutable reference to the window.
+    ///
+    /// # Undefined Behavior
+    /// When the application only has a single window, the return value
+    /// will always be that window, regardless of the given id.
+    ///
+    pub fn window_mut(&mut self, id: glutin::WindowId) -> Option<&mut Window> {
+        if self.windows.len() == 1 {
+            self.windows.values_mut().next()
+        } else {
+            self.windows.get_mut(&id)
+        }
+    }
+
+    ///
+    /// Borrow events loop.
     ///
     /// # Returns
     /// Reference to the events loop.
@@ -92,7 +140,7 @@ impl Application {
     }
 
     ///
-    /// Check if events loop is still running
+    /// Check if events loop is still running.
     ///
     /// # Returns
     /// State of the events loop.
@@ -102,7 +150,7 @@ impl Application {
     }
 
     ///
-    /// Get exit code
+    /// Get exit code.
     ///
     /// # Returns
     /// Exit code (0 for no error, > 0 for error)
@@ -112,7 +160,7 @@ impl Application {
     }
 
     ///
-    /// Exit application
+    /// Exit application.
     ///
     /// This will stop the events loop and thereby exit the application.
     ///
@@ -125,54 +173,7 @@ impl Application {
     }
 
     ///
-    /// Poll events for all windows once.
-    ///
-    pub fn poll_events(&mut self) {
-        // get references to data we want to access, because closure borrows self
-        let events_loop = &mut self.events_loop;
-        let windows = &self.windows;
-        let running = &mut self.running;
-        let first_window = windows.values().next();
-
-        // poll events
-        events_loop.poll_events(|event| {
-            // dispatch event
-            #[allow(clippy::single_match)]
-            match event {
-                // window events
-                glutin::Event::WindowEvent { event, window_id } => {
-                    // get window
-                    let window = first_window.unwrap_or_else(|| windows.get(&window_id).unwrap());
-
-                    // get GlWindow
-                    let gl_window = window.get_gl_window();
-
-                    // dispatch window event
-                    match event {
-                        // window closed
-                        glutin::WindowEvent::CloseRequested => {
-                            *running = false;
-                        }
-
-                        // window resized
-                        glutin::WindowEvent::Resized(logical_size) => {
-                            let dpi_factor = gl_window.get_hidpi_factor();
-                            gl_window.resize(logical_size.to_physical(dpi_factor));
-                        }
-
-                        // other event
-                        _ => (),
-                    }
-                }
-
-                // other event
-                _ => (),
-            }
-        });
-    }
-
-    ///
-    /// Run events loop
+    /// Run events loop.
     ///
     /// Executes the events loop for the application.
     /// This function will block and run as long as the events loop
@@ -183,12 +184,124 @@ impl Application {
     /// Exit code (0 for no error, > 0 for error)
     ///
     pub fn run(&mut self) -> i32 {
-        // run events loop until application is exited
-        while self.running {
-            self.poll_events();
-        }
+        // Get references to data we want to access, because closure borrows self
+        let windows = &mut self.windows;
+        let running = &mut self.running;
+        let proxy = self.events_loop.create_proxy();
+        let mut wakeup_scheduled = false;
 
-        // return exit code
+        // Run main loop
+        self.events_loop.run_forever(|event| {
+            // [DEBUG]
+            // println!("{:?}", event);
+
+            // Dispatch event
+            #[allow(clippy::single_match)]
+            match event {
+                // Window events
+                glutin::Event::WindowEvent { event, window_id } => {
+                    // Get window
+                    if let Some(window) = windows.get_mut(&window_id) {
+                        // Dispatch window event
+                        match event {
+                            // Window resized
+                            glutin::WindowEvent::Resized(logical_size) => {
+                                // Calculate size in device coordinates
+                                let dpi_factor = window.gl_window().get_hidpi_factor();
+                                let size = logical_size.to_physical(dpi_factor);
+
+                                // Set new size
+                                window.on_resize(size);
+                            }
+
+                            // DPI factor changed
+                            glutin::WindowEvent::HiDpiFactorChanged(dpi_factor) => {
+                                if let Some(logical_size) = window.gl_window().get_inner_size() {
+                                    // Calculate size in device coordinates
+                                    let size = logical_size.to_physical(dpi_factor);
+
+                                    // Set new size
+                                    window.on_resize(size);
+                                }
+                            }
+
+                            // Window closed
+                            glutin::WindowEvent::CloseRequested => {
+                                // Check whether to exit the application
+                                let exit_on_close = window.get_exit_on_close();
+
+                                // De-initialize and destroy the window
+                                window.on_destroy();
+                                windows.remove(&window_id);
+
+                                // Stop application if instructed
+                                *running = !exit_on_close;
+                            }
+
+                            // Window needs to be refreshed (painted)
+                            glutin::WindowEvent::Refresh => {
+                                // Draw window
+                                window.on_draw();
+                            }
+
+                            // Other event
+                            _ => (),
+                        }
+                    }
+                }
+
+                // Wakeup event
+                glutin::Event::Awakened => {
+                    // This is the update event, in which all windows will be updated
+                    // and drawn if necessary. It is scheduled whenever a window has
+                    // set its update or redraw flags to true.
+
+                    // Reset wakeup
+                    wakeup_scheduled = false;
+
+                    // Update windows
+                    for (_, window) in windows.iter_mut() {
+                        // Update window if necessary
+                        if window.needs_update() {
+                            window.on_update();
+                        }
+
+                        // Redraw window if necessary
+                        if window.needs_redraw() {
+                            window.on_draw();
+                        }
+                    }
+                }
+
+                // Other event
+                _ => ()
+            }
+
+            // After each event, we check if a window needs to be
+            // updated (animation) or redrawn. If that is the case,
+            // we schedule a wakeup event, which will be processed
+            // after all events still waiting in the event queue.
+            // We also make sure that this event is only added once.
+            //
+            // [TODO] The better way to do this would be to send
+            // a redraw event to the window, but I don't see a way
+            // in glutin to do that.
+            for (_, window) in windows.iter_mut() {
+                if (window.needs_update() || window.needs_redraw()) && !wakeup_scheduled {
+                    assert!(proxy.wakeup().is_ok());
+                    wakeup_scheduled = true;
+                }
+            }
+
+            // Abort main loop?
+            if !*running {
+                ControlFlow::Break
+            } else {
+                ControlFlow::Continue
+            }
+        });
+
+        // Return exit code
         self.exit_code
     }
 }

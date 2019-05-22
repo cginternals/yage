@@ -1,8 +1,5 @@
-pub mod application;
+mod application;
 pub use application::*;
 
-pub mod context;
-pub use context::*;
-
-pub mod window;
+mod window;
 pub use window::*;

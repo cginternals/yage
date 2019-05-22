@@ -23,14 +23,15 @@ gltf = ["yage-gltf"]
 default = ["gltf"]
 
 [workspace]
-members = ["yage-core", "yage-glutin", "yage-web", "yage-gltf"]
-exclude = ["examples/native-glutin", "examples/rust-webpack", "examples/native-azul"]
+members = ["yage-core", "yage-glutin", "yage-web", "yage-gltf", "yage-examples", "tools/viewer"]
+exclude = ["tools/rust-webpack"]
 
 [dependencies]
 cfg-if = "0.1.7"
 
 yage-core = { path = "yage-core", version = "0.0.1" }
 yage-gltf = { path = "yage-gltf", version = "0.0.1", optional = true }
+yage-examples = { path = "yage-examples", version = "0.0.1" }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 yage-glutin = { path = "yage-glutin", version = "0.0.1" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -57,3 +58,7 @@ wasm-bindgen-test = "0.2.40"
 [profile.release]
 # Tell `rustc` to optimize for small code size.
 opt-level = "s"
+
+[[bin]]
+name = "viewer"
+path = "tools/viewer/src/main.rs"

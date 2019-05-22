@@ -1,4 +1,5 @@
 pub extern crate yage_core as core;
+pub extern crate yage_examples as examples;
 #[cfg(not(target_arch = "wasm32"))]
 pub extern crate yage_glutin as glutin;
 #[cfg(target_arch = "wasm32")]
