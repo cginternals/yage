@@ -460,7 +460,7 @@ impl super::GlFunctions for GL {
 
     fn active_texture(&self, unit: u32) {
         unsafe {
-            gl::ActiveTexture(gl::TEXTURE0 + unit);
+            gl::ActiveTexture(unit);
         }
     }
 
