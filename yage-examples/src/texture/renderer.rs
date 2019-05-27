@@ -157,7 +157,7 @@ impl Render for Renderer {
         check_error!();
 
         // Bind texture
-        self.texture.bind_active(context, glenum::TEXTURE0);
+        self.texture.bind_active(context, 0);
         check_error!();
 
         // Draw geometry

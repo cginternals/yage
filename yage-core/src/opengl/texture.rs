@@ -55,10 +55,10 @@ impl Texture {
     ///
     /// # Parameters
     /// - `context`: Active OpenGL context
-    /// - `unit`: Texture unit as GLenum, e.g. `glenum::TEXTURE0`
+    /// - `unit`: Texture unit (counting from `0`)
     ///
-    pub fn bind_active(&self, context: &Context, unit: glenum::types::GLenum) {
-        context.gl().active_texture(unit);
+    pub fn bind_active(&self, context: &Context, unit: u32) {
+        context.gl().active_texture(glenum::TEXTURE0 + unit);
         context.gl().bind_texture(self.target, self.handle.as_ref());
     }
 
