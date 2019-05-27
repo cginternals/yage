@@ -52,7 +52,7 @@ impl Renderer {
             camera,
             mesh_renderer: BasicMeshRenderer::new(),
             cube: Cube::new(),
-            texture: Texture::new(gl::TEXTURE_2D),
+            texture: Texture::new(glenum::TEXTURE_2D),
             transform: Transform::new(),
             animation: Animation::new(0.0, 2.0 * PI, 4.0, true, false, true),
             frame_count: 0,
@@ -78,7 +78,7 @@ impl GpuObject for Renderer {
         self.cube.init(context);
 
         // Create texture
-        self.texture = Texture::new(gl::TEXTURE_2D);
+        self.texture = Texture::new(glenum::TEXTURE_2D);
         self.texture.init(context);
         {
             // Load texture
@@ -153,7 +153,7 @@ impl Render for Renderer {
 
         // Clear background
         context.gl().clear_color(0.1, 0.2, 0.3, 1.0);
-        context.gl().clear(glenum::BufferBit::Color as u32 | glenum::BufferBit::Depth as u32);
+        context.gl().clear(glenum::COLOR_BUFFER_BIT | glenum::DEPTH_BUFFER_BIT);
         check_error!();
 
         // Bind texture

@@ -1,7 +1,8 @@
 use crate::{
     Context,
     GL, GlFunctions,
-    GpuObject
+    GpuObject,
+    opengl::glenum,
 };
 
 ///
@@ -21,7 +22,7 @@ impl Framebuffer {
     ///
     pub fn new() -> Self {
         Self {
-            target: glenum::Buffers::Framebuffer as _,
+            target: glenum::FRAMEBUFFER,
             handle: None
         }
     }

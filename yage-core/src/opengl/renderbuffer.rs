@@ -1,9 +1,8 @@
-use glenum;
-
 use crate::{
     Context,
     GL, GlFunctions,
-    GpuObject
+    GpuObject,
+    opengl::glenum,
 };
 
 ///
@@ -43,7 +42,7 @@ impl Renderbuffer {
     /// - `context`: Active OpenGL context
     ///
     pub fn bind(&self, context: &Context) {
-        context.gl().bind_renderbuffer(glenum::Buffers::Renderbuffer as _, self.handle.as_ref());
+        context.gl().bind_renderbuffer(glenum::RENDERBUFFER, self.handle.as_ref());
     }
 
     ///
@@ -53,7 +52,7 @@ impl Renderbuffer {
     /// - `context`: Active OpenGL context
     ///
     pub fn unbind(&self, context: &Context) {
-        context.gl().bind_renderbuffer(glenum::Buffers::Renderbuffer as _, None);
+        context.gl().bind_renderbuffer(glenum::RENDERBUFFER, None);
     }
 }
 

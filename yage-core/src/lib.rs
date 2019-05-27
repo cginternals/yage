@@ -1,4 +1,3 @@
-pub use glenum;
 pub use cgmath;
 
 #[cfg(not(target_arch = "wasm32"))]

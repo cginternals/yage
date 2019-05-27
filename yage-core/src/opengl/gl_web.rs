@@ -3,6 +3,8 @@ use web_sys::{
     WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject, WebGlTransformFeedback
 };
 
+use crate::opengl::glenum;
+
 pub struct GL {
     // TODO: support WebGL1?
     gl: WebGl2RenderingContext,
@@ -37,8 +39,8 @@ impl super::GlFunctions for GL {
 
     // Programs and Shaders
 
-    fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader {
-        self.gl.create_shader(kind as _).unwrap()
+    fn create_shader(&self, kind: glenum::types::GLenum) -> Self::GlShader {
+        self.gl.create_shader(kind).unwrap()
     }
 
     fn shader_source(&self, shader: &Self::GlShader, source: &str) {
@@ -106,7 +108,7 @@ impl super::GlFunctions for GL {
     }
 
     fn delete_program(&self, program: &Self::GlProgram) {
-        self.gl.delete_program(program);
+        self.gl.delete_program(Some(program));
     }
 
     // Buffer Objects
