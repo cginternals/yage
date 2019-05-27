@@ -1,3 +1,5 @@
+pub mod glenum;
+
 mod glfunctions;
 pub use glfunctions::*;
 

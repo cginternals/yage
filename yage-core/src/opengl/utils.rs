@@ -11,7 +11,7 @@ pub fn gl_check_error(file: &str, line: u32) -> u32 {
                 gl::STACK_UNDERFLOW => "STACK_UNDERFLOW",
                 gl::OUT_OF_MEMORY => "OUT_OF_MEMORY",
                 gl::INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
-                _ => "unknown GL error code"
+                _ => "unknown GL error code",
             };
 
             println!("{} | {} ({})", error, file, line);
@@ -22,10 +22,15 @@ pub fn gl_check_error(file: &str, line: u32) -> u32 {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(target_arch = "wasm32")]
+pub fn gl_check_error(_file: &str, _line: u32) -> u32 {
+    // TODO!: implement
+    0
+}
+
 #[macro_export]
 macro_rules! check_error {
-    () => (
+    () => {
         $crate::utils::gl_check_error(file!(), line!())
-    )
+    };
 }

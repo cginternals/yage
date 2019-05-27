@@ -6,7 +6,6 @@ edition = "2018"
 
 [dependencies]
 toolshed = "0.8.0"
-glenum = "0.1.1"
 log = "0.4.6"
 cgmath = "0.17.0"
 image = "0.21.1"

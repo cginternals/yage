@@ -2,6 +2,7 @@ use crate::{
     Geometry,
     Context, GpuObject, Drawable,
     Primitive, Buffer, VertexAttribute,
+    opengl::glenum,
 };
 
 ///
@@ -58,10 +59,10 @@ impl GpuObject for Cube {
         self.geometry = Geometry::new();
         {
             // Create vertex buffer
-            let mut buffer = Buffer::new(glenum::BufferKind::Array as _);
+            let mut buffer = Buffer::new(glenum::ARRAY_BUFFER);
             buffer.init(context);
             buffer.bind(context);
-            buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
+            buffer.set_data(context, &VERTEX_DATA, glenum::STATIC_DRAW);
 
             // Add vertex buffer
             let buffer_index = self.geometry.add_buffer(buffer);
@@ -72,7 +73,7 @@ impl GpuObject for Cube {
                 0,
                 0,
                 5 * std::mem::size_of::<f32>(),
-                gl::FLOAT,
+                glenum::FLOAT,
                 3,
                 false
             );
@@ -83,7 +84,7 @@ impl GpuObject for Cube {
                 0,
                 3 * std::mem::size_of::<f32>(),
                 5 * std::mem::size_of::<f32>(),
-                gl::FLOAT,
+                glenum::FLOAT,
                 2,
                 false
             );
@@ -95,7 +96,7 @@ impl GpuObject for Cube {
             // Create primitive
             let primitive = Primitive::new(
                 0,
-                gl::TRIANGLES,
+                glenum::TRIANGLES,
                 36,
                 None,
                 0,

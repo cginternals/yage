@@ -1,5 +1,7 @@
 use std::ffi::c_void;
 
+use crate::opengl::glenum;
+
 #[derive(Default)]
 pub struct GL {}
 
@@ -36,7 +38,7 @@ impl super::GlFunctions for GL {
 
     // Programs and Shaders
 
-    fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader {
+    fn create_shader(&self, kind: glenum::types::GLenum) -> Self::GlShader {
         unsafe { gl::CreateShader(kind as _) }
     }
 

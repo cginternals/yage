@@ -1,3 +1,5 @@
+use crate::opengl::glenum;
+
 /// Trait for many GL functions
 ///
 /// Associated types are used to support different handles types in native GL and WebGL
@@ -25,7 +27,7 @@ pub trait GlFunctions {
 
     // Programs and Shaders
 
-    fn create_shader(&self, kind: glenum::ShaderKind) -> Self::GlShader;
+    fn create_shader(&self, kind: glenum::types::GLenum) -> Self::GlShader;
     fn shader_source(&self, shader: &Self::GlShader, source: &str);
     fn compile_shader(&self, shader: &Self::GlShader);
     fn delete_shader(&self, shader: &Self::GlShader);

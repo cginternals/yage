@@ -3,6 +3,7 @@ use crate::{
     Context, GlFunctions,
     Program, Shader, Geometry, Transform, Camera,
     MeshRenderer, GpuObject, Drawable,
+    opengl::glenum,
 };
 
 ///
@@ -40,11 +41,11 @@ impl GpuObject for BasicMeshRenderer {
         self.program.init(context);
         {
             // Load vertex shader
-            let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
+            let mut vertex_shader = Shader::new(glenum::VERTEX_SHADER);
             vertex_shader.set_code(context, VS_SRC, &[]);
 
             // Load fragment shader
-            let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
+            let mut fragment_shader = Shader::new(glenum::FRAGMENT_SHADER);
             fragment_shader.set_code(context, FS_SRC, &[]);
 
             // Attach shaders
@@ -94,8 +95,8 @@ impl MeshRenderer for BasicMeshRenderer {
         check_error!();
 
         // Set rendering states
-        context.gl().enable(gl::DEPTH_TEST);
-        context.gl().disable(gl::CULL_FACE);
+        context.gl().enable(glenum::DEPTH_TEST);
+        context.gl().disable(glenum::CULL_FACE);
 
         // Draw geometry
         geometry.draw(context);

@@ -5,7 +5,8 @@ use crate::{
     Context,
     GL, GlFunctions,
     GpuObject,
-    Shader, Uniform
+    Shader, Uniform,
+    opengl::glenum,
 };
 
 ///
@@ -135,15 +136,16 @@ impl Program {
 
         // Look up uniform location in cache
         if let Some(loc) = self.uniform_location_cache.get(name) {
-            if *loc > -1 {
+            // [TODO] How to check null/-1 properly depending on WebGL/OpenGL??
+            // if *loc > -1 {
                 #[allow(clippy::clone_on_copy)] // The type is only `Copy` on OpenGL, not WebGL
                 return loc.clone();
-            }
+            // }
         }
 
         // Get uniform location
         // [TODO] Handle case when program is None
-        let loc = context.gl().get_uniform_location(&self.handle.unwrap(), &name.to_string());
+        let loc = context.gl().get_uniform_location(self.handle.as_ref().unwrap(), &name.to_string());
 
         // [TODO] How to check null/-1 properly depending on WebGL/OpenGL??
         // if loc == -1 {
@@ -189,7 +191,7 @@ impl Program {
             // Get linker status
             let success = context.gl().get_program_parameter(
                 program,
-                glenum::ShaderParameter::LinkStatus as _
+                glenum::LINK_STATUS,
             );
 
             // Determine error status

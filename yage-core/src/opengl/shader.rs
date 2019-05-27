@@ -4,14 +4,15 @@ use std::io::Read;
 use crate::{
     Context,
     GL, GlFunctions,
-    GpuObject
+    GpuObject,
+    opengl::glenum,
 };
 
 ///
 /// Represents a shader on the GPU.
 ///
 pub struct Shader {
-    shader_type: glenum::ShaderKind,
+    shader_type: glenum::types::GLenum,
     handle: Option<<GL as GlFunctions>::GlShader>
 }
 
@@ -25,7 +26,7 @@ impl Shader {
     /// # Returns
     /// A new instance of Shader.
     ///
-    pub fn new(shader_type: glenum::ShaderKind) -> Self {
+    pub fn new(shader_type: glenum::types::GLenum) -> Self {
         Self {
             shader_type,
             handle: None
@@ -86,7 +87,7 @@ impl Shader {
     /// # Returns
     /// OpenGL handle.
     ///
-    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlProgram> {
+    pub fn handle(&self) -> Option<& <GL as GlFunctions>::GlShader> {
         self.handle.as_ref()
     }
 
@@ -130,14 +131,15 @@ impl Shader {
         if let Some(ref shader) = self.handle {
             // Determine shader type
             let shader_type = match self.shader_type {
-                glenum::ShaderKind::Vertex => "VERTEX",
-                glenum::ShaderKind::Fragment => "FRAGMENT"
+                glenum::VERTEX_SHADER => "VERTEX",
+                glenum::FRAGMENT_SHADER => "FRAGMENT",
+                _ => panic!("bad shader type enum")
             };
 
             // Get compile status
             let success = context.gl().get_shader_parameter(
                 shader,
-                glenum::ShaderParameter::CompileStatus as _
+                glenum::COMPILE_STATUS
             );
 
             // Determine error status

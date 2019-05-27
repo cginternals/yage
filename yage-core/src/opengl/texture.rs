@@ -1,7 +1,8 @@
 use crate::{
     Context,
     GL, GlFunctions,
-    GpuObject
+    GpuObject,
+    opengl::glenum,
 };
 
 ///
@@ -82,12 +83,12 @@ impl Texture {
     pub fn filter(&self, context: &Context, mag: i32, min: i32) {
         context.gl().tex_parameteri(
             self.target,
-            glenum::TextureParameter::TextureMagFilter as _,
+            glenum::TEXTURE_MAG_FILTER,
             mag,
         );
         context.gl().tex_parameteri(
             self.target,
-            glenum::TextureParameter::TextureMinFilter as _,
+            glenum::TEXTURE_MIN_FILTER,
             min,
         );
     }
@@ -105,12 +106,12 @@ impl Texture {
     pub fn wrap(&self, context: &Context, wrap_s: i32, wrap_t: i32) {
         context.gl().tex_parameteri(
             self.target,
-            glenum::TextureParameter::TextureWrapS as _,
+            glenum::TEXTURE_WRAP_S,
             wrap_s,
         );
         context.gl().tex_parameteri(
             self.target,
-            glenum::TextureParameter::TextureWrapT as _,
+            glenum::TEXTURE_WRAP_T,
             wrap_t,
         );
     }

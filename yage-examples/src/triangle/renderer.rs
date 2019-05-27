@@ -7,7 +7,7 @@ use yage_core::{
     Program, Shader, Buffer,
     GpuObject, Render, Update, Drawable,
     Geometry, VertexAttribute, Primitive,
-    Animation, ColorRotation
+    Animation, ColorRotation,
 };
 
 ///
@@ -57,10 +57,10 @@ impl GpuObject for Renderer {
         self.geometry = Geometry::new();
         {
             // Create vertex buffer
-            let mut buffer = Buffer::new(glenum::BufferKind::Array as _);
+            let mut buffer = Buffer::new(glenum::ARRAY_BUFFER);
             buffer.init(context);
             buffer.bind(context);
-            buffer.set_data(context, &VERTEX_DATA, glenum::DrawMode::Static as _);
+            buffer.set_data(context, &VERTEX_DATA, glenum::STATIC_DRAW);
 
             // Add vertex buffer
             let buffer_index = self.geometry.add_buffer(buffer);
@@ -71,7 +71,7 @@ impl GpuObject for Renderer {
                 0,
                 0,
                 5 * std::mem::size_of::<f32>(),
-                gl::FLOAT,
+                glenum::FLOAT,
                 2,
                 false
             );
@@ -82,7 +82,7 @@ impl GpuObject for Renderer {
                 0,
                 2 * std::mem::size_of::<f32>(),
                 5 * std::mem::size_of::<f32>(),
-                gl::FLOAT,
+                glenum::FLOAT,
                 3,
                 false
             );
@@ -94,7 +94,7 @@ impl GpuObject for Renderer {
             // Create primitive
             let primitive = Primitive::new(
                 0,
-                gl::TRIANGLES,
+                glenum::TRIANGLES,
                 3,
                 None,
                 0,
@@ -110,11 +110,11 @@ impl GpuObject for Renderer {
         self.program.init(context);
         {
             // Load vertex shader
-            let mut vertex_shader = Shader::new(glenum::ShaderKind::Vertex);
+            let mut vertex_shader = Shader::new(glenum::VERTEX_SHADER);
             vertex_shader.set_code(context, VS_SRC, &[]);
 
             // Load fragment shader
-            let mut fragment_shader = Shader::new(glenum::ShaderKind::Fragment);
+            let mut fragment_shader = Shader::new(glenum::FRAGMENT_SHADER);
             fragment_shader.set_code(context, FS_SRC, &[]);
 
             // Attach shaders
@@ -170,7 +170,7 @@ impl Render for Renderer {
 
         // Clear background
         context.gl().clear_color(0.1, 0.2, 0.3, 1.0);
-        context.gl().clear(glenum::BufferBit::Color as u32);
+        context.gl().clear(glenum::COLOR_BUFFER_BIT);
         check_error!();
 
         // Bind program and set uniforms
