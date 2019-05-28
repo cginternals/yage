@@ -10,7 +10,7 @@ use yage::core::{
     glenum, Context, Cube, Drawable, GlFunctions, GpuObject, Program, Shader,
 };
 
-use yage::web::CanvasContext;
+use yage::web::BrowserContext;
 
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -39,7 +39,7 @@ fn setup_canvas() -> Result<(), JsValue> {
     let canvas = document.get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
 
-    let context = CanvasContext::new(canvas).unwrap();
+    let context = BrowserContext::new(canvas).unwrap();
 
     context.gl().clear_color(0.1, 0.2, 0.3, 1.0);
     context.gl().clear(glenum::COLOR_BUFFER_BIT);

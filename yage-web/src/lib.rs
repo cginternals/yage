@@ -5,11 +5,11 @@ use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
 use yage_core::{Context, GL};
 
-pub struct CanvasContext {
+pub struct BrowserContext {
     gl: Rc<GL>
 }
 
-impl CanvasContext {
+impl BrowserContext {
     pub fn new(canvas_element: HtmlCanvasElement) -> Result<Self, String> {
         let error_msg = "Failed to get WebGL2 context.";
         let context: WebGl2RenderingContext = canvas_element
@@ -25,7 +25,7 @@ impl CanvasContext {
     }
 }
 
-impl Context for CanvasContext {
+impl Context for BrowserContext {
     fn make_current(&self) {
         // doesn't apply in the browser
     }

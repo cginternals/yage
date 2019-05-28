@@ -59,6 +59,6 @@ wasm-bindgen-test = "0.2.40"
 # Tell `rustc` to optimize for small code size.
 opt-level = "s"
 
-[[target.'cfg(not(target_arch = "wasm32"))'.bin]]
+[[bin]]
 name = "viewer"
 path = "tools/viewer/src/main.rs"
