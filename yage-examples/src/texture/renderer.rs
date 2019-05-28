@@ -82,7 +82,7 @@ impl GpuObject for Renderer {
         self.texture.init(context);
         {
             // Load texture
-            TextureLoader::load(context, &mut self.texture, "data/duck.jpg");
+            TextureLoader::load(context, &mut self.texture, "data/rust.jpg");
             check_error!();
         }
 
