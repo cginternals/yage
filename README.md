@@ -8,25 +8,19 @@
 Graphics engine targeting WebGL 2.0 (via WebAssembly) and OpenGL 3.3+.
 
 ## Current state
-Very, very early. Currently it's mostly [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template) and [create-wasm-app](https://github.com/rustwasm/create-wasm-app) combined with the [wasm-bindgen WebGL example](https://rustwasm.github.io/wasm-bindgen/examples/webgl.html).
+Quite early. Many of the basics are there, but it's not quite ready yet.
 
 ## Getting started
 ### Requirements
-- [Rust 1.32+](https://www.rust-lang.org/tools/install)
+- [Rust 1.33+](https://www.rust-lang.org/tools/install)
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 - [npm](https://www.npmjs.com/get-npm)
 
-### Building
-```
-wasm-pack build
-```
-
 ### Examples
 * Native
-  - `cd examples/native-glutin`
-  - `cargo run`
+  - `cargo run --bin viewer` (code: `tools/viewer`)
 * Web
-  - `cd examples/rust-webpack`
+  - `cd tools/rust-webpack`
   - `npm install`
   - `npm start`
 
