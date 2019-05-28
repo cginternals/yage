@@ -28,3 +28,9 @@ Quite early. Many of the basics are there, but it's not quite ready yet.
 ```
 wasm-pack test --headless --firefox
 ```
+
+### Development Hints
+* Make sure to check both native and wasm compilation, e.g. with
+  - `cargo check` (native)
+  - `cargo check --target wasm32-unknown-unknown --lib` (wasm)
+  - with [cargo-watch](https://github.com/passcod/cargo-watch) installed, the above can be wrapped in `cargo watch -x "..."` for a permanent watch (use `-w`/`-i` to fine-tune watched/ignored files)

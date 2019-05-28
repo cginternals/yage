@@ -1,19 +1,16 @@
 #[macro_use]
 extern crate cfg_if;
-extern crate web_sys;
 extern crate wasm_bindgen;
+extern crate web_sys;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use web_sys::WebGl2RenderingContext;
-
-use yage::gl::{
-    GL, GlFunctions, 
-    glenum,
-    objects::{Program, Buffer, VertexArray}
+use yage::core::{
+    glenum, Context, Cube, Drawable, GlFunctions, GpuObject, Program, Shader,
 };
 
+use yage::web::BrowserContext;
 
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -38,51 +35,37 @@ cfg_if! {
 }
 
 fn setup_canvas() -> Result<(), JsValue> {
-    // TODO!!: most of this setup should go into yage-web
     let document = web_sys::window().unwrap().document().unwrap();
     let canvas = document.get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
 
-    let context: WebGl2RenderingContext = canvas
-        .get_context("webgl2")?
-        .unwrap()
-        .dyn_into()?;
+    let context = BrowserContext::new(canvas).unwrap();
 
-    let gl = GL::from_webgl_context(context);
-    gl.clear_color(0.1, 0.2, 0.3, 1.0);
-    gl.clear(glenum::BufferBit::Color);
+    context.gl().clear_color(0.1, 0.2, 0.3, 1.0);
+    context.gl().clear(glenum::COLOR_BUFFER_BIT);
 
-    let program = Program::from_source(&gl, VS_SRC, FS_SRC, &[]);
-    program.use_program();
+    // Create shader program
+    let mut program = Program::new();
+    program.init(&context);
+    {
+        // Load vertex shader
+        let mut vertex_shader = Shader::new(glenum::VERTEX_SHADER);
+        vertex_shader.set_code(&context, VS_SRC, &[]);
 
-    let vertex_buffer = Buffer::new(&gl, glenum::BufferKind::Array as _);
-    vertex_buffer.bind();
-    vertex_buffer.set_data(&VERTEX_DATA, glenum::DrawMode::Static as _);
+        // Load fragment shader
+        let mut fragment_shader = Shader::new(glenum::FRAGMENT_SHADER);
+        fragment_shader.set_code(&context, FS_SRC, &[]);
 
-    let vao = VertexArray::new(&gl);
-    vao.bind();
+        // Attach shaders
+        program.attach(vertex_shader);
+        program.attach(fragment_shader);
+    }
 
-    vertex_buffer.attrib_enable(
-        0,
-        2,
-        glenum::DataType::Float as _,
-        false,
-        5 * std::mem::size_of::<f32>() as i32,
-        0,
-    );
+    program.use_program(&context);
 
-    vertex_buffer.attrib_enable(
-        1,
-        3,
-        glenum::DataType::Float as _,
-        false,
-        5 * std::mem::size_of::<f32>() as i32,
-        2 * std::mem::size_of::<f32>() as i32,
-    );
-
-    // check_error!();
-
-    gl.draw_arrays(glenum::Primitives::Triangles as _, 0, 3);
+    let mut cube = Cube::new();
+    cube.init(&context);
+    cube.draw(&context);
 
     Ok(())
 }
@@ -107,6 +90,7 @@ pub fn run() -> Result<(), JsValue> {
     Ok(())
 }
 
+// NOTE: misusing tex coord as color...
 const VS_SRC: &str = "#version 300 es
 precision mediump float;
 layout (location = 0) in vec2 position;
@@ -124,10 +108,3 @@ out vec4 FragColor;
 void main() {
     FragColor = vec4(v_color, 1.0);
 }";
-
-#[rustfmt::skip]
-static VERTEX_DATA: [f32; 15] = [
-    -0.5, -0.5,  1.0,  0.0,  0.0,
-     0.0,  0.5,  0.0,  1.0,  0.0,
-     0.5, -0.5,  0.0,  0.0,  1.0,
-];
