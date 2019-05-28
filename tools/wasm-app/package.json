@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bwasty/yage.git"
+    "url": "git+https://github.com/cginternals/yage.git"
   },
   "license": "(MIT OR Apache-2.0)",
-  "homepage": "https://github.com/bwasty/yage",
+  "homepage": "https://github.com/cginternals/yage",
   "devDependencies": {
     "yage": "file:../../pkg",
     "webpack": "~4.29.5",

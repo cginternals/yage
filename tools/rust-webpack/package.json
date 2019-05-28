@@ -2,7 +2,7 @@
   "author": "Nick Fitzgerald <nfitzgerald@mozilla.com>",
   "name": "rust-webpack",
   "version": "0.0.1",
-  "repository": "git+https://github.com/bwasty/yage.git",
+  "repository": "git+https://github.com/cginternals/yage.git",
   "license": "(MIT OR Apache-2.0)",
   "scripts": {
     "start": "webpack-dev-server -d",
